@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Consumo Eléctrico - Cámara de Frío</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="consumo.css">
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+</head>
+<body>
+    <script>
+
+/* =========================================================
+   PROTECCIÓN DE PÁGINA - SOLO PARA DESARROLLO
+   BORRAR CUANDO EL BACKEND ESTE FUNCIONANDO
+   ========================================================= */
+
+const token = localStorage.getItem("token");
+
+/* si no existe token -> volver al login */
+if(!token){
+    window.location.href = "index.html";
+}
+
+</script>
+
+<header>
+    <h1>Panel Eléctrico</h1>
+    <nav>
+        <a href="inicio.html">Inicio</a>
+        <a href="Temperatura.html">Temperatura</a>
+        <a href="Consumo.html">Consumo Eléctrico</a>
+        <a href="Historicos.html">Historicos</a>
+        <a href="#" onclick="logout()">Cerrar sesión</a>
+    </nav>
+</header>
+
+<section class="dashboard">
+
+    <h2>Mediciones de Línea</h2>
+
+    <div class="grid-3">
+
+        <div class="card">
+            <h3>Tensión L1-L2</h3>
+            <p class="value">381 V</p>
+        </div>
+
+        <div class="card">
+            <h3>Tensión L2-L3</h3>
+            <p class="value">379 V</p>
+        </div>
+
+        <div class="card">
+            <h3>Tensión L3-L1</h3>
+            <p class="value">382 V</p>
+        </div>
+
+    </div>
+
+    <h2>Corrientes de Fase</h2>
+
+    <div class="grid-3">
+
+        <div class="card">
+            <h3>Corriente Fase 1</h3>
+            <p class="value">8.2 A</p>
+        </div>
+
+        <div class="card">
+            <h3>Corriente Fase 2</h3>
+            <p class="value">7.9 A</p>
+        </div>
+
+        <div class="card">
+            <h3>Corriente Fase 3</h3>
+            <p class="value">8.4 A</p>
+        </div>
+
+    </div>
+
+    <h2>Consumo Total</h2>
+
+    <div class="grid-1">
+
+        <div class="card consumo-total">
+            <h3>Potencia Activa</h3>
+            <p class="value consumo">5.2 kW</p>
+        </div>
+
+    </div>
+
+    <h2>Histórico de Consumo</h2>
+
+    <div class="grid-1">
+        <div class="card chart-card">
+            <canvas id="chartConsumo"></canvas>
+        </div>
+    </div>
+
+</section>
+
+<footer>
+    © 2026 El Abuelo Distribuciones
+</footer>
+
+<script>
+new Chart(document.getElementById("chartConsumo"), {
+    type: 'line',
+    data: {
+        labels: ['Mes 1', 'Mes 2', 'Mes 3'],
+        datasets: [{
+            label: 'Consumo kW',
+            data: [4.8, 5.1, 5.2],
+            borderColor: '#6b0f1a',
+            backgroundColor: 'rgba(107,15,26,0.1)',
+            fill: true,
+            tension: 0.3
+        }]
+    },
+    options: {
+        responsive: true,
+        plugins: {
+            legend: { display: false }
+        }
+    }
+});
+</script>
+<script src="Auth.js" ></script>
+</body>
+</html>

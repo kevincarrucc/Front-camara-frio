@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Temperatura - Cámara de Frío</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="Temperatura.css">
+
+<!-- Chart.js para las gráficas -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+</head>
+<body>
+    <script>
+
+/* =========================================================
+   PROTECCIÓN DE PÁGINA - SOLO PARA DESARROLLO
+   BORRAR CUANDO EL BACKEND ESTE FUNCIONANDO
+   ========================================================= */
+
+const token = localStorage.getItem("token");
+
+/* si no existe token -> volver al login */
+if(!token){
+    window.location.href = "index.html";
+}
+
+</script>
+
+<header>
+    <h1>Panel de Temperatura</h1>
+    <nav>
+        <a href="inicio.html">Inicio</a>
+        <a href="Temperatura.html">Temperatura</a>
+        <a href="Consumo.html">Consumo Eléctrico</a>
+        <a href="Historicos.html">Historicos</a>
+        <a href="#" onclick="logout()">Cerrar sesión</a>
+    </nav>
+</header>
+
+<section class="dashboard">
+
+    <h2>Temperaturas Actuales</h2>
+
+    <div class="grid-4">
+
+        <div class="card">
+            <h3>Temp. Promedio</h3>
+            <p class="value">-17.5°C</p>
+        </div>
+
+        <div class="card">
+            <h3>Espacio 1</h3>
+            <p class="value">-18.2°C</p>
+        </div>
+
+        <div class="card">
+            <h3>Espacio 2</h3>
+            <p class="value">-16.9°C</p>
+        </div>
+
+        <div class="card">
+            <h3>Exterior</h3>
+            <p class="value exterior">32°C</p>
+        </div>
+
+    </div>
+
+    <h2>Configuración de Histéresis</h2>
+
+    <div class="grid-2">
+
+        <div class="card control-card">
+            <h3>Temperatura Mínima</h3>
+            <div class="control">
+                <button>-</button>
+                <span>-20°C</span>
+                <button>+</button>
+            </div>
+        </div>
+
+        <div class="card control-card">
+            <h3>Temperatura Máxima</h3>
+            <div class="control">
+                <button>-</button>
+                <span>-15°C</span>
+                <button>+</button>
+            </div>
+        </div>
+
+    </div>
+
+    <h2>Histórico Trimestral</h2>
+
+    
+
+        <div class="card chart-card">
+            <h3>Promedio</h3>
+            <canvas id="chartPromedio"></canvas>
+        </div>
+
+        <div class="card chart-card">
+            <h3>Espacio 1</h3>
+            <canvas id="chartE1"></canvas>
+        </div>
+
+        <div class="card chart-card">
+            <h3>Espacio 2</h3>
+            <canvas id="chartE2"></canvas>
+        </div>
+
+        <div class="card chart-card">
+            <h3>Exterior</h3>
+            <canvas id="chartExt"></canvas>
+        </div>
+
+    
+
+</section>
+
+<footer>
+    © 2026 El Abuelo Distribuciones
+</footer>
+
+<script>
+function crearGrafica(id, label, datos) {
+    new Chart(document.getElementById(id), {
+        type: 'line',
+        data: {
+            labels: ['Mes 1', 'Mes 2', 'Mes 3'],
+            datasets: [{
+                label: label,
+                data: datos,
+                borderColor: '#6b0f1a',
+                backgroundColor: 'rgba(107,15,26,0.1)',
+                tension: 0.3,
+                fill: true
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: { display: false }
+            }
+        }
+    });
+}
+
+crearGrafica('chartPromedio', 'Promedio', [-18, -17, -17.5]);
+crearGrafica('chartE1', 'Espacio 1', [-19, -18, -18.2]);
+crearGrafica('chartE2', 'Espacio 2', [-17, -16.5, -16.9]);
+crearGrafica('chartExt', 'Exterior', [30, 31, 32]);
+</script>
+<script src="Auth.js" ></script>
+</body>
+</html>

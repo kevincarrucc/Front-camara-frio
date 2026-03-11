@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>El Abuelo Distribuciones</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
+
+<!-- Vinculación del CSS -->
+<link rel="stylesheet" href="Inicio.css">
+
+</head>
+
+<body>
+    <script>
+
+/* =========================================================
+   PROTECCIÓN DE PÁGINA - SOLO PARA DESARROLLO
+   BORRAR CUANDO EL BACKEND ESTE FUNCIONANDO
+   ========================================================= */
+
+const token = localStorage.getItem("token");
+
+/* si no existe token -> volver al login */
+if(!token){
+    window.location.href = "index.html";
+}
+
+</script>
+
+<header>
+    
+    <img src="imagenes/logo.jpg" alt="Logo El Abuelo Distribuciones" class="logo">
+
+    <nav>
+        <a href="inicio.html">Inicio</a>
+        <a href="Temperatura.html">Temperatura</a>
+        <a href="Consumo.html">Consumo Eléctrico</a>
+        <a href="Historicos.html">Historicos</a>
+        <a href="#" onclick="logout()">Cerrar sesión</a>
+    </nav>
+</header>
+
+<section class="dashboard">
+
+    <h2>Panel de Visualización - Cámara de Frío</h2>
+
+    <div class="dashboard-grid">
+
+        <div class="status-card">
+            <h3>Motor Principal</h3>
+            <p class="value ok">--</p>
+        </div>
+
+        <div class="status-card">
+            <h3>Temperatura</h3>
+            <div id="temp">-- °C</div>
+        </div>
+
+         <div class="status-card">
+            <h3>Consumo</h3>
+            <p class="value">-- kW</p>
+        </div>
+
+        <div class="status-card">
+            <h3>Puerta</h3>
+            <p class="value alert"> -- </p>
+        </div>
+
+        <div class="status-card">
+            <h3>Motor Secundario</h3>
+            <p class="value off">--</p>
+        </div>
+
+        <div class="status-card">
+            <h3>Tensión</h3>
+            <p class="tension L1-L2">L1</p>
+            <p class="tension L2-L3">L2</p>
+            <p class="tension L1-L3">L3</p>
+        </div>
+
+        <div class="status-card">
+            <h3>Corriente</h3>
+            <p class="corriente L1">L1</p>
+            <p class="corriente L2">L2</p>
+            <p class="corriente L1">L3</p>
+        </div>
+    
+        <div class="status-card">
+            <h3>Luces</h3>
+            <p class="value ok">--</p>
+        </div>
+
+    </div>
+
+</section>
+
+<footer>
+    © 2026 El Abuelo Distribuciones - Todos los derechos reservados
+</footer>
+
+<script type="module">console.log("🔌 Conectando a Firebase...") ;
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+  import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyA7BNbFNzdARWEGM_dAMKe7WUNUTI_0h-0",
+    authDomain: "camara-frio-elabuelo.firebaseapp.com",
+    databaseURL: "https://camara-frio-elabuelo-default-rtdb.firebaseio.com",
+    projectId: "camara-frio-elabuelo"
+  };
+
+  const app = initializeApp(firebaseConfig);
+
+  const db = getDatabase(app);
+
+  const temperaturaRef = ref(db, "camara/actual");
+
+onValue(temperaturaRef, (snapshot) => {
+
+  const data = snapshot.val();
+  console.log("Snapshot:", data);
+
+  if (data && data.temperatura1 !== undefined) {
+    document.getElementById("temp").innerText =
+      data.temperatura1 + " °C";
+  }
+
+});
+</script>
+<script src="Auth.js" ></script>
+</body>
+</html>

@@ -1,0 +1,181 @@
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+}
+
+body{
+font-family:'Montserrat', sans-serif;
+color:#333;
+}
+
+/* HEADER */
+
+header{
+position:fixed;
+top:0;
+width:100%;
+background:#6b0f1a;
+height:80px;
+display:flex;
+justify-content:space-between;
+align-items:center;
+padding:0 40px;
+color:white;
+z-index:1000;
+}
+
+nav a{
+color:white;
+text-decoration:none;
+margin-left:25px;
+font-weight:500;
+transition:0.3s;
+}
+
+nav a:hover{
+opacity:0.7;
+}
+
+.logo{
+height:50px;
+}
+
+/* SECCION LOGIN */
+
+.login{
+
+padding-top:120px;
+
+background:
+linear-gradient(rgba(0,0,0,0.55), rgba(0,0,0,0.55)),
+url("imagenes/fondo-productos.jpg") center/cover no-repeat;
+
+min-height:100vh;
+
+display:flex;
+justify-content:center;
+align-items:center;
+}
+
+/* TARJETA */
+
+.login-box{
+
+background:white;
+padding:45px 40px;
+width:360px;
+border-radius:10px;
+
+box-shadow:0 10px 25px rgba(0,0,0,0.25);
+
+}
+
+/* TITULO */
+
+.login-box h1{
+
+text-align:center;
+margin-bottom:30px;
+font-size:26px;
+
+}
+
+/* INPUTS */
+
+.input-group{
+
+position:relative;
+margin-bottom:20px;
+
+}
+
+.input-group i{
+
+position:absolute;
+left:12px;
+top:50%;
+transform:translateY(-50%);
+color:#888;
+
+}
+
+.input-group input{
+
+width:100%;
+padding:12px 12px 12px 40px;
+
+border:1px solid #ccc;
+border-radius:5px;
+
+font-size:14px;
+transition:0.3s;
+
+}
+
+.input-group input:focus{
+
+outline:none;
+border-color:#6b0f1a;
+box-shadow:0 0 5px rgba(107,15,26,0.3);
+
+}
+
+/* MOSTRAR PASSWORD */
+
+.show-pass{
+
+font-size:14px;
+margin-bottom:20px;
+
+}
+
+.show-pass input{
+
+margin-right:6px;
+
+}
+
+/* BOTON */
+
+.login-box button{
+
+width:100%;
+
+background:#6b0f1a;
+color:white;
+
+padding:12px;
+
+border:none;
+border-radius:5px;
+
+font-size:15px;
+font-weight:600;
+
+cursor:pointer;
+
+transition:0.3s;
+
+}
+
+.login-box button:hover{
+
+background:#8a1321;
+
+transform:translateY(-2px);
+
+box-shadow:0 5px 10px rgba(0,0,0,0.2);
+
+}
+
+/* FOOTER */
+
+footer{
+
+background:#6b0f1a;
+color:white;
+text-align:center;
+padding:20px;
+
+}

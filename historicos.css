@@ -1,0 +1,74 @@
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
+
+body{
+    font-family:'Montserrat', sans-serif;
+    background:
+        linear-gradient(rgba(0,0,0,0.55), rgba(0,0,0,0.55)),
+        url('imagenes/fondo-productos.jpg') center/cover no-repeat;
+    color:#333;
+}
+
+header{
+    position:fixed;
+    top:0;
+    width:100%;
+    background:#6b0f1a;
+    height:80px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding:0 40px;
+    color:white;
+    z-index:1000;
+}
+
+nav a{
+    color:white;
+    text-decoration:none;
+    margin-left:20px;
+}
+
+.dashboard{
+    padding:120px 40px 60px 40px;
+}
+
+h2{
+    color: black;
+    text-align:center;
+    margin:60px 0 30px 0;
+}
+
+.grid-2{
+    display:grid;
+    grid-template-columns:repeat(auto-fit, minmax(400px,1fr));
+    gap:30px;
+}
+
+.card{
+    background:white;
+    padding:25px;
+    border-radius:10px;
+    box-shadow:0 5px 15px rgba(0,0,0,0.08);
+    
+}
+
+.chart-card{
+    height:400px;
+    margin-bottom:50px;
+}
+
+canvas{
+    margin-top:20px;
+}
+
+footer{
+    background:#6b0f1a;
+    color:white;
+    text-align:center;
+    padding:20px;
+    margin-top:60px;
+}

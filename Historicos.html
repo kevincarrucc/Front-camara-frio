@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Históricos - Cámara de Frío</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="historicos.css">
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+</head>
+<body>
+    <script>
+
+/* =========================================================
+   PROTECCIÓN DE PÁGINA - SOLO PARA DESARROLLO
+   BORRAR CUANDO EL BACKEND ESTE FUNCIONANDO
+   ========================================================= */
+
+const token = localStorage.getItem("token");
+
+/* si no existe token -> volver al login */
+if(!token){
+    window.location.href = "index.html";
+}
+
+</script>
+
+<header>
+    <h1>Históricos del Sistema</h1>
+    <nav>
+        <a href="inicio.html">Inicio</a>
+        <a href="Temperatura.html">Temperatura</a>
+        <a href="Consumo.html">Consumo Eléctrico</a>
+        <a href="Historicos.html">Historicos</a>
+        <a href="#" onclick="logout()">Cerrar sesión</a>
+    </nav>
+</header>
+
+<section class="dashboard">
+
+    <!-- ================= TEMPERATURAS ================= -->
+
+    <h2>Histórico de Temperaturas</h2>
+
+    <div class="card chart-card">
+        <canvas id="chartTemperaturas"></canvas>
+    </div>
+
+    <!-- ================= VARIABLES ELÉCTRICAS ================= -->
+
+    <h2>Histórico Eléctrico</h2>
+
+        <div class="card chart-card">
+            <h3>Tensiones de Línea</h3>
+            <canvas id="chartTensiones"></canvas>
+        </div>
+
+        <div class="card chart-card">
+            <h3>Corrientes de Fase</h3>
+            <canvas id="chartCorrientes"></canvas>
+        </div>
+
+        <div class="card chart-card">
+            <h3>Potencia Activa (kW)</h3>
+            <canvas id="chartPotencia"></canvas>
+        </div>
+
+        <div class="card chart-card">
+            <h3>Factor de Potencia</h3>
+            <canvas id="chartFP"></canvas>
+        </div>
+
+    <!-- ================= EVENTOS IMPORTANTES ================= -->
+
+    <h2>Eventos del Sistema</h2>
+
+    <div class="card chart-card">
+        <h3>Aperturas de Puerta</h3>
+        <canvas id="chartPuerta"></canvas>
+    </div>
+
+</section>
+
+<footer>
+    © 2026 El Abuelo Distribuciones
+</footer>
+
+<script>
+
+// ---------- TEMPERATURAS ----------
+new Chart(document.getElementById("chartTemperaturas"), {
+    type: 'line',
+    data: {
+        labels: ['Mes 1', 'Mes 2', 'Mes 3'],
+        datasets: [
+            { label: 'Promedio', data: [-18, -17, -17.5], borderColor:'#6b0f1a', tension:0.3 },
+            { label: 'Espacio 1', data: [-19, -18, -18.2], borderColor:'#1e8e3e', tension:0.3 },
+            { label: 'Espacio 2', data: [-17, -16.5, -16.9], borderColor:'#1565c0', tension:0.3 },
+            { label: 'Exterior', data: [30, 31, 32], borderColor:'#c62828', tension:0.3 }
+        ]
+    },
+    options: { responsive:true }
+});
+
+// ---------- TENSIONES ----------
+new Chart(document.getElementById("chartTensiones"), {
+    type: 'line',
+    data: {
+        labels: ['Mes 1','Mes 2','Mes 3'],
+        datasets: [
+            { label:'L1-L2', data:[381,379,382], borderColor:'#6b0f1a' },
+            { label:'L2-L3', data:[380,378,381], borderColor:'#1e8e3e' },
+            { label:'L3-L1', data:[382,380,383], borderColor:'#1565c0' }
+        ]
+    },
+    options:{ responsive:true }
+});
+
+// ---------- CORRIENTES ----------
+new Chart(document.getElementById("chartCorrientes"), {
+    type: 'line',
+    data: {
+        labels:['Mes 1','Mes 2','Mes 3'],
+        datasets:[
+            { label:'Fase 1', data:[8.2,8.0,8.4], borderColor:'#6b0f1a' },
+            { label:'Fase 2', data:[7.9,8.1,8.3], borderColor:'#1e8e3e' },
+            { label:'Fase 3', data:[8.4,8.2,8.5], borderColor:'#1565c0' }
+        ]
+    },
+    options:{ responsive:true }
+});
+
+// ---------- POTENCIA ----------
+new Chart(document.getElementById("chartPotencia"), {
+    type:'line',
+    data:{
+        labels:['Mes 1','Mes 2','Mes 3'],
+        datasets:[{
+            label:'kW',
+            data:[4.8,5.1,5.2],
+            borderColor:'#6b0f1a',
+            backgroundColor:'rgba(107,15,26,0.1)',
+            fill:true,
+            tension:0.3
+        }]
+    },
+    options:{ responsive:true }
+});
+
+// ---------- FACTOR DE POTENCIA ----------
+new Chart(document.getElementById("chartFP"), {
+    type:'line',
+    data:{
+        labels:['Mes 1','Mes 2','Mes 3'],
+        datasets:[{
+            label:'FP',
+            data:[0.89,0.91,0.93],
+            borderColor:'#ff9800',
+            tension:0.3
+        }]
+    },
+    options:{ responsive:true }
+});
+
+// ---------- PUERTA ----------
+new Chart(document.getElementById("chartPuerta"), {
+    type:'bar',
+    data:{
+        labels:['Mes 1','Mes 2','Mes 3'],
+        datasets:[{
+            label:'Cantidad de Aperturas',
+            data:[12,18,9],
+            backgroundColor:'#6b0f1a'
+        }]
+    },
+    options:{ responsive:true }
+});
+
+</script>
+<script src="Auth.js" ></script>
+</body>
+</html>

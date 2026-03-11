@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Login | El Abuelo Distribuciones</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
+
+<link rel="stylesheet" href="Index.css">
+
+<!-- Iconos -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+</head>
+
+<body>
+
+<header>
+
+<img src="imagenes/logo.jpg" alt="Logo El Abuelo Distribuciones" class="logo">
+
+<nav>
+<a href="">Inicio</a>
+<a href="">Temperatura</a>
+<a href="">Consumo Eléctrico</a>
+<a href="">Historicos</a>
+<a href="">Cerrar sesión</a>
+</nav>
+
+</header>
+
+
+<section class="login">
+
+<div class="login-box">
+
+<h1>Iniciar Sesión</h1>
+
+<form id="loginForm">
+
+<div class="input-group">
+<i class="fa fa-user"></i>
+<input type="text" id="username" placeholder="Usuario" required></div>
+
+<div class="input-group">
+<i class="fa fa-lock"></i>
+<input type="password" id="password" placeholder="Contraseña" required>
+</div>
+
+<div class="show-pass">
+<input type="checkbox" id="mostrar">
+<label for="mostrar">Mostrar contraseña</label>
+</div>
+<div id="error-msg" style="display:none; color:red; margin-bottom:10px;">
+Usuario o contraseña incorrectos
+</div>
+<button type="submit">Ingresar</button>
+
+</form>
+
+</div>
+
+</section>
+
+
+<footer>
+© 2026 El Abuelo Distribuciones - Todos los derechos reservados
+</footer>
+
+
+<script>
+
+const checkbox = document.getElementById("mostrar");
+const password = document.getElementById("password");
+
+checkbox.addEventListener("change", function(){
+
+if(this.checked){
+password.type = "text";
+}else{
+password.type = "password";
+}
+
+});
+
+</script>
+
+<script>
+
+/* =========================================================
+   LOGIN SIMULADO SOLO PARA DESARROLLO
+   BORRAR CUANDO EL BACKEND ESTE FUNCIONANDO
+   ========================================================= */
+
+/* USUARIO Y CONTRASEÑA TEMPORALES */
+const DEV_USER = "admin";
+const DEV_PASS = "1234";
+
+/* =========================================================
+   CODIGO ORIGINAL DE LOGIN (DESACTIVADO)
+   ========================================================= */
+
+/*
+const form = document.getElementById("loginForm");
+const error = document.getElementById("error-msg");
+
+form.addEventListener("submit", async function(e){
+
+e.preventDefault();
+
+const username = document.getElementById("username").value;
+const password = document.getElementById("password").value;
+
+try{
+
+const response = await fetch("/login", {
+
+method: "POST",
+
+headers:{
+"Content-Type":"application/json"
+},
+
+body: JSON.stringify({
+username: username,
+password: password
+})
+
+});
+
+if(response.ok){
+
+const data = await response.json();
+
+localStorage.setItem("token", data.token);
+
+window.location.href = "inicio.html";
+
+}else{
+
+error.style.display = "block";
+
+}
+
+}catch(err){
+
+console.error(err);
+error.style.display = "block";
+
+}
+
+});
+*/
+
+
+/* =========================================================
+   LOGIN SIMULADO LOCAL
+   ========================================================= */
+
+const form = document.getElementById("loginForm");
+const error = document.getElementById("error-msg");
+
+form.addEventListener("submit", function(e){
+
+e.preventDefault();
+
+const username = document.getElementById("username").value;
+const password = document.getElementById("password").value;
+
+/* verificación local */
+if(username === DEV_USER && password === DEV_PASS){
+
+/* simulamos un token */
+localStorage.setItem("token", "dev-token-123");
+
+/* entrar al sistema */
+window.location.href = "inicio.html";
+
+}else{
+
+error.style.display = "block";
+
+}
+
+});
+
+</script>
+
+</body>
+</html>
