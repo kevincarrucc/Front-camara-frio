@@ -90,7 +90,7 @@ if(!token){
     
         <div class="status-card">
             <h3>Luces</h3>
-            <p class="value ok">--</p>
+            <div><span id="LuzCamara">--</span></div>
         </div>
 
     </div>
@@ -158,6 +158,15 @@ onValue(datosRef, (snapshot) => {
 
   document.getElementById("puerta").innerText =
     puerta === 0 ? "Abierta" : "Cerrada";
+
+}
+
+if (data.estadoLuzCamara !== undefined) {
+
+  const luz = Number(data.estadoLuzCamara);
+
+  document.getElementById("LuzCamara").innerText =
+    luz === 0 ? "Apagada" : "Encendida";
 
 }
 
