@@ -127,33 +127,39 @@ onValue(datosRef, (snapshot) => {
 
   if (data.temperatura1 !== undefined)
     document.getElementById("temp1").innerText = data.temperatura1;
-
+/*
   if (data.temperatura2 !== undefined)
     document.getElementById("temp2").innerText = data.temperatura2;
 
   if (data.temperaturaExterior !== undefined)
     document.getElementById("tempExt").innerText = data.temperaturaExterior;
-
+*/
   if (data.tensionL1 !== undefined)
     document.getElementById("tensionL1").innerText = data.tensionL1;
-
+/*
   if (data.tensionL2 !== undefined)
     document.getElementById("tensionL2").innerText = data.tensionL2;
 
   if (data.tensionL3 !== undefined)
     document.getElementById("tensionL3").innerText = data.tensionL3;
-
+*/
   if (data.corrienteL1 !== undefined)
     document.getElementById("corrienteL1").innerText = data.corrienteL1;
-
+/*
   if (data.corrienteL2 !== undefined)
     document.getElementById("corrienteL2").innerText = data.corrienteL2;
 
   if (data.corrienteL3 !== undefined)
     document.getElementById("corrienteL3").innerText = data.corrienteL3;
+*/
+  if (data.estadoPuerta !== undefined) {
 
-  if (data.estadoPuerta !== undefined)
-    document.getElementById("puerta").innerText = data.estadoPuerta ? "Abierta" : "Cerrada";
+  const puerta = Number(data.estadoPuerta);
+
+  document.getElementById("puerta").innerText =
+    puerta === 0 ? "Abierta" : "Cerrada";
+
+}
 
 });
 </script>
