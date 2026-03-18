@@ -13,11 +13,12 @@ body{
     font-family:'Montserrat', sans-serif;
     display:flex;
     flex-direction:column;
-
+    
     background: #333030;
         
 
     color:white;
+    padding-top: 90px; /* 80px header + espacio */
 }
 
 /* 🔴 HEADER FIJO */
@@ -36,6 +37,37 @@ header{
     z-index:1000;
 }
 
+/* BOTONES */
+.selector-graficos{
+    margin-top: 20px;
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+}
+
+.selector-graficos button{
+    padding: 10px 20px;
+    border: none;
+    border-radius: 3px;
+    background: #635d5e;
+    color: white;
+    cursor: pointer;
+    font-weight: 600;
+}
+
+.selector-graficos button:hover{
+    background: #847f80;
+}
+
+.selector-graficos button.activo{
+    background: #6b0f1a; /* color cuando está seleccionado */
+}
+
+/* SECCIONES */
+.seccion{
+    margin-top: 20px;
+}
+
 /* NAV */
 nav a{
     color:white;
@@ -47,12 +79,13 @@ nav a{
 .Temperatura24h-container{
     flex:1; /* 🔥 empuja el footer abajo */
     
-    margin-top:120px; /* 🔥 separa del header fijo */
+    margin-top:30px; /* 🔥 separa del header fijo */
     margin-bottom:40px;
 
     display:flex;
     justify-content:center;
     align-items:center;
+
 }
 
 /* 📊 GRÁFICO */
@@ -112,7 +145,7 @@ nav a{
 .Tensión24h-container{
     flex:1; /* 🔥 empuja el footer abajo */
     
-    margin-top:10px; /* 🔥 separa del header fijo */
+    margin-top:30px; /* 🔥 separa del header fijo */
     margin-bottom:40px;
 
     display:flex;
@@ -178,7 +211,7 @@ nav a{
 .Corriente24h-container{
     flex:1; /* 🔥 empuja el footer abajo */
     
-    margin-top:10px; /* 🔥 separa del header fijo */
+    margin-top:30px; /* 🔥 separa del header fijo */
     margin-bottom:40px;
 
     display:flex;
@@ -247,4 +280,15 @@ footer{
     color:white;
     text-align:center;
     padding:20px;
+}
+
+.oculto {
+     opacity: 0;
+    pointer-events: none;
+
+    height: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+
+    overflow: hidden;
 }

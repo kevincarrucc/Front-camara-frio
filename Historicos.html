@@ -45,6 +45,65 @@ if(!token){
     </nav>
 </header>
 
+<div class="selector-graficos">
+    <button class="activo" onclick="mostrarSeccion(event, 'temp')">Temperatura</button>
+    <button onclick="mostrarSeccion(event, 'tension')">Tensión</button>
+    <button onclick="mostrarSeccion(event, 'corriente')">Corriente</button>
+    <button onclick="mostrarSeccion(event, 'potencia')">Potencia</button>
+    <button onclick="mostrarSeccion(event, 'eventos')">Eventos</button>
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+    mostrarSeccion(null, 'temp');
+    });
+</script>
+
+
+<script>
+function mostrarSeccion(event, tipo){
+
+    const todos = document.querySelectorAll(
+        '.Temperatura24h-container, .Temperatura1sem-container, .Temperatura1mes-container, \
+         .Tensión24h-container, .Tensión1sem-container, .Tensión1mes-container, \
+         .Corriente24h-container, .Corriente1sem-container, .Corriente1mes-container'
+    );
+
+    // 🔴 ocultar todo
+    todos.forEach(el => el.classList.add('oculto'));
+
+    // 🟢 mostrar según botón
+    if(tipo === 'temp'){
+        document.querySelectorAll(
+            '.Temperatura24h-container, .Temperatura1sem-container, .Temperatura1mes-container'
+        ).forEach(el => el.classList.remove('oculto'));
+    }
+
+    if(tipo === 'tension'){
+        document.querySelectorAll(
+            '.Tensión24h-container, .Tensión1sem-container, .Tensión1mes-container'
+        ).forEach(el => el.classList.remove('oculto'));
+    }
+
+    if(tipo === 'corriente'){
+        document.querySelectorAll(
+            '.Corriente24h-container, .Corriente1sem-container, .Corriente1mes-container'
+        ).forEach(el => el.classList.remove('oculto'));
+    }
+
+    // 🔵 botón activo
+    const botones = document.querySelectorAll('.selector-graficos button');
+    botones.forEach(btn => btn.classList.remove('activo'));
+
+    if(event){
+        event.target.classList.add('activo');
+    } else {
+        document.querySelector('.selector-graficos button')
+            .classList.add('activo');
+    }
+}
+</script>
+
 <!-- Contenedor del gráfico -->
 <div class="Temperatura24h-container">
     <div id="container-1"></div>
@@ -86,6 +145,8 @@ if(!token){
 <footer>
     © 2026 El Abuelo Distribuciones
 </footer>
+
+
 
 <script>
 document.addEventListener("DOMContentLoaded", function () {
