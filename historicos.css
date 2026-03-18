@@ -4,71 +4,247 @@
     box-sizing:border-box;
 }
 
-body{
-    font-family:'Montserrat', sans-serif;
-    background:
-        linear-gradient(rgba(0,0,0,0.55), rgba(0,0,0,0.55)),
-        url('imagenes/fondo-productos.jpg') center/cover no-repeat;
-    color:#333;
+/* 🔧 Layout base para empujar footer abajo */
+html, body{
+    height:100%;
 }
 
+body{
+    font-family:'Montserrat', sans-serif;
+    display:flex;
+    flex-direction:column;
+
+    background: #333030;
+        
+
+    color:white;
+}
+
+/* 🔴 HEADER FIJO */
 header{
     position:fixed;
     top:0;
+    left:0;
     width:100%;
-    background:#6b0f1a;
     height:80px;
+
+    background:#6b0f1a;
     display:flex;
     justify-content:space-between;
     align-items:center;
     padding:0 40px;
-    color:white;
     z-index:1000;
 }
 
+/* NAV */
 nav a{
     color:white;
     text-decoration:none;
     margin-left:20px;
 }
 
-.dashboard{
-    padding:120px 40px 60px 40px;
-}
-
-h2{
-    color: black;
-    text-align:center;
-    margin:60px 0 30px 0;
-}
-
-.grid-2{
-    display:grid;
-    grid-template-columns:repeat(auto-fit, minmax(400px,1fr));
-    gap:30px;
-}
-
-.card{
-    background:white;
-    padding:25px;
-    border-radius:10px;
-    box-shadow:0 5px 15px rgba(0,0,0,0.08);
+/* 🟢 CONTENEDOR PRINCIPAL */
+.Temperatura24h-container{
+    flex:1; /* 🔥 empuja el footer abajo */
     
+    margin-top:120px; /* 🔥 separa del header fijo */
+    margin-bottom:40px;
+
+    display:flex;
+    justify-content:center;
+    align-items:center;
 }
 
-.chart-card{
+/* 📊 GRÁFICO */
+#container-1{
+    width:90%;
+    max-width:1400px;
     height:400px;
-    margin-bottom:50px;
+
+    background:#635d5e;
+    border-radius:10px;
+    padding:10px;
 }
 
-canvas{
-    margin-top:20px;
+.Temperatura1sem-container{
+    flex:1; /* 🔥 empuja el footer abajo */
+    
+    margin-top:10px; /* 🔥 separa del header fijo */
+    margin-bottom:40px;
+
+    display:flex;
+    justify-content:center;
+    align-items:center;
 }
 
+/* 📊 GRÁFICO */
+#container-2{
+    width:90%;
+    max-width:1400px;
+    height:400px;
+
+    background:#635d5e;
+    border-radius:10px;
+    padding:10px;
+}
+.Temperatura1mes-container{
+    flex:1; /* 🔥 empuja el footer abajo */
+    
+    margin-top:10px; /* 🔥 separa del header fijo */
+    margin-bottom:40px;
+
+    display:flex;
+    justify-content:center;
+    align-items:center;
+}
+
+/* 📊 GRÁFICO */
+#container-3{
+    width:90%;
+    max-width:1400px;
+    height:400px;
+
+    background:#635d5e;
+    border-radius:10px;
+    padding:10px;
+}
+
+.Tensión24h-container{
+    flex:1; /* 🔥 empuja el footer abajo */
+    
+    margin-top:10px; /* 🔥 separa del header fijo */
+    margin-bottom:40px;
+
+    display:flex;
+    justify-content:center;
+    align-items:center;
+}
+
+/* 📊 GRÁFICO */
+#container-4{
+    width:90%;
+    max-width:1400px;
+    height:400px;
+
+    background:#635d5e;
+    border-radius:10px;
+    padding:10px;
+}
+
+.Tensión1sem-container{
+    flex:1; /* 🔥 empuja el footer abajo */
+    
+    margin-top:10px; /* 🔥 separa del header fijo */
+    margin-bottom:40px;
+
+    display:flex;
+    justify-content:center;
+    align-items:center;
+}
+
+/* 📊 GRÁFICO */
+#container-5{
+    width:90%;
+    max-width:1400px;
+    height:400px;
+
+    background:#635d5e;
+    border-radius:10px;
+    padding:10px;
+}
+
+.Tensión1mes-container{
+    flex:1; /* 🔥 empuja el footer abajo */
+    
+    margin-top:10px; /* 🔥 separa del header fijo */
+    margin-bottom:40px;
+
+    display:flex;
+    justify-content:center;
+    align-items:center;
+}
+
+/* 📊 GRÁFICO */
+#container-6{
+    width:90%;
+    max-width:1400px;
+    height:400px;
+
+    background:#635d5e;
+    border-radius:10px;
+    padding:10px;
+}
+
+.Corriente24h-container{
+    flex:1; /* 🔥 empuja el footer abajo */
+    
+    margin-top:10px; /* 🔥 separa del header fijo */
+    margin-bottom:40px;
+
+    display:flex;
+    justify-content:center;
+    align-items:center;
+}
+
+/* 📊 GRÁFICO */
+#container-7{
+    width:90%;
+    max-width:1400px;
+    height:400px;
+
+    background:#635d5e;
+    border-radius:10px;
+    padding:10px;
+}
+
+.Corriente1sem-container{
+    flex:1; /* 🔥 empuja el footer abajo */
+    
+    margin-top:10px; /* 🔥 separa del header fijo */
+    margin-bottom:40px;
+
+    display:flex;
+    justify-content:center;
+    align-items:center;
+}
+
+/* 📊 GRÁFICO */
+#container-8{
+    width:90%;
+    max-width:1400px;
+    height:400px;
+
+    background:#635d5e;
+    border-radius:10px;
+    padding:10px;
+}
+
+.Corriente1mes-container{
+    flex:1; /* 🔥 empuja el footer abajo */
+    
+    margin-top:10px; /* 🔥 separa del header fijo */
+    margin-bottom:40px;
+
+    display:flex;
+    justify-content:center;
+    align-items:center;
+}
+
+/* 📊 GRÁFICO */
+#container-9{
+    width:90%;
+    max-width:1400px;
+    height:400px;
+
+    background:#635d5e;
+    border-radius:10px;
+    padding:10px;
+}
+
+/* 🟣 FOOTER SIEMPRE ABAJO */
 footer{
     background:#6b0f1a;
     color:white;
     text-align:center;
     padding:20px;
-    margin-top:60px;
 }

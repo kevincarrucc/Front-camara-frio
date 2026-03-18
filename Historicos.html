@@ -8,11 +8,16 @@
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="historicos.css">
 
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<!-- Highcharts -->
+<script src="code/highcharts.js"></script>
+<script src="code/modules/exporting.js"></script>
+<script src="code/modules/export-data.js"></script>
+<script src="code/modules/accessibility.js"></script>
 
 </head>
 <body>
-    <script>
+
+<script>
 
 /* =========================================================
    PROTECCIÓN DE PÁGINA - SOLO PARA DESARROLLO
@@ -28,158 +33,1040 @@ if(!token){
 
 </script>
 
+
 <header>
     <h1>Históricos del Sistema</h1>
     <nav>
         <a href="inicio.html">Inicio</a>
         <a href="Temperatura.html">Temperatura</a>
         <a href="Consumo.html">Consumo Eléctrico</a>
-        <a href="Historicos.html">Historicos</a>
+        <a href="Historicos.html">Históricos</a>
         <a href="#" onclick="logout()">Cerrar sesión</a>
     </nav>
 </header>
 
-<section class="dashboard">
+<!-- Contenedor del gráfico -->
+<div class="Temperatura24h-container">
+    <div id="container-1"></div>
+</div>
 
-    <!-- ================= TEMPERATURAS ================= -->
+<div class="Temperatura1sem-container">
+    <div id="container-2"></div>
+</div>
 
-    <h2>Histórico de Temperaturas</h2>
+<div class="Temperatura1mes-container">
+    <div id="container-3"></div>
+</div>
 
-    <div class="card chart-card">
-        <canvas id="chartTemperaturas"></canvas>
-    </div>
+<div class="Tensión24h-container">
+    <div id="container-4"></div>
+</div>
 
-    <!-- ================= VARIABLES ELÉCTRICAS ================= -->
+<div class="Tensión1sem-container">
+    <div id="container-5"></div>
+</div>
 
-    <h2>Histórico Eléctrico</h2>
+<div class="Tensión1mes-container">
+    <div id="container-6"></div>
+</div>
 
-        <div class="card chart-card">
-            <h3>Tensiones de Línea</h3>
-            <canvas id="chartTensiones"></canvas>
-        </div>
+<div class="Corriente24h-container">
+    <div id="container-7"></div>
+</div>
 
-        <div class="card chart-card">
-            <h3>Corrientes de Fase</h3>
-            <canvas id="chartCorrientes"></canvas>
-        </div>
+<div class="Corriente1sem-container">
+    <div id="container-8"></div>
+</div>
 
-        <div class="card chart-card">
-            <h3>Potencia Activa (kW)</h3>
-            <canvas id="chartPotencia"></canvas>
-        </div>
+<div class="Corriente1mes-container">
+    <div id="container-9"></div>
+</div>
 
-        <div class="card chart-card">
-            <h3>Factor de Potencia</h3>
-            <canvas id="chartFP"></canvas>
-        </div>
-
-    <!-- ================= EVENTOS IMPORTANTES ================= -->
-
-    <h2>Eventos del Sistema</h2>
-
-    <div class="card chart-card">
-        <h3>Aperturas de Puerta</h3>
-        <canvas id="chartPuerta"></canvas>
-    </div>
-
-</section>
 
 <footer>
     © 2026 El Abuelo Distribuciones
 </footer>
 
 <script>
+document.addEventListener("DOMContentLoaded", function () {
 
-// ---------- TEMPERATURAS ----------
-new Chart(document.getElementById("chartTemperaturas"), {
-    type: 'line',
-    data: {
-        labels: ['Mes 1', 'Mes 2', 'Mes 3'],
-        datasets: [
-            { label: 'Promedio', data: [-18, -17, -17.5], borderColor:'#6b0f1a', tension:0.3 },
-            { label: 'Espacio 1', data: [-19, -18, -18.2], borderColor:'#1e8e3e', tension:0.3 },
-            { label: 'Espacio 2', data: [-17, -16.5, -16.9], borderColor:'#1565c0', tension:0.3 },
-            { label: 'Exterior', data: [30, 31, 32], borderColor:'#c62828', tension:0.3 }
+    const INTERVAL = 600000; // 10 minutos
+
+    // Evento al cargar el gráfico
+    const onChartLoad = function () {
+        const chart = this;
+
+        const t1 = chart.series[0];
+        const t2 = chart.series[1];
+        const tProm = chart.series[2];
+        const tExt = chart.series[3];
+
+        setInterval(function () {
+            const x = (new Date()).getTime();
+
+            // 🔧 Datos simulados (después reemplazás por sensores reales)
+            const y1 = 2 + Math.random() * 4;   // temp1
+            const y2 = 2 + Math.random() * 4;   // temp2
+            const yProm = (y1 + y2) / 2;        // promedio
+            const yExt = 10 + Math.random() * 10; // exterior
+
+            // Mantener cantidad constante
+            const shift = t1.data.length >= 144;
+
+            t1.addPoint([x, y1], true, shift);
+            t2.addPoint([x, y2], true, shift);
+            tProm.addPoint([x, yProm], true, shift);
+            tExt.addPoint([x, yExt], true, shift);
+
+        }, INTERVAL);
+    };
+
+    // Datos iniciales
+    const dataT1 = [];
+    const dataT2 = [];
+    const dataProm = [];
+    const dataExt = [];
+
+    const time = new Date().getTime();
+
+    for (let i = -144; i <= 0; i++) {
+        const x = time + i * INTERVAL;
+
+        const y1 = 2 + Math.random() * 4;
+        const y2 = 2 + Math.random() * 4;
+        const yProm = (y1 + y2) / 2;
+        const yExt = 10 + Math.random() * 10;
+
+        dataT1.push([x, y1]);
+        dataT2.push([x, y2]);
+        dataProm.push([x, yProm]);
+        dataExt.push([x, yExt]);
+    }
+
+    Highcharts.chart('container-1', {
+        chart: {
+            type: 'spline',
+            events: {
+                load: onChartLoad
+            }
+        },
+
+        time: {
+            useUTC: false
+        },
+
+        title: {
+            text: 'Histórico de Temperaturas (24 hs)'
+        },
+
+        xAxis: {
+            type: 'datetime'
+        },
+
+        yAxis: {
+            title: {
+                text: 'Temperatura (°C)'
+            }
+        },
+
+        legend: {
+            enabled: true // 🔥 importante para diferenciar líneas
+        },
+
+        exporting: {
+            enabled: false
+        },
+
+        series: [
+            {
+                name: 'Temp 1',
+                data: dataT1
+            },
+            {
+                name: 'Temp 2',
+                data: dataT2
+            },
+            {
+                name: 'Temp Promedio',
+                data: dataProm,
+                dashStyle: 'ShortDash' // línea punteada
+            },
+            {
+                name: 'Temp Exterior',
+                data: dataExt
+            }
         ]
-    },
-    options: { responsive:true }
-});
+    });
 
-// ---------- TENSIONES ----------
-new Chart(document.getElementById("chartTensiones"), {
-    type: 'line',
-    data: {
-        labels: ['Mes 1','Mes 2','Mes 3'],
-        datasets: [
-            { label:'L1-L2', data:[381,379,382], borderColor:'#6b0f1a' },
-            { label:'L2-L3', data:[380,378,381], borderColor:'#1e8e3e' },
-            { label:'L3-L1', data:[382,380,383], borderColor:'#1565c0' }
-        ]
-    },
-    options:{ responsive:true }
 });
-
-// ---------- CORRIENTES ----------
-new Chart(document.getElementById("chartCorrientes"), {
-    type: 'line',
-    data: {
-        labels:['Mes 1','Mes 2','Mes 3'],
-        datasets:[
-            { label:'Fase 1', data:[8.2,8.0,8.4], borderColor:'#6b0f1a' },
-            { label:'Fase 2', data:[7.9,8.1,8.3], borderColor:'#1e8e3e' },
-            { label:'Fase 3', data:[8.4,8.2,8.5], borderColor:'#1565c0' }
-        ]
-    },
-    options:{ responsive:true }
-});
-
-// ---------- POTENCIA ----------
-new Chart(document.getElementById("chartPotencia"), {
-    type:'line',
-    data:{
-        labels:['Mes 1','Mes 2','Mes 3'],
-        datasets:[{
-            label:'kW',
-            data:[4.8,5.1,5.2],
-            borderColor:'#6b0f1a',
-            backgroundColor:'rgba(107,15,26,0.1)',
-            fill:true,
-            tension:0.3
-        }]
-    },
-    options:{ responsive:true }
-});
-
-// ---------- FACTOR DE POTENCIA ----------
-new Chart(document.getElementById("chartFP"), {
-    type:'line',
-    data:{
-        labels:['Mes 1','Mes 2','Mes 3'],
-        datasets:[{
-            label:'FP',
-            data:[0.89,0.91,0.93],
-            borderColor:'#ff9800',
-            tension:0.3
-        }]
-    },
-    options:{ responsive:true }
-});
-
-// ---------- PUERTA ----------
-new Chart(document.getElementById("chartPuerta"), {
-    type:'bar',
-    data:{
-        labels:['Mes 1','Mes 2','Mes 3'],
-        datasets:[{
-            label:'Cantidad de Aperturas',
-            data:[12,18,9],
-            backgroundColor:'#6b0f1a'
-        }]
-    },
-    options:{ responsive:true }
-});
-
 </script>
-<script src="Auth.js" ></script>
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+
+    const INTERVAL = 2 * 60 * 60 * 1000; // 2 horas
+    const MAX_POINTS = 84; // 7 días
+
+    // Evento al cargar el gráfico
+    const onChartLoad = function () {
+        const chart = this;
+
+        const t1 = chart.series[0];
+        const t2 = chart.series[1];
+        const tProm = chart.series[2];
+        const tExt = chart.series[3];
+
+        setInterval(function () {
+            const x = (new Date()).getTime();
+
+            // 🔧 Datos simulados (después reemplazás por sensores reales)
+            const y1 = 2 + Math.random() * 4;   // temp1
+            const y2 = 2 + Math.random() * 4;   // temp2
+            const yProm = (y1 + y2) / 2;        // promedio
+            const yExt = 10 + Math.random() * 10; // exterior
+
+            // Mantener cantidad constante
+            const shift = t1.data.length >= MAX_POINTS;
+
+            t1.addPoint([x, y1], true, shift);
+            t2.addPoint([x, y2], true, shift);
+            tProm.addPoint([x, yProm], true, shift);
+            tExt.addPoint([x, yExt], true, shift);
+
+        }, INTERVAL);
+    };
+
+    // Datos iniciales
+    const dataT1 = [];
+    const dataT2 = [];
+    const dataProm = [];
+    const dataExt = [];
+
+    const time = new Date().getTime();
+
+    for (let i = -MAX_POINTS; i <= 0; i++) {
+        const x = time + i * INTERVAL;
+
+        const y1 = 2 + Math.random() * 4;
+        const y2 = 2 + Math.random() * 4;
+        const yProm = (y1 + y2) / 2;
+        const yExt = 10 + Math.random() * 10;
+
+        dataT1.push([x, y1]);
+        dataT2.push([x, y2]);
+        dataProm.push([x, yProm]);
+        dataExt.push([x, yExt]);
+    }
+
+    Highcharts.chart('container-2', {
+        chart: {
+            type: 'spline',
+            events: {
+                load: onChartLoad
+            }
+        },
+
+        time: {
+            useUTC: false
+        },
+
+        title: {
+            text: 'Histórico de Temperaturas (1 Semana)'
+        },
+
+        xAxis: {
+            type: 'datetime'
+        },
+
+        yAxis: {
+            title: {
+                text: 'Temperatura (°C)'
+            }
+        },
+
+        legend: {
+            enabled: true // 🔥 importante para diferenciar líneas
+        },
+
+        exporting: {
+            enabled: false
+        },
+
+        series: [
+            {
+                name: 'Temp 1',
+                data: dataT1
+            },
+            {
+                name: 'Temp 2',
+                data: dataT2
+            },
+            {
+                name: 'Temp Promedio',
+                data: dataProm,
+                dashStyle: 'ShortDash' // línea punteada
+            },
+            {
+                name: 'Temp Exterior',
+                data: dataExt
+            }
+        ]
+    });
+
+});
+</script>
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+
+    const INTERVAL = 4 * 60 * 60 * 1000; // 4 horas
+    const MAX_POINTS = 180; // 30 días
+
+    // Evento al cargar el gráfico
+    const onChartLoad = function () {
+        const chart = this;
+
+        const t1 = chart.series[0];
+        const t2 = chart.series[1];
+        const tProm = chart.series[2];
+        const tExt = chart.series[3];
+
+        setInterval(function () {
+            const x = (new Date()).getTime();
+
+            // 🔧 Datos simulados (después reemplazás por sensores reales)
+            const y1 = 2 + Math.random() * 4;   // temp1
+            const y2 = 2 + Math.random() * 4;   // temp2
+            const yProm = (y1 + y2) / 2;        // promedio
+            const yExt = 10 + Math.random() * 10; // exterior
+
+            // Mantener cantidad constante
+            const shift = t1.data.length >= MAX_POINTS;
+
+            t1.addPoint([x, y1], true, shift);
+            t2.addPoint([x, y2], true, shift);
+            tProm.addPoint([x, yProm], true, shift);
+            tExt.addPoint([x, yExt], true, shift);
+
+        }, INTERVAL);
+    };
+
+    // Datos iniciales
+    const dataT1 = [];
+    const dataT2 = [];
+    const dataProm = [];
+    const dataExt = [];
+
+    const time = new Date().getTime();
+
+    for (let i = -MAX_POINTS; i <= 0; i++) {
+        const x = time + i * INTERVAL;
+
+        const y1 = 2 + Math.random() * 4;
+        const y2 = 2 + Math.random() * 4;
+        const yProm = (y1 + y2) / 2;
+        const yExt = 10 + Math.random() * 10;
+
+        dataT1.push([x, y1]);
+        dataT2.push([x, y2]);
+        dataProm.push([x, yProm]);
+        dataExt.push([x, yExt]);
+    }
+
+    Highcharts.chart('container-3', {
+        chart: {
+            type: 'spline',
+            events: {
+                load: onChartLoad
+            }
+        },
+
+        time: {
+            useUTC: false
+        },
+
+        title: {
+            text: 'Histórico de Temperaturas (1 Mes)'
+        },
+
+        xAxis: {
+            type: 'datetime'
+        },
+
+        yAxis: {
+            title: {
+                text: 'Temperatura (°C)'
+            }
+        },
+
+        legend: {
+            enabled: true // 🔥 importante para diferenciar líneas
+        },
+
+        exporting: {
+            enabled: false
+        },
+
+        series: [
+            {
+                name: 'Temp 1',
+                data: dataT1
+            },
+            {
+                name: 'Temp 2',
+                data: dataT2
+            },
+            {
+                name: 'Temp Promedio',
+                data: dataProm,
+                dashStyle: 'ShortDash' // línea punteada
+            },
+            {
+                name: 'Temp Exterior',
+                data: dataExt
+            }
+        ]
+    });
+
+});
+</script>
+
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+
+    const INTERVAL = 600000; // 10 minutos
+
+    // Evento al cargar el gráfico
+    const onChartLoad = function () {
+        const chart = this;
+
+        const t1 = chart.series[0];
+        const t2 = chart.series[1];
+        const t3 = chart.series[2];
+
+        setInterval(function () {
+            const x = (new Date()).getTime();
+
+            // 🔧 Datos simulados (después reemplazás por sensores reales)
+            const y1 = 2 + Math.random() * 4;   // temp1
+            const y2 = 2 + Math.random() * 4;   // temp2
+            const y3 = 2 + Math.random() * 4;   // temp3
+            
+
+            // Mantener cantidad constante
+            const shift = t1.data.length >= 144;
+
+            t1.addPoint([x, y1], true, shift);
+            t2.addPoint([x, y2], true, shift);
+            tProm.addPoint([x, yProm], true, shift);
+            tExt.addPoint([x, yExt], true, shift);
+
+        }, INTERVAL);
+    };
+
+    // Datos iniciales
+    const dataTensionL1 = [];
+    const dataTensionL2 = [];
+    const dataTensionL3 = [];
+
+    const time = new Date().getTime();
+
+    for (let i = -144; i <= 0; i++) {
+        const x = time + i * INTERVAL;
+
+        const y1 = 2 + Math.random() * 4;
+        const y2 = 2 + Math.random() * 4;
+        const y3 = 2 + Math.random() * 4;
+        
+
+        dataTensionL1.push([x, y1]);
+        dataTensionL2.push([x, y2]);
+        dataTensionL3.push([x, y3]);
+    }
+
+    Highcharts.chart('container-4', {
+        chart: {
+            type: 'spline',
+            events: {
+                load: onChartLoad
+            }
+        },
+
+        time: {
+            useUTC: false
+        },
+
+        title: {
+            text: 'Histórico de Tensiones (24 hs)'
+        },
+
+        xAxis: {
+            type: 'datetime'
+        },
+
+        yAxis: {
+            title: {
+                text: 'Tensión (V)'
+            }
+        },
+
+        legend: {
+            enabled: true // 🔥 importante para diferenciar líneas
+        },
+
+        exporting: {
+            enabled: false
+        },
+
+        series: [
+            {
+                name: 'Tensión L1',
+                data: dataTensionL1,
+            },
+            {
+                name: 'Tensión L2',
+                data: dataTensionL2,
+            },
+            {
+                name: 'Tensión L3  ',
+                data: dataTensionL3,
+                
+            },
+        ]
+    });
+
+});
+</script>
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+
+    const INTERVAL = 2 * 60 * 60 * 1000; // 2 horas
+    const MAX_POINTS = 84; // 7 días
+
+    // Evento al cargar el gráfico
+    const onChartLoad = function () {
+        const chart = this;
+
+        const t1 = chart.series[0];
+        const t2 = chart.series[1];
+        const t3 = chart.series[2];
+
+        setInterval(function () {
+            const x = (new Date()).getTime();
+
+            // 🔧 Datos simulados (después reemplazás por sensores reales)
+            const y1 = 2 + Math.random() * 4;   // temp1
+            const y2 = 2 + Math.random() * 4;   // temp2
+            const y3 = 2 + Math.random() * 4;   // temp3
+            
+
+            // Mantener cantidad constante
+            const shift = t1.data.length >= MAX_POINTS;
+
+            t1.addPoint([x, y1], true, shift);
+            t2.addPoint([x, y2], true, shift);
+            tProm.addPoint([x, yProm], true, shift);
+            tExt.addPoint([x, yExt], true, shift);
+
+        }, INTERVAL);
+    };
+
+    // Datos iniciales
+    const dataTensionL1 = [];
+    const dataTensionL2 = [];
+    const dataTensionL3 = [];
+
+    const time = new Date().getTime();
+
+    for (let i = -MAX_POINTS; i <= 0; i++) {
+        const x = time + i * INTERVAL;
+
+        const y1 = 2 + Math.random() * 4;
+        const y2 = 2 + Math.random() * 4;
+        const y3 = 2 + Math.random() * 4;
+        
+
+        dataTensionL1.push([x, y1]);
+        dataTensionL2.push([x, y2]);
+        dataTensionL3.push([x, y3]);
+    }
+
+    Highcharts.chart('container-5', {
+        chart: {
+            type: 'spline',
+            events: {
+                load: onChartLoad
+            }
+        },
+
+        time: {
+            useUTC: false
+        },
+
+        title: {
+            text: 'Histórico de Tensiones (1 Semana)'
+        },
+
+        xAxis: {
+            type: 'datetime'
+        },
+
+        yAxis: {
+            title: {
+                text: 'Tensión (V)'
+            }
+        },
+
+        legend: {
+            enabled: true // 🔥 importante para diferenciar líneas
+        },
+
+        exporting: {
+            enabled: false
+        },
+
+        series: [
+            {
+                name: 'Tensión L1',
+                data: dataTensionL1,
+            },
+            {
+                name: 'Tensión L2',
+                data: dataTensionL2,
+            },
+            {
+                name: 'Tensión L3  ',
+                data: dataTensionL3,
+                
+            },
+        ]
+    });
+
+});
+</script>
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+
+    const INTERVAL = 4 * 60 * 60 * 1000; // 4 horas
+    const MAX_POINTS = 180; // 7 días
+
+    // Evento al cargar el gráfico
+    const onChartLoad = function () {
+        const chart = this;
+
+        const t1 = chart.series[0];
+        const t2 = chart.series[1];
+        const t3 = chart.series[2];
+
+        setInterval(function () {
+            const x = (new Date()).getTime();
+
+            // 🔧 Datos simulados (después reemplazás por sensores reales)
+            const y1 = 2 + Math.random() * 4;   // temp1
+            const y2 = 2 + Math.random() * 4;   // temp2
+            const y3 = 2 + Math.random() * 4;   // temp3
+            
+
+            // Mantener cantidad constante
+            const shift = t1.data.length >= MAX_POINTS;
+
+            t1.addPoint([x, y1], true, shift);
+            t2.addPoint([x, y2], true, shift);
+            tProm.addPoint([x, yProm], true, shift);
+            tExt.addPoint([x, yExt], true, shift);
+
+        }, INTERVAL);
+    };
+
+    // Datos iniciales
+    const dataTensionL1 = [];
+    const dataTensionL2 = [];
+    const dataTensionL3 = [];
+
+    const time = new Date().getTime();
+
+    for (let i = -MAX_POINTS; i <= 0; i++) {
+        const x = time + i * INTERVAL;
+
+        const y1 = 2 + Math.random() * 4;
+        const y2 = 2 + Math.random() * 4;
+        const y3 = 2 + Math.random() * 4;
+        
+
+        dataTensionL1.push([x, y1]);
+        dataTensionL2.push([x, y2]);
+        dataTensionL3.push([x, y3]);
+    }
+
+    Highcharts.chart('container-6', {
+        chart: {
+            type: 'spline',
+            events: {
+                load: onChartLoad
+            }
+        },
+
+        time: {
+            useUTC: false
+        },
+
+        title: {
+            text: 'Histórico de Tensiones (1 Mes)'
+        },
+
+        xAxis: {
+            type: 'datetime'
+        },
+
+        yAxis: {
+            title: {
+                text: 'Tensión (V)'
+            }
+        },
+
+        legend: {
+            enabled: true // 🔥 importante para diferenciar líneas
+        },
+
+        exporting: {
+            enabled: false
+        },
+
+        series: [
+            {
+                name: 'Tensión L1',
+                data: dataTensionL1,
+            },
+            {
+                name: 'Tensión L2',
+                data: dataTensionL2,
+            },
+            {
+                name: 'Tensión L3  ',
+                data: dataTensionL3,
+                
+            },
+        ]
+    });
+
+});
+</script>
+
+
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+
+    const INTERVAL = 600000; // 10 minutos
+    const MAX_POINTS = 144; // 7 días
+
+    // Evento al cargar el gráfico
+    const onChartLoad = function () {
+        const chart = this;
+
+        const t1 = chart.series[0];
+        const t2 = chart.series[1];
+        const t3 = chart.series[2];
+
+        setInterval(function () {
+            const x = (new Date()).getTime();
+
+            // 🔧 Datos simulados (después reemplazás por sensores reales)
+            const y1 = 2 + Math.random() * 4;   // temp1
+            const y2 = 2 + Math.random() * 4;   // temp2
+            const y3 = 2 + Math.random() * 4;   // temp3
+            
+
+            // Mantener cantidad constante
+            const shift = t1.data.length >= MAX_POINTS;
+
+            t1.addPoint([x, y1], true, shift);
+            t2.addPoint([x, y2], true, shift);
+            tProm.addPoint([x, yProm], true, shift);
+            tExt.addPoint([x, yExt], true, shift);
+
+        }, INTERVAL);
+    };
+
+    // Datos iniciales
+    const dataCorrienteL1 = [];
+    const dataCorrienteL2 = [];
+    const dataCorrienteL3 = [];
+
+    const time = new Date().getTime();
+
+    for (let i = -MAX_POINTS; i <= 0; i++) {
+        const x = time + i * INTERVAL;
+
+        const y1 = 2 + Math.random() * 4;
+        const y2 = 2 + Math.random() * 4;
+        const y3 = 2 + Math.random() * 4;
+        
+
+        dataCorrienteL1.push([x, y1]);
+        dataCorrienteL2.push([x, y2]);
+        dataCorrienteL3.push([x, y3]);
+    }
+
+    Highcharts.chart('container-7', {
+        chart: {
+            type: 'spline',
+            events: {
+                load: onChartLoad
+            }
+        },
+
+        time: {
+            useUTC: false
+        },
+
+        title: {
+            text: 'Histórico de Corrientes (24 hs)'
+        },
+
+        xAxis: {
+            type: 'datetime'
+        },
+
+        yAxis: {
+            title: {
+                text: 'Corriente (A)'
+            }
+        },
+
+        legend: {
+            enabled: true // 🔥 importante para diferenciar líneas
+        },
+
+        exporting: {
+            enabled: false
+        },
+
+        series: [
+            {
+                name: 'Corriente L1',
+                data: dataCorrienteL1,
+            },
+            {
+                name: 'Corriente L2',
+                data: dataCorrienteL2,
+            },
+            {
+                name: 'Corriente L3  ',
+                data: dataCorrienteL3,
+                
+            },
+        ]
+    });
+
+});
+</script>
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+
+    const INTERVAL = 2 * 60 * 60 * 1000; // 2 horas
+    const MAX_POINTS = 84; // 7 días
+
+    // Evento al cargar el gráfico
+    const onChartLoad = function () {
+        const chart = this;
+
+        const t1 = chart.series[0];
+        const t2 = chart.series[1];
+        const t3 = chart.series[2];
+
+        setInterval(function () {
+            const x = (new Date()).getTime();
+
+            // 🔧 Datos simulados (después reemplazás por sensores reales)
+            const y1 = 2 + Math.random() * 4;   // temp1
+            const y2 = 2 + Math.random() * 4;   // temp2
+            const y3 = 2 + Math.random() * 4;   // temp3
+            
+
+            // Mantener cantidad constante
+            const shift = t1.data.length >= MAX_POINTS;
+
+            t1.addPoint([x, y1], true, shift);
+            t2.addPoint([x, y2], true, shift);
+            tProm.addPoint([x, yProm], true, shift);
+            tExt.addPoint([x, yExt], true, shift);
+
+        }, INTERVAL);
+    };
+
+    // Datos iniciales
+    const dataCorrienteL1 = [];
+    const dataCorrienteL2 = [];
+    const dataCorrienteL3 = [];
+
+    const time = new Date().getTime();
+
+    for (let i = -MAX_POINTS; i <= 0; i++) {
+        const x = time + i * INTERVAL;
+
+        const y1 = 2 + Math.random() * 4;
+        const y2 = 2 + Math.random() * 4;
+        const y3 = 2 + Math.random() * 4;
+        
+
+        dataCorrienteL1.push([x, y1]);
+        dataCorrienteL2.push([x, y2]);
+        dataCorrienteL3.push([x, y3]);
+    }
+
+    Highcharts.chart('container-8', {
+        chart: {
+            type: 'spline',
+            events: {
+                load: onChartLoad
+            }
+        },
+
+        time: {
+            useUTC: false
+        },
+
+        title: {
+            text: 'Histórico de Corrientes (1 Semana)'
+        },
+
+        xAxis: {
+            type: 'datetime'
+        },
+
+        yAxis: {
+            title: {
+                text: 'Corriente (A)'
+            }
+        },
+
+        legend: {
+            enabled: true // 🔥 importante para diferenciar líneas
+        },
+
+        exporting: {
+            enabled: false
+        },
+
+        series: [
+            {
+                name: 'Corriente L1',
+                data: dataCorrienteL1,
+            },
+            {
+                name: 'Corriente L2',
+                data: dataCorrienteL2,
+            },
+            {
+                name: 'Corriente L3  ',
+                data: dataCorrienteL3,
+                
+            },
+        ]
+    });
+
+});
+</script>
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+
+    const INTERVAL = 4 * 60 * 60 * 1000; // 4 horas
+    const MAX_POINTS = 180; // 30 días
+
+    const onChartLoad = function () {
+        const chart = this;
+
+        const t1 = chart.series[0];
+        const t2 = chart.series[1];
+        const t3 = chart.series[2];
+
+        setInterval(function () {
+            const x = (new Date()).getTime();
+
+            const y1 = 2 + Math.random() * 4;
+            const y2 = 2 + Math.random() * 4;
+            const y3 = 2 + Math.random() * 4;
+
+            const shift = t1.data.length >= MAX_POINTS;
+
+            t1.addPoint([x, y1], true, shift);
+            t2.addPoint([x, y2], true, shift);
+            t3.addPoint([x, y3], true, shift);
+
+        }, INTERVAL);
+    };
+
+    const dataCorrienteL1 = [];
+    const dataCorrienteL2 = [];
+    const dataCorrienteL3 = [];
+
+    const time = new Date().getTime();
+
+    for (let i = -MAX_POINTS; i <= 0; i++) {
+        const x = time + i * INTERVAL;
+
+        const y1 = 2 + Math.random() * 4;
+        const y2 = 2 + Math.random() * 4;
+        const y3 = 2 + Math.random() * 4;
+
+        dataCorrienteL1.push([x, y1]);
+        dataCorrienteL2.push([x, y2]);
+        dataCorrienteL3.push([x, y3]);
+    }
+
+    Highcharts.chart('container-9', {
+        chart: {
+            type: 'spline',
+            zoomType: 'x', // 🔥 clave para moverte en el mes
+            events: {
+                load: onChartLoad
+            }
+        },
+
+        time: {
+            useUTC: false
+        },
+
+        title: {
+            text: 'Histórico de Corrientes (1 Mes)'
+        },
+
+        xAxis: {
+            type: 'datetime'
+        },
+
+        yAxis: {
+            title: {
+                text: 'Corriente (A)'
+            }
+        },
+
+        legend: {
+            enabled: true
+        },
+
+        exporting: {
+            enabled: false
+        },
+
+        series: [
+            {
+                name: 'Corriente L1',
+                data: dataCorrienteL1
+            },
+            {
+                name: 'Corriente L2',
+                data: dataCorrienteL2
+            },
+            {
+                name: 'Corriente L3',
+                data: dataCorrienteL3
+            }
+        ]
+    });
+
+});
+</script>
+
 </body>
 </html>
