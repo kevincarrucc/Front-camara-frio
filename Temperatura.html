@@ -8,26 +8,14 @@
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="Temperatura.css">
 
-<!-- Chart.js para las gráficas -->
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<!-- Highcharts -->
+<script src="code/highcharts.js"></script>
+<script src="code/modules/exporting.js"></script>
+<script src="code/modules/export-data.js"></script>
+<script src="code/modules/accessibility.js"></script>
 
 </head>
 <body>
-    <script>
-
-/* =========================================================
-   PROTECCIÓN DE PÁGINA - SOLO PARA DESARROLLO
-   BORRAR CUANDO EL BACKEND ESTE FUNCIONANDO
-   ========================================================= */
-
-const token = localStorage.getItem("token");
-
-/* si no existe token -> volver al login */
-if(!token){
-    window.location.href = "index.html";
-}
-
-</script>
 
 <header>
     <h1>Panel de Temperatura</h1>
@@ -48,17 +36,17 @@ if(!token){
 
         <div class="card">
             <h3>Temp. Promedio</h3>
-            <p class="value">-17.5°C</p>
+            <p class="value">7°C</p>
         </div>
 
         <div class="card">
             <h3>Espacio 1</h3>
-            <p class="value">-18.2°C</p>
+            <p class="value">8°C</p>
         </div>
 
         <div class="card">
             <h3>Espacio 2</h3>
-            <p class="value">-16.9°C</p>
+            <p class="value">6°C</p>
         </div>
 
         <div class="card">
@@ -68,55 +56,81 @@ if(!token){
 
     </div>
 
-    <h2>Configuración de Histéresis</h2>
+    <div class="Temperatura24h-container">
+        <div id="container-1"></div>
+    </div>
+
+    <h2>Configuración de Temperatura</h2>
 
     <div class="grid-2">
 
         <div class="card control-card">
-            <h3>Temperatura Mínima</h3>
+            <h3>Temperatura</h3>
             <div class="control">
                 <button>-</button>
-                <span>-20°C</span>
+                <span>6°C</span>
                 <button>+</button>
             </div>
         </div>
 
         <div class="card control-card">
-            <h3>Temperatura Máxima</h3>
+            <h3>Margen de control +/- °C</h3>
             <div class="control">
                 <button>-</button>
-                <span>-15°C</span>
+                <span>3°C</span>
                 <button>+</button>
             </div>
         </div>
 
     </div>
 
-    <h2>Histórico Trimestral</h2>
+    <h2>Configuración de avisos</h2>
 
-    
+    <div class="grid-2">
 
-        <div class="card chart-card">
-            <h3>Promedio</h3>
-            <canvas id="chartPromedio"></canvas>
+        <div class="card control-card">
+            <h3>Aviso temperatura baja</h3>
+            <div class="control">
+                <button>-</button>
+                <span>0.5°C</span>
+                <button>+</button>
+            </div>
         </div>
 
-        <div class="card chart-card">
-            <h3>Espacio 1</h3>
-            <canvas id="chartE1"></canvas>
+        <div class="card control-card">
+            <h3>Aviso temperatura alta</h3>
+            <div class="control">
+                <button>-</button>
+                <span>15°C</span>
+                <button>+</button>
+            </div>
         </div>
 
-        <div class="card chart-card">
-            <h3>Espacio 2</h3>
-            <canvas id="chartE2"></canvas>
+    </div>
+
+    <h2>Configuración de alarmas</h2>
+
+    <div class="grid-2">
+
+        <div class="card control-card">
+            <h3>Alarma temperatura baja</h3>
+            <div class="control">
+                <button>-</button>
+                <span>0°C</span>
+                <button>+</button>
+            </div>
         </div>
 
-        <div class="card chart-card">
-            <h3>Exterior</h3>
-            <canvas id="chartExt"></canvas>
+        <div class="card control-card">
+            <h3>Alarma temperatura alta</h3>
+            <div class="control">
+                <button>-</button>
+                <span>18°C</span>
+                <button>+</button>
+            </div>
         </div>
 
-    
+    </div>
 
 </section>
 
@@ -125,33 +139,117 @@ if(!token){
 </footer>
 
 <script>
-function crearGrafica(id, label, datos) {
-    new Chart(document.getElementById(id), {
-        type: 'line',
-        data: {
-            labels: ['Mes 1', 'Mes 2', 'Mes 3'],
-            datasets: [{
-                label: label,
-                data: datos,
-                borderColor: '#6b0f1a',
-                backgroundColor: 'rgba(107,15,26,0.1)',
-                tension: 0.3,
-                fill: true
-            }]
-        },
-        options: {
-            responsive: true,
-            plugins: {
-                legend: { display: false }
-            }
-        }
-    });
-}
+document.addEventListener("DOMContentLoaded", function () {
 
-crearGrafica('chartPromedio', 'Promedio', [-18, -17, -17.5]);
-crearGrafica('chartE1', 'Espacio 1', [-19, -18, -18.2]);
-crearGrafica('chartE2', 'Espacio 2', [-17, -16.5, -16.9]);
-crearGrafica('chartExt', 'Exterior', [30, 31, 32]);
+    const INTERVAL = 600000; // 10 minutos
+
+    // Evento al cargar el gráfico
+    const onChartLoad = function () {
+        const chart = this;
+
+        const t1 = chart.series[0];
+        const t2 = chart.series[1];
+        const tProm = chart.series[2];
+        const tExt = chart.series[3];
+
+        setInterval(function () {
+            const x = (new Date()).getTime();
+
+            // 🔧 Datos simulados (después reemplazás por sensores reales)
+            const y1 = 2 + Math.random() * 4;   // temp1
+            const y2 = 2 + Math.random() * 4;   // temp2
+            const yProm = (y1 + y2) / 2;        // promedio
+            const yExt = 10 + Math.random() * 10; // exterior
+
+            // Mantener cantidad constante
+            const shift = t1.data.length >= 144;
+
+            t1.addPoint([x, y1], true, shift);
+            t2.addPoint([x, y2], true, shift);
+            tProm.addPoint([x, yProm], true, shift);
+            tExt.addPoint([x, yExt], true, shift);
+
+        }, INTERVAL);
+    };
+
+    // Datos iniciales
+    const dataT1 = [];
+    const dataT2 = [];
+    const dataProm = [];
+    const dataExt = [];
+
+    const time = new Date().getTime();
+
+    for (let i = -144; i <= 0; i++) {
+        const x = time + i * INTERVAL;
+
+        const y1 = 2 + Math.random() * 4;
+        const y2 = 2 + Math.random() * 4;
+        const yProm = (y1 + y2) / 2;
+        const yExt = 10 + Math.random() * 10;
+
+        dataT1.push([x, y1]);
+        dataT2.push([x, y2]);
+        dataProm.push([x, yProm]);
+        dataExt.push([x, yExt]);
+    }
+
+    Highcharts.chart('container-1', {
+        chart: {
+            type: 'spline',
+            events: {
+                load: onChartLoad
+            }
+        },
+
+        time: {
+            useUTC: false
+        },
+
+        title: {
+            text: 'Histórico de Temperaturas (24 hs)'
+        },
+
+        xAxis: {
+            type: 'datetime'
+        },
+
+        yAxis: {
+            title: {
+                text: 'Temperatura (°C)'
+            }
+        },
+
+        legend: {
+            enabled: true // 🔥 importante para diferenciar líneas
+        },
+
+        exporting: {
+            enabled: false
+        },
+
+        series: [
+            {
+                name: 'Temp 1',
+                data: dataT1
+            },
+            {
+                name: 'Temp 2',
+                data: dataT2
+            },
+            {
+                name: 'Temp Promedio',
+                data: dataProm,
+                dashStyle: 'ShortDash' // línea punteada
+            },
+            {
+                name: 'Temp Exterior',
+                data: dataExt
+            }
+        ]
+    });
+
+});
 </script>
 <script src="Auth.js" ></script>
 </body>

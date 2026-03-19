@@ -12,24 +12,9 @@
 
 </head>
 <body>
-    <script>
-
-/* =========================================================
-   PROTECCIÓN DE PÁGINA - SOLO PARA DESARROLLO
-   BORRAR CUANDO EL BACKEND ESTE FUNCIONANDO
-   ========================================================= */
-
-const token = localStorage.getItem("token");
-
-/* si no existe token -> volver al login */
-if(!token){
-    window.location.href = "index.html";
-}
-
-</script>
 
 <header>
-    <h1>Panel Eléctrico 0000</h1>
+    <h1>Panel Eléctrico</h1>
     <nav>
         <a href="inicio.html">Inicio</a>
         <a href="Temperatura.html">Temperatura</a>
@@ -41,7 +26,7 @@ if(!token){
 
 <section class="dashboard">
 
-    <h2>Mediciones de Línea</h2>
+    <h2>Tensiones de Fase</h2>
 
     <div class="grid-3">
 
@@ -94,12 +79,96 @@ if(!token){
 
     </div>
 
-    <h2>Histórico de Consumo</h2>
+    <h2>Configuración de avisos</h2>
 
-    <div class="grid-1">
-        <div class="card chart-card">
-            <canvas id="chartConsumo"></canvas>
+    <div class="grid-2">
+
+        <div class="card control-card">
+            <h3>Aviso tensión baja</h3>
+            <div class="control">
+                <button>-</button>
+                <span>200 V</span>
+                <button>+</button>
+            </div>
         </div>
+
+        <div class="card control-card">
+            <h3>Aviso tensión alta</h3>
+            <div class="control">
+                <button>-</button>
+                <span>250 V</span>
+                <button>+</button>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="grid-2">
+
+        <div class="card control-card">
+            <h3>Aviso corriente baja</h3>
+            <div class="control">
+                <button>-</button>
+                <span>1.5 A</span>
+                <button>+</button>
+            </div>
+        </div>
+
+        <div class="card control-card">
+            <h3>Aviso corriente alta</h3>
+            <div class="control">
+                <button>-</button>
+                <span>15 A</span>
+                <button>+</button>
+            </div>
+        </div>
+
+    </div>
+
+    <h2>Configuración de alarmas</h2>
+
+    <div class="grid-2">
+
+        <div class="card control-card">
+            <h3>Alarma tensión baja</h3>
+            <div class="control">
+                <button>-</button>
+                <span>190 V</span>
+                <button>+</button>
+            </div>
+        </div>
+
+        <div class="card control-card">
+            <h3>Alarma tensión alta</h3>
+            <div class="control">
+                <button>-</button>
+                <span>260 V</span>
+                <button>+</button>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="grid-2">
+
+        <div class="card control-card">
+            <h3>Alarma corriente baja</h3>
+            <div class="control">
+                <button>-</button>
+                <span>1 A</span>
+                <button>+</button>
+            </div>
+        </div>
+
+        <div class="card control-card">
+            <h3>Alarma corriente alta</h3>
+            <div class="control">
+                <button>-</button>
+                <span>15 A</span>
+                <button>+</button>
+            </div>
+        </div>
+
     </div>
 
 </section>
@@ -108,28 +177,7 @@ if(!token){
     © 2026 El Abuelo Distribuciones
 </footer>
 
-<script>
-new Chart(document.getElementById("chartConsumo"), {
-    type: 'line',
-    data: {
-        labels: ['Mes 1', 'Mes 2', 'Mes 3'],
-        datasets: [{
-            label: 'Consumo kW',
-            data: [4.8, 5.1, 5.2],
-            borderColor: '#6b0f1a',
-            backgroundColor: 'rgba(107,15,26,0.1)',
-            fill: true,
-            tension: 0.3
-        }]
-    },
-    options: {
-        responsive: true,
-        plugins: {
-            legend: { display: false }
-        }
-    }
-});
-</script>
+
 <script src="Auth.js" ></script>
 </body>
 </html>

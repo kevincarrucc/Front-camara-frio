@@ -179,3 +179,25 @@ text-align:center;
 padding:20px;
 
 }
+
+/* adaptar a telefonos */
+@media (max-width: 768px){
+
+    header{
+        flex-direction:column;
+        height:auto;
+        padding:10px;
+        text-align:center;
+    }
+
+    nav{
+        margin-top:10px;
+    }
+
+    nav a{
+        display:inline-block;
+        margin:5px 10px;
+    }
+
+}
+

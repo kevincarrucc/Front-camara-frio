@@ -62,41 +62,28 @@ footer{
     to{opacity:1; transform:translateY(0);}
 }
 
-/* RESPONSIVE */
-@media(max-width:768px){
-
-    header{
-        padding:0 20px;
-    }
-
-    .hero h2{
-        font-size:32px;
-    }
-
-    .hero p{
-        font-size:16px;
-    }
-}
-
 .logo{
-    height:50px;
+    height:60px;
 }
-
-/* DASHBOARD */
-
-
 
 .dashboard h2{
     text-align:center;
     margin-bottom:50px;
     font-size:28px;
-    color: #000000;
+    color: #ffffff;
+
+    background-color: #6b0f1a;   /* fondo del recuadro */
+    padding: 4px;               /* espacio interno para que no toque los bordes */
+    border-radius: 12px;         /* esquinas redondeadas */
+
 }
 
 .dashboard-grid{
     display:grid;
     grid-template-columns:repeat(auto-fit, minmax(250px,1fr));
     gap:30px;
+
+    
 }
 
 .status-card{
@@ -145,4 +132,12 @@ font-weight:700;
 
 .alert{
     color:#c62828;
+}
+
+#temp{
+    font-size: 2rem;
+    font-weight: bold;
+    color: #000000;
+    padding: 10px 20px;
+    display: inline-block;
 }
