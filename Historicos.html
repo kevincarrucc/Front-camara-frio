@@ -6,7 +6,7 @@
 <title>Históricos - Cámara de Frío</title>
 
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="historicos.css">
+<link rel="stylesheet" href="historicos.css?v=3">
 
 <!-- Highcharts -->
 <script src="code/highcharts.js"></script>
@@ -91,6 +91,15 @@ function mostrarSeccion(event, tipo){
         ).forEach(el => el.classList.remove('oculto'));
     }
 
+    if(tipo === 'eventos'){
+        document.getElementById('event-panel')
+            .classList.remove('oculto');
+    }
+    else {
+        document.getElementById('event-panel')
+            .classList.add('oculto');
+    }
+
     // 🔵 botón activo
     const botones = document.querySelectorAll('.selector-graficos button');
     botones.forEach(btn => btn.classList.remove('activo'));
@@ -98,6 +107,7 @@ function mostrarSeccion(event, tipo){
     if(event){
         event.target.classList.add('activo');
     } else {
+        
         document.querySelector('.selector-graficos button')
             .classList.add('activo');
     }
@@ -141,10 +151,49 @@ function mostrarSeccion(event, tipo){
     <div id="container-9"></div>
 </div>
 
+<div id="event-panel" class="oculto">
+    <div id="eventList"></div>
+</div>
+
 
 <footer>
     © 2026 El Abuelo Distribuciones
 </footer>
+
+<script>// simulación de eventos cada 3 segundos (después reemplazás por eventos reales del backend)
+setInterval(() => {
+    const tipos = ["info", "aviso", "alarma"];
+    const mensajes = [
+        "Sistema iniciado",
+        "Temperatura alta",
+        "Falla de sensor",
+        "Puerta abierta"
+    ];
+
+    const tipo = tipos[Math.floor(Math.random() * tipos.length)];
+    const mensaje = mensajes[Math.floor(Math.random() * mensajes.length)];
+
+    agregarEvento(mensaje, tipo);
+}, 3000);
+</script>
+
+<script>// función para agregar eventos al panel de eventos a traves del back
+    function agregarEvento(mensaje, tipo) {
+    const eventList = document.getElementById("eventList");
+
+    const nuevoEvento = document.createElement("div");
+    nuevoEvento.classList.add("event", tipo);
+
+    const fecha = new Date().toLocaleTimeString();
+
+    nuevoEvento.innerHTML = `
+        <strong>${fecha}</strong> - ${mensaje}
+    `;
+
+    // prepend = lo coloca arriba de todo
+    eventList.prepend(nuevoEvento);
+}
+</script>
 
 
 

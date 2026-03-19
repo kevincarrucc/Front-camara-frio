@@ -14,7 +14,9 @@ body{
     display:flex;
     flex-direction:column;
     
-    background: #333030;
+    background:
+        linear-gradient(rgba(0,0,0,0.55), rgba(0,0,0,0.55)),
+        url('/imagenes/fondo-productos.jpg') center/cover no-repeat;
         
 
     color:white;
@@ -291,4 +293,57 @@ footer{
     padding: 0 !important;
 
     overflow: hidden;
+}
+
+#event-panel {
+    margin-top: 10px; /* separación de los botones */
+    max-height: 600px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 10px;
+}
+
+#eventList {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+/* Base de cada recuadro */
+.event {
+    padding: 10px 12px;
+    border-radius: 8px;
+    font-family: sans-serif;
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    
+    backdrop-filter: blur(4px); /* efecto glass opcional */
+}
+
+/* Texto */
+.event .mensaje {
+    font-weight: 500;
+}
+
+.event .timestamp {
+    font-size: 0.85em;
+    opacity: 0.7;
+}
+
+/* Tipos de eventos */
+.event.info {
+    background-color: rgba(150, 150, 150, 0.25); /* gris transparente */
+    border-left: 4px solid gray;
+}
+
+.event.aviso {
+    background-color: rgba(255, 200, 0, 0.25); /* amarillo transparente */
+    border-left: 4px solid orange;
+}
+
+.event.alarma {
+    background-color: rgba(255, 0, 0, 0.25); /* rojo transparente */
+    border-left: 4px solid red;
 }
