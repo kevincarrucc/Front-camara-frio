@@ -54,12 +54,7 @@ footer{
     color:white;
     text-align:center;
     padding:20px;
-}
-
-/* ANIMACION */
-@keyframes fadeIn{
-    from{opacity:0; transform:translateY(20px);}
-    to{opacity:1; transform:translateY(0);}
+   
 }
 
 .logo{
@@ -82,8 +77,6 @@ footer{
     display:grid;
     grid-template-columns:repeat(auto-fit, minmax(250px,1fr));
     gap:30px;
-
-    
 }
 
 .status-card{
@@ -93,10 +86,8 @@ footer{
     box-shadow:0 5px 15px rgba(0,0,0,0.08);
     text-align:center;
     transition:0.3s;
-}
-
-.status-card:hover{
-    transform:translateY(-5px);
+    height: 180px;
+    
 }
 
 .status-card h3{
@@ -105,39 +96,8 @@ footer{
     color:#000000;
 }
 
-.value{
-    font-size:26px;
+.status-card div{
+    font-size:24px;
     font-weight:700;
-}
-
-.tension{
-    font-size:14px;
-font-weight:700;
-}
-
-.corriente{
-    font-size:14px;
-    font-weight:700;
-}
-
-/* Estados */
-
-.ok{
-    color:#1e8e3e;
-}
-
-.off{
-    color:#777;
-}
-
-.alert{
-    color:#c62828;
-}
-
-#temp{
-    font-size: 2rem;
-    font-weight: bold;
-    color: #000000;
-    padding: 10px 20px;
-    display: inline-block;
+    color:#000000;
 }
