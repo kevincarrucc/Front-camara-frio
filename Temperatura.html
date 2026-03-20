@@ -8,24 +8,25 @@
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="Temperatura.css">
 
-<!-- Highcharts -->
 <script src="code/highcharts.js"></script>
 <script src="code/modules/exporting.js"></script>
 <script src="code/modules/export-data.js"></script>
 <script src="code/modules/accessibility.js"></script>
 
+
 </head>
+
 <body>
 
 <header>
-    <h1>Panel de Temperatura</h1>
-    <nav>
-        <a href="inicio.html">Inicio</a>
-        <a href="Temperatura.html">Temperatura</a>
-        <a href="Consumo.html">Consumo Eléctrico</a>
-        <a href="Historicos.html">Historicos</a>
-        <a href="#" onclick="logout()">Cerrar sesión</a>
-    </nav>
+<h1>Panel de Temperatura</h1>
+<nav>
+<a href="inicio.html">Inicio</a>
+<a href="Temperatura.html">Temperatura</a>
+<a href="Consumo.html">Consumo Eléctrico</a>
+<a href="Historicos.html">Historicos</a>
+<a href="#" onclick="logout()">Cerrar sesión</a>
+</nav>
 </header>
 
 <section class="dashboard">
@@ -36,22 +37,22 @@
 
         <div class="card">
             <h3>Temp. Promedio</h3>
-            <p class="value">7°C</p>
+            <div><span id="tempProm">--</span> °C</div>
         </div>
 
         <div class="card">
             <h3>Espacio 1</h3>
-            <p class="value">8°C</p>
+            <div><span id="temp1">--</span> °C</div>
         </div>
 
         <div class="card">
             <h3>Espacio 2</h3>
-            <p class="value">6°C</p>
+            <div><span id="temp2">--</span> °C</div>
         </div>
 
         <div class="card">
             <h3>Exterior</h3>
-            <p class="value exterior">32°C</p>
+            <div><span id="tempExt">--</span> °C</div>
         </div>
 
     </div>
@@ -66,21 +67,21 @@
 
         <div class="card control-card">
             <h3>Temperatura</h3>
-            <div class="control">
-                <button>-</button>
-                <span>6°C</span>
-                <button>+</button>
+            <div class="control" data-param="tempObjetivo">
+<button class="minus">-</button>
+<span class="value">6.0°C</span>
+<button class="plus">+</button>
             </div>
         </div>
 
         <div class="card control-card">
             <h3>Margen de control +/- °C</h3>
-            <div class="control">
-                <button>-</button>
-                <span>3°C</span>
-                <button>+</button>
-            </div>
+            <div class="control" data-param="margen">
+            <button class="minus">-</button>
+            <span class="value">3.0°C</span>
+            <button class="plus">+</button>
         </div>
+    </div>
 
     </div>
 
@@ -90,21 +91,21 @@
 
         <div class="card control-card">
             <h3>Aviso temperatura baja</h3>
-            <div class="control">
-                <button>-</button>
-                <span>0.5°C</span>
-                <button>+</button>
-            </div>
+            <div class="control" data-param="avisoBajo">
+            <button class="minus">-</button>
+            <span class="value">0.5°C</span>
+            <button class="plus">+</button>
         </div>
+    </div>
 
         <div class="card control-card">
             <h3>Aviso temperatura alta</h3>
-            <div class="control">
-                <button>-</button>
-                <span>15°C</span>
-                <button>+</button>
-            </div>
+            <div class="control" data-param="avisoAlto">
+            <button class="minus">-</button>
+            <span class="value">15.0°C</span>
+            <button class="plus">+</button>
         </div>
+    </div>
 
     </div>
 
@@ -114,29 +115,75 @@
 
         <div class="card control-card">
             <h3>Alarma temperatura baja</h3>
-            <div class="control">
-                <button>-</button>
-                <span>0°C</span>
-                <button>+</button>
-            </div>
+            <div class="control" data-param="alarmaBaja">
+            <button class="minus">-</button>
+            <span class="value">0.0°C</span>
+            <button class="plus">+</button>
         </div>
+    </div>
 
-        <div class="card control-card">
+         <div class="card control-card">
             <h3>Alarma temperatura alta</h3>
-            <div class="control">
-                <button>-</button>
-                <span>18°C</span>
-                <button>+</button>
-            </div>
-        </div>
+            <div class="control" data-param="alarmaAlta">
+            <button class="minus">-</button>
+            <span class="value">18.0°C</span>
+            <button class="plus">+</button>
+         </div>
+    </div>
 
+    </div>
+
+    <div class="save-container">
+        <button id="saveBtn" class="save-btn">Cargar valores</button>
     </div>
 
 </section>
 
 <footer>
-    © 2026 El Abuelo Distribuciones
+© 2026 El Abuelo Distribuciones
 </footer>
+
+<script type="module">console.log("🔌 Conectando a Firebase...") ;
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+  import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyA7BNbFNzdARWEGM_dAMKe7WUNUTI_0h-0",
+    authDomain: "camara-frio-elabuelo.firebaseapp.com",
+    databaseURL: "https://camara-frio-elabuelo-default-rtdb.firebaseio.com",
+    projectId: "camara-frio-elabuelo"
+  };
+
+  const app = initializeApp(firebaseConfig);
+
+const db = getDatabase(app);
+
+const datosRef = ref(db, "camara/actual");
+
+onValue(datosRef, (snapshot) => {
+
+  const data = snapshot.val();
+  console.log("Snapshot:", data);
+
+  if (!data) return;
+
+  if (data.temperatura1 !== undefined)
+    document.getElementById("temp1").innerText = data.temperatura1;
+
+  if (data.temperatura2 !== undefined)
+    document.getElementById("temp2").innerText = data.temperatura2;
+
+    /*if (data.temperaturaProm !== undefined)
+    document.getElementById("tempProm").innerText = data.temperatura2;*/
+
+  if (data.temperaturaExterior !== undefined)
+    document.getElementById("tempExt").innerText = data.temperaturaExterior;
+
+
+});
+</script>
+
+
 
 <script>
 document.addEventListener("DOMContentLoaded", function () {
@@ -251,6 +298,136 @@ document.addEventListener("DOMContentLoaded", function () {
 
 });
 </script>
-<script src="Auth.js" ></script>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+
+// =========================
+// Estado actual
+// =========================
+
+const config = {
+    tempObjetivo: 6.0,
+    margen: 3.0,
+    avisoBajo: 0.5,
+    avisoAlto: 15.0,
+    alarmaBaja: 0.0,
+    alarmaAlta: 18.0
+};
+
+// copia editable
+const stagedConfig = { ...config };
+
+// parámetros modificados
+const modified = new Set();
+const saveBtn = document.getElementById("saveBtn");
+
+function updateSaveButton() {
+    if (modified.size === 0) {
+        saveBtn.classList.remove("enabled");
+        saveBtn.classList.add("disabled");
+    } else {
+        saveBtn.classList.remove("disabled");
+        saveBtn.classList.add("enabled");
+    }
+}
+updateSaveButton();
+
+// =========================
+// Límites
+// =========================
+
+const limits = {
+    tempObjetivo: { min: 3.0, max: 7.0 },
+    margen:       { min: 1.0, max: 5.0 },
+    avisoBajo:    { min: 0.0, max: 3.0 },
+    avisoAlto:    { min: 10.0, max: 15.0 },
+    alarmaBaja:   { min: 0.0, max: 3.0 },
+    alarmaAlta:   { min: 10.0, max: 18.0 }
+};
+
+function round1(v){ return Math.round(v*10)/10; }
+function clamp(v,min,max){ return Math.min(Math.max(v,min),max); }
+
+function updateDisplay(control, value) {
+    control.querySelector(".value").textContent = value.toFixed(1)+"°C";
+}
+
+function markPending(control){
+    control.querySelector(".value").classList.add("pending");
+}
+
+// =========================
+// Botones +/-
+// =========================
+
+document.querySelectorAll(".control").forEach(control => {
+
+    const param = control.dataset.param;
+    const plus = control.querySelector(".plus");
+    const minus = control.querySelector(".minus");
+
+    plus.addEventListener("click", () => {
+        let v = round1(stagedConfig[param] + 0.1);
+        v = clamp(v, limits[param].min, limits[param].max);
+
+        if(v === stagedConfig[param]) return;
+
+        stagedConfig[param] = v;
+        modified.add(param);
+        
+
+        updateDisplay(control, v);
+        markPending(control);
+        updateSaveButton();
+    });
+
+    minus.addEventListener("click", () => {
+        let v = round1(stagedConfig[param] - 0.1);
+        v = clamp(v, limits[param].min, limits[param].max);
+
+        if(v === stagedConfig[param]) return;
+
+        stagedConfig[param] = v;
+        modified.add(param);
+        
+
+        updateDisplay(control, v);
+        markPending(control);
+        updateSaveButton();
+    });
+});
+
+// =========================
+// Botón Cargar valores
+// =========================
+
+document.getElementById("saveBtn").addEventListener("click", () => {
+
+    if(modified.size === 0){
+        console.log("No hay cambios para enviar");
+        return;
+    }
+
+    console.log("Enviando parámetros modificados:");
+
+    modified.forEach(param => {
+        config[param] = stagedConfig[param];
+        console.log(param, config[param]);
+    });
+
+    // quitar parpadeo
+    document.querySelectorAll(".value").forEach(v=>{
+        v.classList.remove("pending");
+    });
+
+    modified.clear();
+    updateSaveButton();
+});
+
+});
+</script>
+
+<script src="Auth.js"></script>
 </body>
 </html>
