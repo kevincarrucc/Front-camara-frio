@@ -6,7 +6,7 @@
 <title>Temperatura - Cámara de Frío</title>
 
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="Temperatura.css">
+<link rel="stylesheet" href="Temperatura.css?v=3">
 
 <script src="code/highcharts.js"></script>
 <script src="code/modules/exporting.js"></script>
@@ -414,6 +414,7 @@ document.getElementById("saveBtn").addEventListener("click", () => {
     modified.forEach(param => {
         config[param] = stagedConfig[param];
         console.log(param, config[param]);
+        // Aquí iría la lógica para enviar el nuevo valor al backend o Firebase
     });
 
     // quitar parpadeo

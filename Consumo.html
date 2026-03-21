@@ -6,11 +6,11 @@
 <title>Consumo Eléctrico - Cámara de Frío</title>
 
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="consumo.css">
+<link rel="stylesheet" href="consumo.css?v=3">
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
 </head>
+
 <body>
 
 <header>
@@ -29,146 +29,136 @@
     <h2>Tensiones de Fase</h2>
 
     <div class="grid-3">
-
         <div class="card">
-            <h3>Tensión L1-L2</h3>
-            <p class="value">381 V</p>
+            <h3>Tensión L1</h3>
+            <div><span id="tensionL1">--</span> V</div>
         </div>
 
         <div class="card">
-            <h3>Tensión L2-L3</h3>
-            <p class="value">379 V</p>
+            <h3>Tensión L2</h3>
+            <div><span id="tensionL2">--</span> V</div>
         </div>
 
         <div class="card">
-            <h3>Tensión L3-L1</h3>
-            <p class="value">382 V</p>
+            <h3>Tensión L3</h3>
+            <div><span id="tensionL3">--</span> V</div>
         </div>
-
     </div>
 
     <h2>Corrientes de Fase</h2>
 
     <div class="grid-3">
-
         <div class="card">
             <h3>Corriente Fase 1</h3>
-            <p class="value">8.2 A</p>
+            <div><span id="corrienteL1">--</span> A</div>
         </div>
 
         <div class="card">
             <h3>Corriente Fase 2</h3>
-            <p class="value">7.9 A</p>
+            <div><span id="corrienteL2">--</span> A</div>
         </div>
 
         <div class="card">
             <h3>Corriente Fase 3</h3>
-            <p class="value">8.4 A</p>
+            <div><span id="corrienteL3">--</span> A</div>
         </div>
-
     </div>
 
     <h2>Consumo Total</h2>
 
     <div class="grid-1">
-
         <div class="card consumo-total">
-            <h3>Potencia Activa</h3>
-            <p class="value consumo">5.2 kW</p>
+            <h3>Potencia Aparente</h3>
+            <div><span id="potenciaAparente">--</span> VA</div>
         </div>
-
     </div>
 
     <h2>Configuración de avisos</h2>
 
     <div class="grid-2">
-
         <div class="card control-card">
             <h3>Aviso tensión baja</h3>
-            <div class="control">
-                <button>-</button>
-                <span>200 V</span>
-                <button>+</button>
+            <div class="control" data-param="avisoTensionBaja">
+                <button class="minus">-</button>
+                <span class="value">200 V</span>
+                <button class="plus">+</button>
             </div>
         </div>
 
         <div class="card control-card">
             <h3>Aviso tensión alta</h3>
-            <div class="control">
-                <button>-</button>
-                <span>250 V</span>
-                <button>+</button>
+            <div class="control" data-param="avisoTensionAlta">
+                <button class="minus">-</button>
+                <span class="value">250 V</span>
+                <button class="plus">+</button>
             </div>
         </div>
-
     </div>
 
     <div class="grid-2">
-
         <div class="card control-card">
             <h3>Aviso corriente baja</h3>
-            <div class="control">
-                <button>-</button>
-                <span>1.5 A</span>
-                <button>+</button>
+            <div class="control" data-param="avisoCorrienteBaja">
+                <button class="minus">-</button>
+                <span class="value">1.5 A</span>
+                <button class="plus">+</button>
             </div>
         </div>
 
         <div class="card control-card">
             <h3>Aviso corriente alta</h3>
-            <div class="control">
-                <button>-</button>
-                <span>15 A</span>
-                <button>+</button>
+            <div class="control" data-param="avisoCorrienteAlta">
+                <button class="minus">-</button>
+                <span class="value">15 A</span>
+                <button class="plus">+</button>
             </div>
         </div>
-
     </div>
 
     <h2>Configuración de alarmas</h2>
 
     <div class="grid-2">
-
         <div class="card control-card">
             <h3>Alarma tensión baja</h3>
-            <div class="control">
-                <button>-</button>
-                <span>190 V</span>
-                <button>+</button>
+            <div class="control" data-param="alarmaTensionBaja">
+                <button class="minus">-</button>
+                <span class="value">190 V</span>
+                <button class="plus">+</button>
             </div>
         </div>
 
         <div class="card control-card">
             <h3>Alarma tensión alta</h3>
-            <div class="control">
-                <button>-</button>
-                <span>260 V</span>
-                <button>+</button>
+            <div class="control" data-param="alarmaTensionAlta">
+                <button class="minus">-</button>
+                <span class="value">260 V</span>
+                <button class="plus">+</button>
             </div>
         </div>
-
     </div>
 
     <div class="grid-2">
-
         <div class="card control-card">
             <h3>Alarma corriente baja</h3>
-            <div class="control">
-                <button>-</button>
-                <span>1 A</span>
-                <button>+</button>
+            <div class="control" data-param="alarmaCorrienteBaja">
+                <button class="minus">-</button>
+                <span class="value">1 A</span>
+                <button class="plus">+</button>
             </div>
         </div>
 
         <div class="card control-card">
             <h3>Alarma corriente alta</h3>
-            <div class="control">
-                <button>-</button>
-                <span>15 A</span>
-                <button>+</button>
+            <div class="control" data-param="alarmaCorrienteAlta">
+                <button class="minus">-</button>
+                <span class="value">15 A</span>
+                <button class="plus">+</button>
             </div>
         </div>
+    </div>
 
+    <div class="save-container">
+        <button id="saveBtn" class="save-btn">Cargar valores</button>
     </div>
 
 </section>
@@ -177,7 +167,130 @@
     © 2026 El Abuelo Distribuciones
 </footer>
 
+<script>
+document.addEventListener("DOMContentLoaded", function () {
 
-<script src="Auth.js" ></script>
+const config = {
+    avisoTensionBaja: 200,
+    avisoTensionAlta: 250,
+    avisoCorrienteBaja: 1.5,
+    avisoCorrienteAlta: 15,
+    alarmaTensionBaja: 190,
+    alarmaTensionAlta: 260,
+    alarmaCorrienteBaja: 1,
+    alarmaCorrienteAlta: 15
+};
+
+const stagedConfig = { ...config };
+const modified = new Set();
+const saveBtn = document.getElementById("saveBtn");
+
+function updateSaveButton() {
+    if (modified.size === 0) {
+        saveBtn.classList.remove("enabled");
+        saveBtn.classList.add("disabled");
+    } else {
+        saveBtn.classList.remove("disabled");
+        saveBtn.classList.add("enabled");
+    }
+}
+updateSaveButton();
+
+/* 🔧 AQUÍ DEFINÍS LOS LÍMITES MÍNIMOS Y MÁXIMOS */
+const limitsA = {
+    avisoTensionBaja: { min: 150, max: 220 },
+    avisoTensionAlta: { min: 230, max: 280 },
+    avisoCorrienteBaja: { min: 0.5, max: 5 },
+    avisoCorrienteAlta: { min: 5, max: 25 },
+    alarmaTensionBaja: { min: 150, max: 220 },
+    alarmaTensionAlta: { min: 230, max: 300 },
+    alarmaCorrienteBaja: { min: 0.5, max: 5 },
+    alarmaCorrienteAlta: { min: 5, max: 30 }
+};
+
+function round1(v){ return Math.round(v*10)/10; }
+function clamp(v,min,max){ return Math.min(Math.max(v,min),max); }
+
+function updateDisplay(control, value, unit) {
+    control.querySelector(".value").textContent = value + " " + unit;
+}
+
+function markPending(control){
+    control.querySelector(".value").classList.add("pending");
+}
+
+document.querySelectorAll(".control").forEach(control => {
+
+    const param = control.dataset.param;
+    const plus = control.querySelector(".plus");
+    const minus = control.querySelector(".minus");
+
+    const unit = control.querySelector(".value").textContent.includes("A") ? "A" : "V";
+
+    /* 🔧 AQUÍ SE DEFINE EL PASO SEGÚN EL TIPO DE VARIABLE */
+    const step = param.toLowerCase().includes("corriente") ? 0.1 : 1;
+
+    plus.addEventListener("click", () => {
+        let v = stagedConfig[param] + step;
+
+        if(step === 0.1) v = round1(v);
+
+        v = clamp(v, limitsA[param].min, limitsA[param].max);
+
+        if(v === stagedConfig[param]) return;
+
+        stagedConfig[param] = v;
+        modified.add(param);
+
+        updateDisplay(control, v, unit);
+        markPending(control);
+        updateSaveButton();
+    });
+
+    minus.addEventListener("click", () => {
+        let v = stagedConfig[param] - step;
+
+        if(step === 0.1) v = round1(v);
+
+        v = clamp(v, limitsA[param].min, limitsA[param].max);
+
+        if(v === stagedConfig[param]) return;
+
+        stagedConfig[param] = v;
+        modified.add(param);
+
+        updateDisplay(control, v, unit);
+        markPending(control);
+        updateSaveButton();
+    });
+    
+});
+
+saveBtn.addEventListener("click", () => {
+
+    if(modified.size === 0){
+        console.log("No hay cambios");
+        return;
+    }
+
+    console.log("Enviando parámetros:");
+
+    modified.forEach(param => {
+        config[param] = stagedConfig[param];
+        console.log(param, config[param]);
+        // aquí después conectás Firebase
+    });
+
+    document.querySelectorAll(".value").forEach(v=>{
+        v.classList.remove("pending");
+    });
+
+    modified.clear();
+    updateSaveButton();
+});
+});
+</script>
+
+<script src="Auth.js"></script>
 </body>
 </html>
