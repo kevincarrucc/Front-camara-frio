@@ -61,7 +61,7 @@ if(!token){
 
          <div class="status-card">
             <h3>Consumo</h3>
-            <div><span id="consumo">--</span> kW</div>
+            <div><span id="consumo">--</span> VA</div>
         </div>
 
         <div class="status-card">
@@ -91,6 +91,7 @@ if(!token){
         <div class="status-card">
             <h3>Luces</h3>
             <div><span id="LuzCamara">--</span></div>
+            <button id="btnLuz" class="btn-control">Cargando...</button>
         </div>
 
     </div>
@@ -103,7 +104,7 @@ if(!token){
 
 <script type="module">console.log("🔌 Conectando a Firebase...") ;
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-  import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+  import { getDatabase, ref, onValue, set } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
 
   const firebaseConfig = {
     apiKey: "AIzaSyA7BNbFNzdARWEGM_dAMKe7WUNUTI_0h-0",
@@ -117,6 +118,41 @@ if(!token){
 const db = getDatabase(app);
 
 const datosRef = ref(db, "camara/actual");
+
+const estadoLuz = document.getElementById("LuzCamara");
+const btnLuz = document.getElementById("btnLuz");
+
+/* función que actualiza botón según estado */
+function actualizarBotonLuz(estado) {
+    estadoLuz.textContent = estado;
+
+    if (estado === "Encendida") {
+        btnLuz.textContent = "Apagar";
+        btnLuz.classList.remove("off");
+        btnLuz.classList.add("on");
+    } else {
+        btnLuz.textContent = "Encender";
+        btnLuz.classList.remove("on");
+        btnLuz.classList.add("off");
+    }
+}
+
+btnLuz.addEventListener("click", async () => {
+
+    /* si el botón dice Apagar → mandamos 0
+       si dice Encender → mandamos 1 */
+    const accion = btnLuz.textContent === "Apagar" ? 0 : 1;
+
+    console.log("Enviando comando luz:", accion);
+
+    try {
+        await set(ref(db, "camara/actual/actuadorWebLuzCamara"), accion);
+        console.log("Estado guardado en Firebase");
+    } catch (err) {
+        console.error("Error al escribir en la base:", err);
+    }
+});
+
 
 onValue(datosRef, (snapshot) => {
 
@@ -157,17 +193,22 @@ onValue(datosRef, (snapshot) => {
   const puerta = Number(data.estadoPuerta);
 
   document.getElementById("puerta").innerText =
-    puerta === 0 ? "Abierta" : "Cerrada";
+    puerta === 1 ? "Abierta" : "Cerrada";
 
 }
 
+if(data.potenciaAparente !== undefined)
+    document.getElementById("consumo").innerText = data.potenciaAparente;
+
 if (data.estadoLuzCamara !== undefined) {
 
-  const luz = Number(data.estadoLuzCamara);
+    const luz = Number(data.estadoLuzCamara);
 
-  document.getElementById("LuzCamara").innerText =
-    luz === 0 ? "Apagada" : "Encendida";
+    const estadoTexto = luz === 0 ? "Apagada" : "Encendida";
 
+    document.getElementById("LuzCamara").innerText = estadoTexto;
+
+    actualizarBotonLuz(estadoTexto);
 }
 
 });

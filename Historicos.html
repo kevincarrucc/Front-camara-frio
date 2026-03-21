@@ -215,7 +215,7 @@ document.addEventListener("DOMContentLoaded", function () {
             const x = (new Date()).getTime();
 
             // 🔧 Datos simulados (después reemplazás por sensores reales)
-            const y1 = 2 + Math.random() * 4;   // temp1
+            const y1 = Number(document.getElementById("temp1").innerText);   // temp1
             const y2 = 2 + Math.random() * 4;   // temp2
             const yProm = (y1 + y2) / 2;        // promedio
             const yExt = 10 + Math.random() * 10; // exterior
