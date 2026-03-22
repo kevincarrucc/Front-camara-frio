@@ -145,8 +145,8 @@
 
 <script type="module">console.log("🔌 Conectando a Firebase...") ;
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-  import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
-
+  import { getDatabase, ref, onValue, update } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+  
   const firebaseConfig = {
     apiKey: "AIzaSyA7BNbFNzdARWEGM_dAMKe7WUNUTI_0h-0",
     authDomain: "camara-frio-elabuelo.firebaseapp.com",
@@ -157,9 +157,175 @@
   const app = initializeApp(firebaseConfig);
 
 const db = getDatabase(app);
+const configRef = ref(db, "camara/config");
+document.addEventListener("DOMContentLoaded", function () {
 
+// =========================
+// Estado actual
+// =========================
+
+const config = {
+    tempObjetivo: 6.0,
+    margen: 3.0,
+    avisoBajo: 0.5,
+    avisoAlto: 15.0,
+    alarmaBaja: 0.0,
+    alarmaAlta: 18.0
+};
+
+// copia editable
+const stagedConfig = { ...config };
+
+const configRef = ref(db, "camara/config");
+
+onValue(configRef, (snapshot) => {
+    if (modified.size > 0) return; // no actualizar mientras hay cambios locales
+    const data = snapshot.val();
+    if (!data) return;
+
+    console.log("Config recibida de Firebase:", data);
+
+    Object.keys(data).forEach(param => {
+        config[param] = data[param];
+        stagedConfig[param] = data[param];
+
+        const control = document.querySelector(
+            `.control[data-param="${param}"]`
+        );
+
+        if (control) {
+            updateDisplay(control, data[param]);
+            control.querySelector(".value").classList.remove("pending");
+        }
+    });
+
+    modified.clear();
+    updateSaveButton();
+});
+
+// parámetros modificados
+const modified = new Set();
+const saveBtn = document.getElementById("saveBtn");
+
+function updateSaveButton() {
+    if (modified.size === 0) {
+        saveBtn.classList.remove("enabled");
+        saveBtn.classList.add("disabled");
+    } else {
+        saveBtn.classList.remove("disabled");
+        saveBtn.classList.add("enabled");
+    }
+}
+updateSaveButton();
+
+// =========================
+// Límites
+// =========================
+
+const limits = {
+    tempObjetivo: { min: 3.0, max: 7.0 },
+    margen:       { min: 1.0, max: 5.0 },
+    avisoBajo:    { min: 0.0, max: 3.0 },
+    avisoAlto:    { min: 10.0, max: 15.0 },
+    alarmaBaja:   { min: 0.0, max: 3.0 },
+    alarmaAlta:   { min: 10.0, max: 18.0 }
+};
+
+function round1(v){ return Math.round(v*10)/10; }
+function clamp(v,min,max){ return Math.min(Math.max(v,min),max); }
+
+function updateDisplay(control, value) {
+    control.querySelector(".value").textContent = value.toFixed(1)+"°C";
+}
+
+function markPending(control){
+    control.querySelector(".value").classList.add("pending");
+}
+
+// =========================
+// Botones +/-
+// =========================
+
+document.querySelectorAll(".control").forEach(control => {
+
+    const param = control.dataset.param;
+    const plus = control.querySelector(".plus");
+    const minus = control.querySelector(".minus");
+
+    plus.addEventListener("click", () => {
+        let v = round1(stagedConfig[param] + 0.1);
+        v = clamp(v, limits[param].min, limits[param].max);
+
+        if(v === stagedConfig[param]) return;
+
+        stagedConfig[param] = v;
+        modified.add(param);
+        
+
+        updateDisplay(control, v);
+        markPending(control);
+        updateSaveButton();
+    });
+
+    minus.addEventListener("click", () => {
+        let v = round1(stagedConfig[param] - 0.1);
+        v = clamp(v, limits[param].min, limits[param].max);
+
+        if(v === stagedConfig[param]) return;
+
+        stagedConfig[param] = v;
+        modified.add(param);
+        
+
+        updateDisplay(control, v);
+        markPending(control);
+        updateSaveButton();
+    });
+});
+
+// =========================
+// Botón Cargar valores
+// =========================
+
+document.getElementById("saveBtn").addEventListener("click", () => {
+
+    if (modified.size === 0) {
+        console.log("No hay cambios para enviar");
+        return;
+    }
+
+    console.log("Enviando parámetros modificados:");
+
+    const cambios = {};
+
+    modified.forEach(param => {
+        config[param] = stagedConfig[param];
+        cambios[param] = config[param];
+    });
+
+    console.log("Subiendo a Firebase:", cambios);
+
+    update(configRef, cambios)
+        .then(() => {
+            console.log("Configuración actualizada en RTDB");
+
+            document.querySelectorAll(".value").forEach(v => {
+                v.classList.remove("pending");
+            });
+
+            modified.clear();
+            updateSaveButton();
+        })
+        .catch(err => {
+            console.error("Error al escribir en Firebase:", err);
+        });
+
+    
+});
+
+});
+//----------------------------------------------------------------------------------------------------------------
 const datosRef = ref(db, "camara/actual");
-
 onValue(datosRef, (snapshot) => {
 
   const data = snapshot.val();
@@ -182,8 +348,6 @@ onValue(datosRef, (snapshot) => {
 
 });
 </script>
-
-
 
 <script>
 document.addEventListener("DOMContentLoaded", function () {
@@ -295,136 +459,6 @@ document.addEventListener("DOMContentLoaded", function () {
             }
         ]
     });
-
-});
-</script>
-
-<script>
-document.addEventListener("DOMContentLoaded", function () {
-
-// =========================
-// Estado actual
-// =========================
-
-const config = {
-    tempObjetivo: 6.0,
-    margen: 3.0,
-    avisoBajo: 0.5,
-    avisoAlto: 15.0,
-    alarmaBaja: 0.0,
-    alarmaAlta: 18.0
-};
-
-// copia editable
-const stagedConfig = { ...config };
-
-// parámetros modificados
-const modified = new Set();
-const saveBtn = document.getElementById("saveBtn");
-
-function updateSaveButton() {
-    if (modified.size === 0) {
-        saveBtn.classList.remove("enabled");
-        saveBtn.classList.add("disabled");
-    } else {
-        saveBtn.classList.remove("disabled");
-        saveBtn.classList.add("enabled");
-    }
-}
-updateSaveButton();
-
-// =========================
-// Límites
-// =========================
-
-const limits = {
-    tempObjetivo: { min: 3.0, max: 7.0 },
-    margen:       { min: 1.0, max: 5.0 },
-    avisoBajo:    { min: 0.0, max: 3.0 },
-    avisoAlto:    { min: 10.0, max: 15.0 },
-    alarmaBaja:   { min: 0.0, max: 3.0 },
-    alarmaAlta:   { min: 10.0, max: 18.0 }
-};
-
-function round1(v){ return Math.round(v*10)/10; }
-function clamp(v,min,max){ return Math.min(Math.max(v,min),max); }
-
-function updateDisplay(control, value) {
-    control.querySelector(".value").textContent = value.toFixed(1)+"°C";
-}
-
-function markPending(control){
-    control.querySelector(".value").classList.add("pending");
-}
-
-// =========================
-// Botones +/-
-// =========================
-
-document.querySelectorAll(".control").forEach(control => {
-
-    const param = control.dataset.param;
-    const plus = control.querySelector(".plus");
-    const minus = control.querySelector(".minus");
-
-    plus.addEventListener("click", () => {
-        let v = round1(stagedConfig[param] + 0.1);
-        v = clamp(v, limits[param].min, limits[param].max);
-
-        if(v === stagedConfig[param]) return;
-
-        stagedConfig[param] = v;
-        modified.add(param);
-        
-
-        updateDisplay(control, v);
-        markPending(control);
-        updateSaveButton();
-    });
-
-    minus.addEventListener("click", () => {
-        let v = round1(stagedConfig[param] - 0.1);
-        v = clamp(v, limits[param].min, limits[param].max);
-
-        if(v === stagedConfig[param]) return;
-
-        stagedConfig[param] = v;
-        modified.add(param);
-        
-
-        updateDisplay(control, v);
-        markPending(control);
-        updateSaveButton();
-    });
-});
-
-// =========================
-// Botón Cargar valores
-// =========================
-
-document.getElementById("saveBtn").addEventListener("click", () => {
-
-    if(modified.size === 0){
-        console.log("No hay cambios para enviar");
-        return;
-    }
-
-    console.log("Enviando parámetros modificados:");
-
-    modified.forEach(param => {
-        config[param] = stagedConfig[param];
-        console.log(param, config[param]);
-        // Aquí iría la lógica para enviar el nuevo valor al backend o Firebase
-    });
-
-    // quitar parpadeo
-    document.querySelectorAll(".value").forEach(v=>{
-        v.classList.remove("pending");
-    });
-
-    modified.clear();
-    updateSaveButton();
-});
 
 });
 </script>
