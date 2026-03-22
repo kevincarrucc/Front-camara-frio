@@ -67,7 +67,7 @@
 
         <div class="card control-card">
             <h3>Temperatura</h3>
-            <div class="control" data-param="tempObjetivo">
+            <div class="control" data-param="setPointTemperatura">
 <button class="minus">-</button>
 <span class="value">6.0°C</span>
 <button class="plus">+</button>
@@ -76,7 +76,7 @@
 
         <div class="card control-card">
             <h3>Margen de control +/- °C</h3>
-            <div class="control" data-param="margen">
+            <div class="control" data-param="setPointHisteresis">
             <button class="minus">-</button>
             <span class="value">3.0°C</span>
             <button class="plus">+</button>
@@ -91,7 +91,7 @@
 
         <div class="card control-card">
             <h3>Aviso temperatura baja</h3>
-            <div class="control" data-param="avisoBajo">
+            <div class="control" data-param="avisoTemperaturaBaja">
             <button class="minus">-</button>
             <span class="value">0.5°C</span>
             <button class="plus">+</button>
@@ -100,7 +100,7 @@
 
         <div class="card control-card">
             <h3>Aviso temperatura alta</h3>
-            <div class="control" data-param="avisoAlto">
+            <div class="control" data-param="avisoTemperaturaAlta">
             <button class="minus">-</button>
             <span class="value">15.0°C</span>
             <button class="plus">+</button>
@@ -115,7 +115,7 @@
 
         <div class="card control-card">
             <h3>Alarma temperatura baja</h3>
-            <div class="control" data-param="alarmaBaja">
+            <div class="control" data-param="alarmaTemperaturaBaja">
             <button class="minus">-</button>
             <span class="value">0.0°C</span>
             <button class="plus">+</button>
@@ -124,7 +124,7 @@
 
          <div class="card control-card">
             <h3>Alarma temperatura alta</h3>
-            <div class="control" data-param="alarmaAlta">
+            <div class="control" data-param="alarmaTemperaturaAlta">
             <button class="minus">-</button>
             <span class="value">18.0°C</span>
             <button class="plus">+</button>
@@ -157,7 +157,7 @@
   const app = initializeApp(firebaseConfig);
 
 const db = getDatabase(app);
-const configRef = ref(db, "camara/config");
+
 document.addEventListener("DOMContentLoaded", function () {
 
 // =========================
@@ -165,17 +165,20 @@ document.addEventListener("DOMContentLoaded", function () {
 // =========================
 
 const config = {
-    tempObjetivo: 6.0,
-    margen: 3.0,
-    avisoBajo: 0.5,
-    avisoAlto: 15.0,
-    alarmaBaja: 0.0,
-    alarmaAlta: 18.0
+    setPointTemperatura: 6.0,
+    setPointHisteresis: 3.0,
+    avisoTemperaturaBaja: 0.5,
+    avisoTemperaturaAlta: 15.0,
+    alarmaTemperaturaBaja: 0.0,
+    alarmaTemperaturaAlta: 18.0
 };
 
 // copia editable
 const stagedConfig = { ...config };
 
+// parámetros modificados
+const modified = new Set();
+const saveBtn = document.getElementById("saveBtn");
 const configRef = ref(db, "camara/config");
 
 onValue(configRef, (snapshot) => {
@@ -203,9 +206,7 @@ onValue(configRef, (snapshot) => {
     updateSaveButton();
 });
 
-// parámetros modificados
-const modified = new Set();
-const saveBtn = document.getElementById("saveBtn");
+
 
 function updateSaveButton() {
     if (modified.size === 0) {
@@ -223,12 +224,12 @@ updateSaveButton();
 // =========================
 
 const limits = {
-    tempObjetivo: { min: 3.0, max: 7.0 },
-    margen:       { min: 1.0, max: 5.0 },
-    avisoBajo:    { min: 0.0, max: 3.0 },
-    avisoAlto:    { min: 10.0, max: 15.0 },
-    alarmaBaja:   { min: 0.0, max: 3.0 },
-    alarmaAlta:   { min: 10.0, max: 18.0 }
+    setPointTemperatura: { min: 3.0, max: 7.0 },
+    setPointHisteresis:       { min: 1.0, max: 5.0 },
+    avisoTemperaturaBaja:    { min: 0.0, max: 3.0 },
+    avisoTemperaturaAlta:    { min: 10.0, max: 15.0 },
+    alarmaTemperaturaBaja:   { min: 0.0, max: 3.0 },
+    alarmaTemperaturaAlta:   { min: 10.0, max: 18.0 }
 };
 
 function round1(v){ return Math.round(v*10)/10; }
@@ -294,14 +295,53 @@ document.getElementById("saveBtn").addEventListener("click", () => {
         return;
     }
 
-    console.log("Enviando parámetros modificados:");
-
     const cambios = {};
 
     modified.forEach(param => {
-        config[param] = stagedConfig[param];
-        cambios[param] = config[param];
+        cambios[param] = stagedConfig[param];
     });
+
+    // =========================
+    // VALIDACIÓN DE PARÁMETROS
+    // =========================
+
+    const avisoBajo  = parseFloat(stagedConfig.avisoTemperaturaBaja ?? config.avisoTemperaturaBaja);
+    const alarmaBaja = parseFloat(stagedConfig.alarmaTemperaturaBaja ?? config.alarmaTemperaturaBaja);
+
+    const avisoAlto  = parseFloat(stagedConfig.avisoTemperaturaAlta ?? config.avisoTemperaturaAlta);
+    const alarmaAlta = parseFloat(stagedConfig.alarmaTemperaturaAlta ?? config.alarmaTemperaturaAlta);
+
+    const setTemperatura = parseFloat(stagedConfig.setPointTemperatura ?? config.setPointTemperatura);
+    const histeresis = parseFloat(stagedConfig.setPointHisteresis ?? config.setPointHisteresis);
+
+    if(setTemperatura - histeresis <= 0.5){
+        alert("Error: La temperatura objetivo - margen de control NO puede ser MENOR o igual a 0.5°C. LOS PRODUCTOS SE PUEDEN LLEGAR A CONGELAR");
+        return;
+    }
+
+    if ((setTemperatura+ histeresis) >= avisoAlto) {
+        alert("Error: La temperatura objetivo + margen de control NO puede ser MAYOR que el aviso y/o alarma de temperatura alta.");
+        return;
+    }
+
+    if ((setTemperatura - histeresis) <= avisoBajo) {
+        alert("Error: La temperatura objetivo - margen de control NO puede ser MENOR que el aviso y/o alarma de temperatura baja.");
+        return;
+    }
+
+    if (alarmaBaja >= avisoBajo) {
+        alert("Error: La alarma de temperatura baja debe ser MENOR que el aviso.");
+        return;
+    }
+
+    if (alarmaAlta <= avisoAlto) {
+        alert("Error: La alarma de temperatura alta debe ser MAYOR que el aviso.");
+        return;
+    }
+
+    // =========================
+    // SI PASA VALIDACIÓN, GUARDAR
+    // =========================
 
     console.log("Subiendo a Firebase:", cambios);
 
@@ -339,19 +379,27 @@ onValue(datosRef, (snapshot) => {
   if (data.temperatura2 !== undefined)
     document.getElementById("temp2").innerText = data.temperatura2;
 
-    /*if (data.temperaturaProm !== undefined)
-    document.getElementById("tempProm").innerText = data.temperatura2;*/
+    const tempProm = (data.temperatura1 + data.temperatura2) / 2;
+    document.getElementById("tempProm").innerText = tempProm.toFixed(1);
 
   if (data.temperaturaExterior !== undefined)
     document.getElementById("tempExt").innerText = data.temperaturaExterior;
 
 
 });
-</script>
+//-------------------------------GRAFICA---------------------------------------------------------------------------------
 
-<script>
-document.addEventListener("DOMContentLoaded", function () {
+    let data = {
+    temperatura1: 0,
+    temperatura2: 0,
+    temperaturaExterior: 0
+};
+    onValue(ref(db, "camara/actual"), (snapshot) => {
+    const firebaseData = snapshot.val();
+    if (!firebaseData) return;
 
+    data = firebaseData;
+});
     const INTERVAL = 600000; // 10 minutos
 
     // Evento al cargar el gráfico
@@ -367,10 +415,10 @@ document.addEventListener("DOMContentLoaded", function () {
             const x = (new Date()).getTime();
 
             // 🔧 Datos simulados (después reemplazás por sensores reales)
-            const y1 = 2 + Math.random() * 4;   // temp1
-            const y2 = 2 + Math.random() * 4;   // temp2
+            const y1 = data.temperatura1;   // temp1
+            const y2 = data.temperatura2;   // temp2
             const yProm = (y1 + y2) / 2;        // promedio
-            const yExt = 10 + Math.random() * 10; // exterior
+            const yExt = data.temperaturaExterior; // exterior
 
             // Mantener cantidad constante
             const shift = t1.data.length >= 144;
@@ -394,10 +442,10 @@ document.addEventListener("DOMContentLoaded", function () {
     for (let i = -144; i <= 0; i++) {
         const x = time + i * INTERVAL;
 
-        const y1 = 2 + Math.random() * 4;
-        const y2 = 2 + Math.random() * 4;
+        const y1 = data.temperatura1;
+        const y2 = data.temperatura2;
         const yProm = (y1 + y2) / 2;
-        const yExt = 10 + Math.random() * 10;
+        const yExt = data.temperaturaExterior;
 
         dataT1.push([x, y1]);
         dataT2.push([x, y2]);
@@ -460,7 +508,7 @@ document.addEventListener("DOMContentLoaded", function () {
         ]
     });
 
-});
+
 </script>
 
 <script src="Auth.js"></script>
