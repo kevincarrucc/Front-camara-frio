@@ -146,7 +146,14 @@
 <script type="module">console.log("🔌 Conectando a Firebase...") ;
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
   import { getDatabase, ref, onValue, update } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
-  
+  import {
+  getFirestore,
+  collection,
+  query,
+  orderBy,
+  limit,
+  getDocs
+} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
   const firebaseConfig = {
     apiKey: "AIzaSyA7BNbFNzdARWEGM_dAMKe7WUNUTI_0h-0",
     authDomain: "camara-frio-elabuelo.firebaseapp.com",
@@ -157,7 +164,7 @@
   const app = initializeApp(firebaseConfig);
 
 const db = getDatabase(app);
-
+const firestore = getFirestore(app);
 document.addEventListener("DOMContentLoaded", function () {
 
 // =========================
@@ -299,6 +306,7 @@ document.getElementById("saveBtn").addEventListener("click", () => {
 
     modified.forEach(param => {
         cambios[param] = stagedConfig[param];
+        
     });
 
     // =========================
@@ -389,75 +397,111 @@ onValue(datosRef, (snapshot) => {
 });
 //-------------------------------GRAFICA---------------------------------------------------------------------------------
 
-    let data = {
+    // =========================
+// FIRESTORE + RTDB GRÁFICA
+// =========================
+
+// datos en tiempo real desde RTDB
+let data = {
     temperatura1: 0,
     temperatura2: 0,
     temperaturaExterior: 0
 };
-    onValue(ref(db, "camara/actual"), (snapshot) => {
+
+onValue(ref(db, "camara/actual"), (snapshot) => {
     const firebaseData = snapshot.val();
     if (!firebaseData) return;
-
     data = firebaseData;
 });
-    const INTERVAL = 600000; // 10 minutos
 
-    // Evento al cargar el gráfico
-    const onChartLoad = function () {
-        const chart = this;
+const INTERVAL = 600000; // 10 minutos
+const MAX_POINTS = 144;  // 24 horas
 
-        const t1 = chart.series[0];
-        const t2 = chart.series[1];
-        const tProm = chart.series[2];
-        const tExt = chart.series[3];
+// =========================
+// Cargar histórico Firestore
+// =========================
 
-        setInterval(function () {
-            const x = (new Date()).getTime();
+async function cargarHistorico() {
 
-            // 🔧 Datos simulados (después reemplazás por sensores reales)
-            const y1 = data.temperatura1;   // temp1
-            const y2 = data.temperatura2;   // temp2
-            const yProm = (y1 + y2) / 2;        // promedio
-            const yExt = data.temperaturaExterior; // exterior
+    const q = query(
+        collection(firestore, "historial"),
+        orderBy("timestamp", "desc"),
+        limit(MAX_POINTS)
+    );
 
-            // Mantener cantidad constante
-            const shift = t1.data.length >= 144;
+    const snapshot = await getDocs(q);
 
-            t1.addPoint([x, y1], true, shift);
-            t2.addPoint([x, y2], true, shift);
-            tProm.addPoint([x, yProm], true, shift);
-            tExt.addPoint([x, yExt], true, shift);
-
-        }, INTERVAL);
-    };
-
-    // Datos iniciales
     const dataT1 = [];
     const dataT2 = [];
     const dataProm = [];
     const dataExt = [];
 
-    const time = new Date().getTime();
+    snapshot.forEach(doc => {
+        const d = doc.data();
 
-    for (let i = -144; i <= 0; i++) {
-        const x = time + i * INTERVAL;
+        if (!d.timestamp) return;
 
-        const y1 = data.temperatura1;
-        const y2 = data.temperatura2;
+        const x = d.timestamp.toDate().getTime();
+
+        const y1 = d.temperatura1 / 10;
+        const y2 = d.temperatura2 / 10;
         const yProm = (y1 + y2) / 2;
-        const yExt = data.temperaturaExterior;
+        const yExt = d.temperaturaExterior / 10;
 
         dataT1.push([x, y1]);
         dataT2.push([x, y2]);
         dataProm.push([x, yProm]);
         dataExt.push([x, yExt]);
-    }
+    });
+
+    // Firestore devuelve descendente → invertir
+    dataT1.reverse();
+    dataT2.reverse();
+    dataProm.reverse();
+    dataExt.reverse();
+
+    crearGrafica(dataT1, dataT2, dataProm, dataExt);
+}
+
+// =========================
+// Crear gráfica Highcharts
+// =========================
+
+function crearGrafica(dataT1, dataT2, dataProm, dataExt) {
 
     Highcharts.chart('container-1', {
+
         chart: {
             type: 'spline',
             events: {
-                load: onChartLoad
+                load: function () {
+
+                    const chart = this;
+
+                    const t1 = chart.series[0];
+                    const t2 = chart.series[1];
+                    const tProm = chart.series[2];
+                    const tExt = chart.series[3];
+
+                    // actualización en vivo cada 10 min
+                    setInterval(function () {
+
+                        const x = (new Date()).getTime();
+
+                        const y1 = data.temperatura1;
+                        const y2 = data.temperatura2;
+                        const yProm = (y1 + y2) / 2;
+                        const yExt = data.temperaturaExterior;
+
+                        const shift = t1.data.length >= MAX_POINTS;
+
+                        t1.addPoint([x, y1], true, shift);
+                        t2.addPoint([x, y2], true, shift);
+                        tProm.addPoint([x, yProm], true, shift);
+                        tExt.addPoint([x, yExt], true, shift);
+
+                    }, INTERVAL);
+                }
             }
         },
 
@@ -480,7 +524,7 @@ onValue(datosRef, (snapshot) => {
         },
 
         legend: {
-            enabled: true // 🔥 importante para diferenciar líneas
+            enabled: true
         },
 
         exporting: {
@@ -499,7 +543,7 @@ onValue(datosRef, (snapshot) => {
             {
                 name: 'Temp Promedio',
                 data: dataProm,
-                dashStyle: 'ShortDash' // línea punteada
+                dashStyle: 'ShortDash'
             },
             {
                 name: 'Temp Exterior',
@@ -507,6 +551,13 @@ onValue(datosRef, (snapshot) => {
             }
         ]
     });
+}
+
+// =========================
+// iniciar carga
+// =========================
+
+cargarHistorico();
 
 
 </script>

@@ -8,9 +8,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="consumo.css?v=3">
 
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
-
 <body>
 
 <header>
@@ -167,8 +165,25 @@
     © 2026 El Abuelo Distribuciones
 </footer>
 
-<script>
+<script type="module">console.log("🔌 Conectando a Firebase...") ;
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+    import { getDatabase, ref, onValue, update } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+
+    const firebaseConfig = {
+    apiKey: "AIzaSyA7BNbFNzdARWEGM_dAMKe7WUNUTI_0h-0",
+    authDomain: "camara-frio-elabuelo.firebaseapp.com",
+    databaseURL: "https://camara-frio-elabuelo-default-rtdb.firebaseio.com",
+    projectId: "camara-frio-elabuelo"
+  };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+
 document.addEventListener("DOMContentLoaded", function () {
+
+// =========================
+// Estado actual
+// =========================
 
 const config = {
     avisoTensionBaja: 200,
@@ -181,9 +196,28 @@ const config = {
     alarmaCorrienteAlta: 15
 };
 
+// copia editable
 const stagedConfig = { ...config };
+
+// parámetros modificados
 const modified = new Set();
 const saveBtn = document.getElementById("saveBtn");
+const configRef = ref(db, "camara/config");
+
+onValue(configRef, (snapshot) => {
+    const data = snapshot.val();
+    if (!data) return;
+
+    Object.assign(config, data);
+    Object.assign(stagedConfig, data);
+
+    document.querySelectorAll(".control").forEach(control => {
+        const param = control.dataset.param;
+        const unit = control.querySelector(".value").textContent.includes("A") ? "A" : "V";
+        updateDisplay(control, stagedConfig[param], unit);
+    });
+});
+
 
 function updateSaveButton() {
     if (modified.size === 0) {
@@ -196,7 +230,10 @@ function updateSaveButton() {
 }
 updateSaveButton();
 
-/* 🔧 AQUÍ DEFINÍS LOS LÍMITES MÍNIMOS Y MÁXIMOS */
+// =========================
+// Límites
+// =========================
+
 const limitsA = {
     avisoTensionBaja: { min: 150, max: 220 },
     avisoTensionAlta: { min: 230, max: 280 },
@@ -218,6 +255,10 @@ function updateDisplay(control, value, unit) {
 function markPending(control){
     control.querySelector(".value").classList.add("pending");
 }
+
+// =========================
+// Botones +/-
+// =========================
 
 document.querySelectorAll(".control").forEach(control => {
 
@@ -266,27 +307,74 @@ document.querySelectorAll(".control").forEach(control => {
     
 });
 
+// =========================
+// Botón Cargar valores
+// =========================
+
 saveBtn.addEventListener("click", () => {
 
     if(modified.size === 0){
-        console.log("No hay cambios");
+        console.log("No hay cambios para enviar");
         return;
     }
 
-    console.log("Enviando parámetros:");
+    const cambios = {};
 
     modified.forEach(param => {
-        config[param] = stagedConfig[param];
-        console.log(param, config[param]);
-        // aquí después conectás Firebase
+        cambios[param] = stagedConfig[param];
     });
 
-    document.querySelectorAll(".value").forEach(v=>{
-        v.classList.remove("pending");
-    });
+    // =========================
+    // VALIDACIÓN DE PARÁMETROS
+    // =========================
 
-    modified.clear();
-    updateSaveButton();
+    const avisoAltaTension = parseFloat(stagedConfig.avisoTensionAlta ?? config.avisoTensionAlta);
+    const avisoBajaTension = parseFloat(stagedConfig.avisoTensionBaja ?? config.avisoTensionBaja);
+    const alarmaAltaTension = parseFloat(stagedConfig.alarmaTensionAlta ?? config.alarmaTensionAlta);
+    const alarmaBajaTension = parseFloat(stagedConfig.alarmaTensionBaja ?? config.alarmaTensionBaja);
+
+    const avisoAltaCorriente = parseFloat(stagedConfig.avisoCorrienteAlta ?? config.avisoCorrienteAlta);
+    const avisoBajaCorriente = parseFloat(stagedConfig.avisoCorrienteBaja ?? config.avisoCorrienteBaja);
+    const alarmaAltaCorriente = parseFloat(stagedConfig.alarmaCorrienteAlta ?? config.alarmaCorrienteAlta);
+    const alarmaBajaCorriente = parseFloat(stagedConfig.alarmaCorrienteBaja ?? config.alarmaCorrienteBaja);
+
+    if(avisoBajaTension <= alarmaBajaTension){
+        alert("El aviso de tensión baja debe ser mayor que la alarma de tensión baja.");
+        return;
+    }
+    if(avisoAltaTension >= alarmaAltaTension){
+        alert("El aviso de tensión alta debe ser menor que la alarma de tensión alta.");
+        return;
+    }
+    if(avisoBajaCorriente <= alarmaBajaCorriente){
+        alert("El aviso de corriente baja debe ser mayor que la alarma de corriente baja.");
+        return;
+    }
+    if(avisoAltaCorriente >= alarmaAltaCorriente){
+        alert("El aviso de corriente alta debe ser menor que la alarma de corriente alta.");
+        return;
+    }
+
+    // =========================
+    // SI PASA VALIDACIÓN, GUARDAR
+    // =========================
+
+    console.log("Subiendo a Firebase:", cambios);
+
+    update(configRef, cambios)
+        .then(() => {
+            console.log("Configuración actualizada en RTDB");
+
+            document.querySelectorAll(".value").forEach(v => {
+                v.classList.remove("pending");
+            });
+
+            modified.clear();
+            updateSaveButton();
+        })
+        .catch(err => {
+            console.error("Error al escribir en Firebase:", err);
+        });
 });
 });
 </script>
