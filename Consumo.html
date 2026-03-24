@@ -6,7 +6,7 @@
 <title>Consumo Eléctrico - Cámara de Frío</title>
 
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="consumo.css?v=3">
+<link rel="stylesheet" href="consumo.css?v=4">
 
 </head>
 <body>
@@ -27,17 +27,17 @@
     <h2>Tensiones de Fase</h2>
 
     <div class="grid-3">
-        <div class="card">
+        <div class="status-card" id="cardTensionL1">
             <h3>Tensión L1</h3>
             <div><span id="tensionL1">--</span> V</div>
         </div>
 
-        <div class="card">
+        <div class="status-card" id="cardTensionL2">
             <h3>Tensión L2</h3>
             <div><span id="tensionL2">--</span> V</div>
         </div>
 
-        <div class="card">
+        <div class="status-card" id="cardTensionL3">
             <h3>Tensión L3</h3>
             <div><span id="tensionL3">--</span> V</div>
         </div>
@@ -46,17 +46,17 @@
     <h2>Corrientes de Fase</h2>
 
     <div class="grid-3">
-        <div class="card">
+        <div class="status-card" id="cardCorrienteL1">
             <h3>Corriente Fase 1</h3>
             <div><span id="corrienteL1">--</span> A</div>
         </div>
 
-        <div class="card">
+        <div class="status-card" id="cardCorrienteL2">
             <h3>Corriente Fase 2</h3>
             <div><span id="corrienteL2">--</span> A</div>
         </div>
 
-        <div class="card">
+        <div class="status-card" id="cardCorrienteL3">
             <h3>Corriente Fase 3</h3>
             <div><span id="corrienteL3">--</span> A</div>
         </div>
@@ -65,7 +65,7 @@
     <h2>Consumo Total</h2>
 
     <div class="grid-1">
-        <div class="card consumo-total">
+        <div class="status-card" id="cardPotencia">
             <h3>Potencia Aparente</h3>
             <div><span id="potenciaAparente">--</span> VA</div>
         </div>
@@ -178,14 +178,8 @@
 
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
-
-document.addEventListener("DOMContentLoaded", function () {
-
-// =========================
-// Estado actual
-// =========================
-
-const config = {
+    let configCargada = false;
+    let config = {
     avisoTensionBaja: 200,
     avisoTensionAlta: 250,
     avisoCorrienteBaja: 1.5,
@@ -194,9 +188,136 @@ const config = {
     alarmaTensionAlta: 260,
     alarmaCorrienteBaja: 1,
     alarmaCorrienteAlta: 15
-};
+    };
 
-// copia editable
+    
+
+    const datosRef = ref(db, "camara/actual");
+    onValue(datosRef, (snapshot) => {
+
+  const data = snapshot.val();
+  if (!data) return;
+
+  // Tensiones
+  if (data.tensionL1 !== undefined) {
+    document.getElementById("tensionL1").innerText = data.tensionL1;
+    evaluarTension(
+        document.getElementById("cardTensionL1"),
+        data.tensionL1
+    );
+  }
+  /*
+  if (data.tensionL2 !== undefined) {
+    document.getElementById("tensionL2").innerText = data.tensionL2;
+    evaluarTension(
+        document.getElementById("cardTensionL2"),
+        data.tensionL2
+    );
+  }
+
+  if (data.tensionL3 !== undefined) {
+    document.getElementById("tensionL3").innerText = data.tensionL3;
+    evaluarTension(
+        document.getElementById("cardTensionL3"),
+        data.tensionL3
+    );
+  }
+  */
+  // Corrientes
+  if (data.corrienteL1 !== undefined) {
+    document.getElementById("corrienteL1").innerText = data.corrienteL1;
+    evaluarCorriente(
+        document.getElementById("cardCorrienteL1"),
+        data.corrienteL1
+    );
+  }
+ /*
+  if (data.corrienteL2 !== undefined) {
+    document.getElementById("corrienteL2").innerText = data.corrienteL2;
+    evaluarCorriente(
+        document.getElementById("cardCorrienteL2"),
+        data.corrienteL2
+    );
+  }
+
+  if (data.corrienteL3 !== undefined) {
+    document.getElementById("corrienteL3").innerText = data.corrienteL3;
+    evaluarCorriente(
+        document.getElementById("cardCorrienteL3"),
+        data.corrienteL3
+    );
+  }
+    */
+  if (data.potenciaAparente !== undefined)
+    document.getElementById("potenciaAparente").innerText = data.potenciaAparente;
+
+    });
+  //---------------------------------------------  
+  // ============================
+    // FUNCIÓN GENÉRICA DE COLORES
+    // ============================
+
+    function setCardEstado(card, estado) {
+    card.classList.remove("aviso", "alarma");
+
+    if (estado === "alarma")
+        card.classList.add("alarma");
+    else if (estado === "aviso")
+        card.classList.add("aviso");
+    }
+
+   // ============================
+    // EVALUACIÓN DE TENSIÓN
+    // ============================
+
+    function evaluarTension(card, valor) {
+
+    if (!configCargada || valor === undefined) return;
+
+    const v = Number(valor);
+
+    if (v >= config.alarmaTensionAlta ||
+        v <= config.alarmaTensionBaja) {
+
+        setCardEstado(card, "alarma");
+
+    } else if (v >= config.avisoTensionAlta ||
+               v <= config.avisoTensionBaja) {
+
+        setCardEstado(card, "aviso");
+
+    } else {
+        setCardEstado(card, "normal");
+    }
+    }
+    // ============================
+    // EVALUACIÓN DE CORRIENTE
+    // ============================
+
+    function evaluarCorriente(card, valor) {
+
+    if (!configCargada || valor === undefined) return;
+
+    const i = Number(valor);
+
+    if (i >= config.alarmaCorrienteAlta ||
+        i <= config.alarmaCorrienteBaja) {
+
+        setCardEstado(card, "alarma");
+
+    } else if (i >= config.avisoCorrienteAlta ||
+               i <= config.avisoCorrienteBaja) {
+
+        setCardEstado(card, "aviso");
+
+    } else {
+        setCardEstado(card, "normal");
+    }
+    }
+    //--------------------------------------------
+
+document.addEventListener("DOMContentLoaded", function () {
+// copi editable
 const stagedConfig = { ...config };
 
 // parámetros modificados
@@ -210,6 +331,18 @@ onValue(configRef, (snapshot) => {
 
     Object.assign(config, data);
     Object.assign(stagedConfig, data);
+    configCargada = true;
+
+    // reevaluar cards con los valores actuales en pantalla
+    evaluarTension(
+    document.getElementById("cardTensionL1"),
+    document.getElementById("tensionL1").innerText
+    );
+
+evaluarCorriente(
+    document.getElementById("cardCorrienteL1"),
+    document.getElementById("corrienteL1").innerText
+);
 
     document.querySelectorAll(".control").forEach(control => {
         const param = control.dataset.param;
@@ -378,36 +511,7 @@ saveBtn.addEventListener("click", () => {
 });
 });
 //----------------------------------------------------------------------------------------------------------------
-const datosRef = ref(db, "camara/actual");
-onValue(datosRef, (snapshot) => {
 
-  const data = snapshot.val();
-  console.log("Snapshot:", data);
-
-  if (!data) return;
-
-  if (data.tensionL1 !== undefined)
-    document.getElementById("tensionL1").innerText = data.tensionL1;
-/*
-  if (data.tensionL2 !== undefined)
-    document.getElementById("tensionL2").innerText = data.tensionL2;
-
-  if (data.tensionL3 !== undefined)
-    document.getElementById("tensionL3").innerText = data.tensionL3;
-*/
-  if (data.corrienteL1 !== undefined)
-    document.getElementById("corrienteL1").innerText = data.corrienteL1;
- /*
-  if (data.corrienteL2 !== undefined)
-    document.getElementById("corrienteL2").innerText = data.corrienteL2;
-
-  if (data.corrienteL3 !== undefined)
-    document.getElementById("corrienteL3").innerText = data.corrienteL3;
-*/
-  if (data.potenciaAparente !== undefined)
-    document.getElementById("potenciaAparente").innerText = data.potenciaAparente;
-
-});
 </script>
 
 <script src="Auth.js"></script>
