@@ -9,7 +9,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
 
 <!-- Vinculación del CSS -->
-<link rel="stylesheet" href="Inicio.css?v=3">
+<link rel="stylesheet" href="Inicio.css?v=8">
 
 </head>
 
@@ -49,24 +49,33 @@ if(!token){
 
     <div class="dashboard-grid">
 
-        <div class="status-card">
-            <h3>Motor Principal</h3>
-            <div><span id="motorPrincipal">--</span></div>
-        </div>
-
-        <div class="status-card">
+        <div class="status-card" id="cardTempPromedio">
             <h3>Temperatura</h3>
-            <div><span id="temp1">--</span> °C</div>
+            <div><span id="tempProm">--</span> °C</div>
+        </div>
+        
+        <div class="status-card" id="cardTension">
+            <h3>Tensión</h3>
+            <div><span id="tensionL1">--</span> V</div>
+            <div><span id="tensionL2">--</span> V</div>
+            <div><span id="tensionL3">--</span> V</div>
         </div>
 
-         <div class="status-card">
+        <div class="status-card" id="cardCorriente">
+            <h3>Corriente</h3>
+            <div><span id="corrienteL1">--</span> A</div>
+            <div><span id="corrienteL2">--</span> A</div>
+            <div><span id="corrienteL3">--</span> A</div>
+        </div>
+
+        <div class="status-card">
             <h3>Consumo</h3>
             <div><span id="consumo">--</span> VA</div>
         </div>
 
-        <div class="status-card">
-            <h3>Puerta</h3>
-            <div><span id="puerta">--</span></div>
+        <div class="status-card"> 
+            <h3>Motor Principal</h3>
+            <div><span id="motorPrincipal">--</span></div>
         </div>
 
         <div class="status-card">
@@ -75,19 +84,10 @@ if(!token){
         </div>
 
         <div class="status-card">
-            <h3>Tensión</h3>
-            <div><span id="tensionL1">--</span> V</div>
-            <div><span id="tensionL2">--</span> V</div>
-            <div><span id="tensionL3">--</span> V</div>
+            <h3>Puerta</h3>
+            <div><span id="puerta">--</span></div>
         </div>
 
-        <div class="status-card">
-            <h3>Corriente</h3>
-            <div><span id="corrienteL1">--</span> A</div>
-            <div><span id="corrienteL2">--</span> A</div>
-            <div><span id="corrienteL3">--</span> A</div>
-        </div>
-    
         <div class="status-card">
             <h3>Luces</h3>
             <div><span id="LuzCamara">--</span></div>
@@ -95,6 +95,29 @@ if(!token){
         </div>
 
     </div>
+
+    <div class="notas">
+        <p><strong>Nota:</strong> Los datos se actualizan en tiempo real. Si algún valor muestra "--", es posible que el dispositivo aún no haya enviado información o que haya un problema de conexión.</p>
+    
+    </div>
+
+    <div class="leyenda-estados">
+        <div class="estado">
+            <span class="color blanco"></span>
+            <span>Valores normales</span>
+        </div>
+
+        <div class="estado">
+            <span class="color amarillo"></span>
+            <span>Aviso por valores fuera de rango</span>
+        </div>
+
+        <div class="estado">
+            <span class="color rojo"></span>
+            <span>Alarma por valores peligrosos</span>
+        </div>
+    </div>
+
 
 </section>
 
@@ -104,26 +127,26 @@ if(!token){
 
 <script type="module">console.log("🔌 Conectando a Firebase...") ;
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-  import { getDatabase, ref, onValue, set } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+    import { getDatabase, ref, onValue, set } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
 
-  const firebaseConfig = {
+    const firebaseConfig = {
     apiKey: "AIzaSyA7BNbFNzdARWEGM_dAMKe7WUNUTI_0h-0",
     authDomain: "camara-frio-elabuelo.firebaseapp.com",
     databaseURL: "https://camara-frio-elabuelo-default-rtdb.firebaseio.com",
     projectId: "camara-frio-elabuelo"
-  };
+    };
 
-  const app = initializeApp(firebaseConfig);
+    const app = initializeApp(firebaseConfig);
 
-const db = getDatabase(app);
+    const db = getDatabase(app);
 
-const datosRef = ref(db, "camara/actual");
+    const datosRef = ref(db, "camara/actual");
 
-const estadoLuz = document.getElementById("LuzCamara");
-const btnLuz = document.getElementById("btnLuz");
+    const estadoLuz = document.getElementById("LuzCamara");
+    const btnLuz = document.getElementById("btnLuz");
 
-/* función que actualiza botón según estado */
-function actualizarBotonLuz(estado) {
+    /* función que actualiza botón según estado */
+    function actualizarBotonLuz(estado) {
     estadoLuz.textContent = estado;
 
     if (estado === "Encendida") {
@@ -137,7 +160,7 @@ function actualizarBotonLuz(estado) {
     }
 }
 
-btnLuz.addEventListener("click", async () => {
+    btnLuz.addEventListener("click", async () => {
 
     /* si el botón dice Apagar → mandamos 0
        si dice Encender → mandamos 1 */
@@ -156,7 +179,7 @@ btnLuz.addEventListener("click", async () => {
     }
 });
 
-onValue(ref(db, "camara/actual/luzCamara"), (snapshot) => {
+    onValue(ref(db, "camara/actual/luzCamara"), (snapshot) => {
 
     const estado = snapshot.val();
 
@@ -167,54 +190,186 @@ onValue(ref(db, "camara/actual/luzCamara"), (snapshot) => {
     }
 });
 
+    onValue(datosRef, (snapshot) => {
 
-onValue(datosRef, (snapshot) => {
+    const data = snapshot.val();
+    console.log("Snapshot:", data);
 
-  const data = snapshot.val();
-  console.log("Snapshot:", data);
+    if (!data) return;
 
-  if (!data) return;
+    // calcular promedio solo si ambas existen
+    if (data.temperatura1 !== undefined && data.temperatura2 !== undefined) {
+    const tempProm = (data.temperatura1 + data.temperatura2) / 2;
+    document.getElementById("tempProm").innerText = tempProm.toFixed(1);
+    }
 
-  if (data.temperatura1 !== undefined)
-    document.getElementById("temp1").innerText = data.temperatura1;
-/*
-  if (data.temperatura2 !== undefined)
-    document.getElementById("temp2").innerText = data.temperatura2;
-
-  if (data.temperaturaExterior !== undefined)
+    /*
+    if (data.temperaturaExterior !== undefined)
     document.getElementById("tempExt").innerText = data.temperaturaExterior;
-*/
-  if (data.tensionL1 !== undefined)
+    */
+    if (data.tensionL1 !== undefined)
     document.getElementById("tensionL1").innerText = data.tensionL1;
-/*
-  if (data.tensionL2 !== undefined)
+    /*
+    if (data.tensionL2 !== undefined)
     document.getElementById("tensionL2").innerText = data.tensionL2;
 
-  if (data.tensionL3 !== undefined)
+    if (data.tensionL3 !== undefined)
     document.getElementById("tensionL3").innerText = data.tensionL3;
-*/
-  if (data.corrienteL1 !== undefined)
+    */
+    if (data.corrienteL1 !== undefined)
     document.getElementById("corrienteL1").innerText = data.corrienteL1;
-/*
-  if (data.corrienteL2 !== undefined)
+    /*
+    if (data.corrienteL2 !== undefined)
     document.getElementById("corrienteL2").innerText = data.corrienteL2;
 
-  if (data.corrienteL3 !== undefined)
+    if (data.corrienteL3 !== undefined)
     document.getElementById("corrienteL3").innerText = data.corrienteL3;
-*/
-  if (data.estadoPuerta !== undefined) {
+    */
+    if (data.estadoPuerta !== undefined) {
 
-  const puerta = Number(data.estadoPuerta);
+    const puerta = Number(data.estadoPuerta);
 
-  document.getElementById("puerta").innerText =
+    document.getElementById("puerta").innerText =
     puerta === 1 ? "Abierta" : "Cerrada";
 
-}
+    }
 
-if(data.potenciaAparente !== undefined)
+    if(data.potenciaAparente !== undefined)
     document.getElementById("consumo").innerText = data.potenciaAparente;
 
-});
+    // =====================
+    // EVALUAR UMBRALES
+    // =====================
+
+    evaluarTemperatura(
+      document.getElementById("cardTempPromedio"),
+      data.temperatura1,
+      data.temperatura2
+    );
+
+    evaluarCorriente(
+      document.getElementById("cardCorriente"),
+      data.corrienteL1,
+      data.corrienteL2,
+      data.corrienteL3
+    );
+
+    evaluarTension(
+      document.getElementById("cardTension"),
+      data.tensionL1,
+      data.tensionL2,
+      data.tensionL3
+    );
+
+    });
+
+    // ============================
+    // CARGA DE CONFIGURACIÓN
+    // ============================
+
+    const configRef = ref(db, "camara/config");
+
+    let config = {};
+
+    onValue(configRef, (snapshot) => {
+    config = snapshot.val();
+    console.log("CONFIG:", config);
+    });
+
+    // ============================
+    // FUNCIÓN GENÉRICA DE COLORES
+    // ============================
+
+    function setCardEstado(card, estado) {
+    card.classList.remove("aviso", "alarma");
+
+    if (estado === "alarma")
+        card.classList.add("alarma");
+    else if (estado === "aviso")
+        card.classList.add("aviso");
+    }
+
+    // ============================
+    // EVALUACIÓN DE TEMPERATURA
+    // ============================
+
+    function evaluarTemperatura(card, t1, t2) {
+
+    if (!config) return;
+
+    const promedio = (Number(t1) + Number(t2)) / 2;
+
+    if (promedio >= config.alarmaTemperaturaAlta ||
+        promedio <= config.alarmaTemperaturaBaja) {
+
+        setCardEstado(card, "alarma");
+        
+
+    } else if (promedio >= config.avisoTemperaturaAlta ||
+               promedio <= config.avisoTemperaturaBaja) {
+
+        setCardEstado(card, "aviso");
+        // alert("¡Aviso de Temperatura! El promedio es " + promedio.toFixed(2) + " °C");
+    } else {
+        setCardEstado(card, "normal");
+    }
+    }
+
+    // ============================
+    // EVALUACIÓN DE CORRIENTE
+    // ============================
+
+    function evaluarCorriente(card, i1, i2, i3) {
+
+    if (!config) return;
+
+    const corrientes = [i1, i2, i3].map(Number);
+
+    if (corrientes.some(i =>
+        i >= config.alarmaCorrienteAlta ||
+        i <= config.alarmaCorrienteBaja)) {
+
+        setCardEstado(card, "alarma");
+        // alert("¡Alerta de Corriente! Alguna fase está fuera de rango.");
+
+    } else if (corrientes.some(i =>
+        i >= config.avisoCorrienteAlta ||
+        i <= config.avisoCorrienteBaja)) {
+
+        setCardEstado(card, "aviso");
+        // alert("¡Aviso de Corriente! Alguna fase está cerca de los límites.");
+    } else {
+        setCardEstado(card, "normal");
+    }
+    }
+
+    // ============================
+    // EVALUACIÓN DE TENSIÓN
+    // ============================
+
+    function evaluarTension(card, v1, v2, v3) {
+
+    if (!config) return;
+
+    const tensiones = [v1, v2, v3].map(Number);
+
+    if (tensiones.some(v =>
+        v >= config.avisoTensionAlta ||
+        v <= config.avisoTensionBaja)) {
+
+        setCardEstado(card, "aviso");
+        // alert("¡Aviso de Tensión! Alguna fase está cerca de los límites.");
+    } else if (tensiones.some(v =>
+        v >= config.alarmaTensionAlta ||
+        v <= config.alarmaTensionBaja)) {
+
+        setCardEstado(card, "alarma");
+        // alert("¡Alerta de Tensión! Alguna fase está fuera de rango.");
+        }
+    else {
+        setCardEstado(card, "normal");
+    }
+    }
 </script>
 <script src="Auth.js" ></script>
 </body>
