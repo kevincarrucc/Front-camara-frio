@@ -66,7 +66,8 @@ function mostrarSeccion(event, tipo){
     const todos = document.querySelectorAll(
         '.Temperatura24h-container, .Temperatura1sem-container, .Temperatura1mes-container, \
          .Tensión24h-container, .Tensión1sem-container, .Tensión1mes-container, \
-         .Corriente24h-container, .Corriente1sem-container, .Corriente1mes-container'
+         .Corriente24h-container, .Corriente1sem-container, .Corriente1mes-container, \
+         .Potencia24h-container, .Potencia1sem-container, .Potencia1mes-container'
     );
 
     // 🔴 ocultar todo
@@ -91,6 +92,12 @@ function mostrarSeccion(event, tipo){
         ).forEach(el => el.classList.remove('oculto'));
     }
 
+    if(tipo === 'potencia'){
+            document.querySelectorAll(
+                '.Potencia24h-container, .Potencia1sem-container, .Potencia1mes-container'
+        ).forEach(el => el.classList.remove('oculto'));
+    }
+
     if(tipo === 'eventos'){
         document.getElementById('event-panel')
             .classList.remove('oculto');
@@ -111,6 +118,10 @@ function mostrarSeccion(event, tipo){
         document.querySelector('.selector-graficos button')
             .classList.add('activo');
     }
+
+    setTimeout(() => {
+    window.dispatchEvent(new Event('resize'));
+    }, 100);
 }
 </script>
 
@@ -151,6 +162,18 @@ function mostrarSeccion(event, tipo){
     <div id="container-9"></div>
 </div>
 
+<div class="Potencia24h-container">
+    <div id="container-10"></div>
+</div>
+
+<div class="Potencia1sem-container">
+    <div id="container-11"></div>
+</div>
+
+<div class="Potencia1mes-container">
+    <div id="container-12"></div>
+</div>
+
 <div id="event-panel" class="oculto">
     <div id="eventList"></div>
 </div>
@@ -161,6 +184,7 @@ function mostrarSeccion(event, tipo){
 </footer>
 
 <script>// simulación de eventos cada 3 segundos (después reemplazás por eventos reales del backend)
+/*
 setInterval(() => {
     const tipos = ["info", "aviso", "alarma"];
     const mensajes = [
@@ -175,1004 +199,305 @@ setInterval(() => {
 
     agregarEvento(mensaje, tipo);
 }, 3000);
+*/
 </script>
 
-<script>// función para agregar eventos al panel de eventos a traves del back
-    function agregarEvento(mensaje, tipo) {
-    const eventList = document.getElementById("eventList");
 
-    const nuevoEvento = document.createElement("div");
-    nuevoEvento.classList.add("event", tipo);
 
-    const fecha = new Date().toLocaleTimeString();
 
-    nuevoEvento.innerHTML = `
-        <strong>${fecha}</strong> - ${mensaje}
-    `;
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { 
+    getDatabase, ref, onValue 
+} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+import {
+    getFirestore,
+    collection,
+    query,
+    orderBy,
+    limit,
+    getDocs,
+    onSnapshot
+} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
-    // prepend = lo coloca arriba de todo
-    eventList.prepend(nuevoEvento);
+// =========================
+// Firebase init
+// =========================
+
+const firebaseConfig = {
+    apiKey: "AIzaSyA7BNbFNzdARWEGM_dAMKe7WUNUTI_0h-0",
+    authDomain: "camara-frio-elabuelo.firebaseapp.com",
+    databaseURL: "https://camara-frio-elabuelo-default-rtdb.firebaseio.com",
+    projectId: "camara-frio-elabuelo"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
+const firestore = getFirestore(app);
+
+// =======================
+// 🔹 FUNCION UI EVENTOS
+// =======================
+
+function agregarEvento(mensaje, tipo, timestamp) {
+  const eventList = document.getElementById("eventList");
+
+  const nuevoEvento = document.createElement("div");
+  nuevoEvento.classList.add("event", tipo);
+
+  const fecha = timestamp
+    ? new Date(timestamp.seconds * 1000).toLocaleTimeString()
+    : new Date().toLocaleTimeString();
+
+  nuevoEvento.innerHTML = `
+    <strong>${fecha}</strong> - ${mensaje}
+  `;
+
+  eventList.prepend(nuevoEvento);
 }
-</script>
 
+// =======================
+// 🔹 MAPEO DE TIPOS
+// =======================
 
+function mapearTipo(tipoFirestore) {
+  switch (tipoFirestore) {
+    case "puerta":
+    case "luz":
+      return "info";
 
-<script>
-document.addEventListener("DOMContentLoaded", function () {
+    case "aviso":
+      return "aviso";
 
-    const INTERVAL = 600000; // 10 minutos
+    case "alarma":
+      return "alarma";
 
-    // Evento al cargar el gráfico
-    const onChartLoad = function () {
-        const chart = this;
+    default:
+      return "info";
+  }
+}
 
-        const t1 = chart.series[0];
-        const t2 = chart.series[1];
-        const tProm = chart.series[2];
-        const tExt = chart.series[3];
+// =======================
+// 🔹 ESCUCHAR EVENTOS
+// =======================
 
-        setInterval(function () {
-            const x = (new Date()).getTime();
+const eventosRef = collection(firestore, "eventos");
 
-            // 🔧 Datos simulados (después reemplazás por sensores reales)
-            const y1 = Number(document.getElementById("temp1").innerText);   // temp1
-            const y2 = 2 + Math.random() * 4;   // temp2
-            const yProm = (y1 + y2) / 2;        // promedio
-            const yExt = 10 + Math.random() * 10; // exterior
+const q = query(
+  eventosRef,
+  orderBy("timestamp", "desc"),
+  limit(50)
+);
 
-            // Mantener cantidad constante
-            const shift = t1.data.length >= 144;
+let primeraCarga = true;
 
-            t1.addPoint([x, y1], true, shift);
-            t2.addPoint([x, y2], true, shift);
-            tProm.addPoint([x, yProm], true, shift);
-            tExt.addPoint([x, yExt], true, shift);
+onSnapshot(q, (snapshot) => {
+     if (primeraCarga) {
 
-        }, INTERVAL);
-    };
+    document.getElementById("eventList").innerHTML = "";
 
-    // Datos iniciales
-    const dataT1 = [];
-    const dataT2 = [];
-    const dataProm = [];
-    const dataExt = [];
+    // 🔹 invertir orden para que el más nuevo quede arriba
+    const docs = snapshot.docs.reverse();
 
-    const time = new Date().getTime();
+    docs.forEach(doc => {
+      const data = doc.data();
 
-    for (let i = -144; i <= 0; i++) {
-        const x = time + i * INTERVAL;
+      if (!data.timestamp) return;
 
-        const y1 = 2 + Math.random() * 4;
-        const y2 = 2 + Math.random() * 4;
-        const yProm = (y1 + y2) / 2;
-        const yExt = 10 + Math.random() * 10;
-
-        dataT1.push([x, y1]);
-        dataT2.push([x, y2]);
-        dataProm.push([x, yProm]);
-        dataExt.push([x, yExt]);
-    }
-
-    Highcharts.chart('container-1', {
-        chart: {
-            type: 'spline',
-            events: {
-                load: onChartLoad
-            }
-        },
-
-        time: {
-            useUTC: false
-        },
-
-        title: {
-            text: 'Histórico de Temperaturas (24 hs)'
-        },
-
-        xAxis: {
-            type: 'datetime'
-        },
-
-        yAxis: {
-            title: {
-                text: 'Temperatura (°C)'
-            }
-        },
-
-        legend: {
-            enabled: true // 🔥 importante para diferenciar líneas
-        },
-
-        exporting: {
-            enabled: false
-        },
-
-        series: [
-            {
-                name: 'Temp 1',
-                data: dataT1
-            },
-            {
-                name: 'Temp 2',
-                data: dataT2
-            },
-            {
-                name: 'Temp Promedio',
-                data: dataProm,
-                dashStyle: 'ShortDash' // línea punteada
-            },
-            {
-                name: 'Temp Exterior',
-                data: dataExt
-            }
-        ]
+      agregarEvento(
+        data.descripcion,
+        mapearTipo(data.tipo),
+        data.timestamp
+      );
     });
 
-});
-</script>
-<script>
-document.addEventListener("DOMContentLoaded", function () {
+    primeraCarga = false;
+    return;
+  }
 
-    const INTERVAL = 2 * 60 * 60 * 1000; // 2 horas
-    const MAX_POINTS = 84; // 7 días
+  // 🔹 eventos nuevos en tiempo real
+  snapshot.docChanges().forEach((change) => {
 
-    // Evento al cargar el gráfico
-    const onChartLoad = function () {
-        const chart = this;
+    if (change.type === "added") {
+      const data = change.doc.data();
 
-        const t1 = chart.series[0];
-        const t2 = chart.series[1];
-        const tProm = chart.series[2];
-        const tExt = chart.series[3];
+      if (!data.timestamp) return;
 
-        setInterval(function () {
-            const x = (new Date()).getTime();
-
-            // 🔧 Datos simulados (después reemplazás por sensores reales)
-            const y1 = 2 + Math.random() * 4;   // temp1
-            const y2 = 2 + Math.random() * 4;   // temp2
-            const yProm = (y1 + y2) / 2;        // promedio
-            const yExt = 10 + Math.random() * 10; // exterior
-
-            // Mantener cantidad constante
-            const shift = t1.data.length >= MAX_POINTS;
-
-            t1.addPoint([x, y1], true, shift);
-            t2.addPoint([x, y2], true, shift);
-            tProm.addPoint([x, yProm], true, shift);
-            tExt.addPoint([x, yExt], true, shift);
-
-        }, INTERVAL);
-    };
-
-    // Datos iniciales
-    const dataT1 = [];
-    const dataT2 = [];
-    const dataProm = [];
-    const dataExt = [];
-
-    const time = new Date().getTime();
-
-    for (let i = -MAX_POINTS; i <= 0; i++) {
-        const x = time + i * INTERVAL;
-
-        const y1 = 2 + Math.random() * 4;
-        const y2 = 2 + Math.random() * 4;
-        const yProm = (y1 + y2) / 2;
-        const yExt = 10 + Math.random() * 10;
-
-        dataT1.push([x, y1]);
-        dataT2.push([x, y2]);
-        dataProm.push([x, yProm]);
-        dataExt.push([x, yExt]);
+      agregarEvento(
+        data.descripcion,
+        mapearTipo(data.tipo),
+        data.timestamp
+      );
     }
 
-    Highcharts.chart('container-2', {
-        chart: {
-            type: 'spline',
-            events: {
-                load: onChartLoad
-            }
-        },
+  });
 
-        time: {
-            useUTC: false
-        },
 
-        title: {
-            text: 'Histórico de Temperaturas (1 Semana)'
-        },
+});
 
-        xAxis: {
-            type: 'datetime'
-        },
+// =========================
+// Datos en vivo desde RTDB
+// =========================
 
-        yAxis: {
-            title: {
-                text: 'Temperatura (°C)'
-            }
-        },
+let data = {
+    temperatura1: 0,
+    temperatura2: 0,
+    temperaturaExterior: 0,
+    tensionL1: 0,
+    tensionL2: 0,
+    tensionL3: 0,
+    corrienteL1: 0,
+    corrienteL2: 0,
+    corrienteL3: 0,
+    potenciaAparente: 0
+};
 
-        legend: {
-            enabled: true // 🔥 importante para diferenciar líneas
-        },
+onValue(ref(db, "camara/actual"), (snapshot) => {
+    const firebaseData = snapshot.val();
+    if (!firebaseData) return;
+    data = firebaseData;
+});
 
-        exporting: {
-            enabled: false
-        },
+// =========================
+// Configuraciones de gráficos
+// =========================
 
-        series: [
-            {
-                name: 'Temp 1',
-                data: dataT1
-            },
-            {
-                name: 'Temp 2',
-                data: dataT2
-            },
-            {
-                name: 'Temp Promedio',
-                data: dataProm,
-                dashStyle: 'ShortDash' // línea punteada
-            },
-            {
-                name: 'Temp Exterior',
-                data: dataExt
-            }
-        ]
+const CONFIGS = {
+    temp24:  { container: "container-1", intervalo: 600000, puntos: 144, titulo: "Histórico de Temperaturas (24 hs)", campos: ["temperatura1","temperatura2","promedio","temperaturaExterior"] },
+    temp7:   { container: "container-2", intervalo: 7200000, puntos: 84, titulo: "Histórico de Temperaturas (1 Semana)", campos: ["temperatura1","temperatura2","promedio","temperaturaExterior"] },
+    temp30:  { container: "container-3", intervalo: 14400000, puntos: 180, titulo: "Histórico de Temperaturas (1 Mes)", campos: ["temperatura1","temperatura2","promedio","temperaturaExterior"] },
+
+    tens24:  { container: "container-4", intervalo: 600000, puntos: 144, titulo: "Histórico de Tensiones (24 hs)", campos: ["tensionL1","tensionL2","tensionL3"] },
+    tens7:   { container: "container-5", intervalo: 7200000, puntos: 84, titulo: "Histórico de Tensiones (1 Semana)", campos: ["tensionL1","tensionL2","tensionL3"] },
+    tens30:  { container: "container-6", intervalo: 14400000, puntos: 180, titulo: "Histórico de Tensiones (1 Mes)", campos: ["tensionL1","tensionL2","tensionL3"] },
+
+    corr24:  { container: "container-7", intervalo: 600000, puntos: 144, titulo: "Histórico de Corrientes (24 hs)", campos: ["corrienteL1","corrienteL2","corrienteL3"] },
+    corr7:   { container: "container-8", intervalo: 7200000, puntos: 84, titulo: "Histórico de Corrientes (1 Semana)", campos: ["corrienteL1","corrienteL2","corrienteL3"] },
+    corr30:  { container: "container-9", intervalo: 14400000, puntos: 180, titulo: "Histórico de Corrientes (1 Mes)", campos: ["corrienteL1","corrienteL2","corrienteL3"] },
+
+    pot24:   { container: "container-10", intervalo: 600000, puntos: 144, titulo: "Histórico de Potencias (24 hs)", campos: ["potenciaAparente" ] },
+    pot7:    { container: "container-11", intervalo: 7200000, puntos: 84, titulo: "Histórico de Potencias (1 Semana)", campos: ["potenciaAparente" ] },
+    pot30:   { container: "container-12", intervalo: 14400000, puntos: 180, titulo: "Histórico de Potencias (1 Mes)", campos: ["potenciaAparente" ] }
+};
+
+// =========================
+// Cargar histórico Firestore
+// =========================
+
+async function cargarHistorico(campos, maxPoints) {
+
+    const q = query(
+        collection(firestore, "historial"),
+        orderBy("timestamp", "desc"),
+        limit(maxPoints)
+    );
+
+    const snapshot = await getDocs(q);
+
+    const series = campos.map(() => []);
+
+    snapshot.forEach(doc => {
+        const d = doc.data();
+        if (!d.timestamp) return;
+
+        const x = d.timestamp.toDate().getTime();
+
+        campos.forEach((campo, i) => {
+
+    let y = null;
+
+    if (campo === "promedio") {
+        if (d.temperatura1 != null && d.temperatura2 != null)
+            y = ((d.temperatura1 + d.temperatura2) / 2) / 10;
+            } else if (d[campo] != null) {
+                    y = campo.startsWith("temperatura")
+                    ? d[campo] / 10
+                    : d[campo];
+                }
+
+            if (y != null)
+            series[i].push([x, y]);
+        });
     });
 
-});
-</script>
-<script>
-document.addEventListener("DOMContentLoaded", function () {
+    series.forEach(s => s.reverse());
 
-    const INTERVAL = 4 * 60 * 60 * 1000; // 4 horas
-    const MAX_POINTS = 180; // 30 días
+    return series;
+}
 
-    // Evento al cargar el gráfico
-    const onChartLoad = function () {
-        const chart = this;
+// =========================
+// Crear gráfico genérico
+// =========================
 
-        const t1 = chart.series[0];
-        const t2 = chart.series[1];
-        const tProm = chart.series[2];
-        const tExt = chart.series[3];
+async function crearGrafico(config) {
 
-        setInterval(function () {
-            const x = (new Date()).getTime();
+    const seriesData = await cargarHistorico(config.campos, config.puntos);
 
-            // 🔧 Datos simulados (después reemplazás por sensores reales)
-            const y1 = 2 + Math.random() * 4;   // temp1
-            const y2 = 2 + Math.random() * 4;   // temp2
-            const yProm = (y1 + y2) / 2;        // promedio
-            const yExt = 10 + Math.random() * 10; // exterior
+    Highcharts.chart(config.container, {
 
-            // Mantener cantidad constante
-            const shift = t1.data.length >= MAX_POINTS;
-
-            t1.addPoint([x, y1], true, shift);
-            t2.addPoint([x, y2], true, shift);
-            tProm.addPoint([x, yProm], true, shift);
-            tExt.addPoint([x, yExt], true, shift);
-
-        }, INTERVAL);
-    };
-
-    // Datos iniciales
-    const dataT1 = [];
-    const dataT2 = [];
-    const dataProm = [];
-    const dataExt = [];
-
-    const time = new Date().getTime();
-
-    for (let i = -MAX_POINTS; i <= 0; i++) {
-        const x = time + i * INTERVAL;
-
-        const y1 = 2 + Math.random() * 4;
-        const y2 = 2 + Math.random() * 4;
-        const yProm = (y1 + y2) / 2;
-        const yExt = 10 + Math.random() * 10;
-
-        dataT1.push([x, y1]);
-        dataT2.push([x, y2]);
-        dataProm.push([x, yProm]);
-        dataExt.push([x, yExt]);
-    }
-
-    Highcharts.chart('container-3', {
         chart: {
-            type: 'spline',
+            type: "spline",
+            zoomType: config.puntos > 100 ? "x" : undefined,
             events: {
-                load: onChartLoad
+                load: function () {
+
+                    const chart = this;
+
+                    setInterval(() => {
+
+                        const x = Date.now();
+                        const shift = chart.series[0].data.length >= config.puntos;
+
+                        config.campos.forEach((campo, i) => {
+
+                            let y;
+
+                            if (campo === "promedio") {
+                                y = ((data.temperatura1 + data.temperatura2) / 2) / 10;
+                                } else {
+                                 y = data[campo];
+
+                                    if (campo.startsWith("temperatura"))
+                                        y = y / 10;
+                                }
+
+                            chart.series[i].addPoint([x, y], true, shift);
+                        });
+
+                    }, config.intervalo);
+                }
             }
         },
 
-        time: {
-            useUTC: false
-        },
+        time: { useUTC: false },
 
-        title: {
-            text: 'Histórico de Temperaturas (1 Mes)'
-        },
+        title: { text: config.titulo },
 
-        xAxis: {
-            type: 'datetime'
-        },
+        xAxis: { type: "datetime" },
 
         yAxis: {
-            title: {
-                text: 'Temperatura (°C)'
-            }
+            title: { text: "" }
         },
 
-        legend: {
-            enabled: true // 🔥 importante para diferenciar líneas
-        },
+        legend: { enabled: true },
+        exporting: { enabled: false },
 
-        exporting: {
-            enabled: false
-        },
-
-        series: [
-            {
-                name: 'Temp 1',
-                data: dataT1
-            },
-            {
-                name: 'Temp 2',
-                data: dataT2
-            },
-            {
-                name: 'Temp Promedio',
-                data: dataProm,
-                dashStyle: 'ShortDash' // línea punteada
-            },
-            {
-                name: 'Temp Exterior',
-                data: dataExt
-            }
-        ]
+        series: config.campos.map((campo, i) => ({
+            name: campo,
+            data: seriesData[i],
+            dashStyle: campo === "promedio" ? "ShortDash" : "Solid"
+        }))
     });
+}
 
-});
-</script>
+// =========================
+// Inicialización
+// =========================
 
+document.addEventListener("DOMContentLoaded", () => {
 
-<script>
-document.addEventListener("DOMContentLoaded", function () {
-
-    const INTERVAL = 600000; // 10 minutos
-
-    // Evento al cargar el gráfico
-    const onChartLoad = function () {
-        const chart = this;
-
-        const t1 = chart.series[0];
-        const t2 = chart.series[1];
-        const t3 = chart.series[2];
-
-        setInterval(function () {
-            const x = (new Date()).getTime();
-
-            // 🔧 Datos simulados (después reemplazás por sensores reales)
-            const y1 = 2 + Math.random() * 4;   // temp1
-            const y2 = 2 + Math.random() * 4;   // temp2
-            const y3 = 2 + Math.random() * 4;   // temp3
-            
-
-            // Mantener cantidad constante
-            const shift = t1.data.length >= 144;
-
-            t1.addPoint([x, y1], true, shift);
-            t2.addPoint([x, y2], true, shift);
-            tProm.addPoint([x, yProm], true, shift);
-            tExt.addPoint([x, yExt], true, shift);
-
-        }, INTERVAL);
-    };
-
-    // Datos iniciales
-    const dataTensionL1 = [];
-    const dataTensionL2 = [];
-    const dataTensionL3 = [];
-
-    const time = new Date().getTime();
-
-    for (let i = -144; i <= 0; i++) {
-        const x = time + i * INTERVAL;
-
-        const y1 = 2 + Math.random() * 4;
-        const y2 = 2 + Math.random() * 4;
-        const y3 = 2 + Math.random() * 4;
-        
-
-        dataTensionL1.push([x, y1]);
-        dataTensionL2.push([x, y2]);
-        dataTensionL3.push([x, y3]);
-    }
-
-    Highcharts.chart('container-4', {
-        chart: {
-            type: 'spline',
-            events: {
-                load: onChartLoad
-            }
-        },
-
-        time: {
-            useUTC: false
-        },
-
-        title: {
-            text: 'Histórico de Tensiones (24 hs)'
-        },
-
-        xAxis: {
-            type: 'datetime'
-        },
-
-        yAxis: {
-            title: {
-                text: 'Tensión (V)'
-            }
-        },
-
-        legend: {
-            enabled: true // 🔥 importante para diferenciar líneas
-        },
-
-        exporting: {
-            enabled: false
-        },
-
-        series: [
-            {
-                name: 'Tensión L1',
-                data: dataTensionL1,
-            },
-            {
-                name: 'Tensión L2',
-                data: dataTensionL2,
-            },
-            {
-                name: 'Tensión L3  ',
-                data: dataTensionL3,
-                
-            },
-        ]
-    });
-
-});
-</script>
-<script>
-document.addEventListener("DOMContentLoaded", function () {
-
-    const INTERVAL = 2 * 60 * 60 * 1000; // 2 horas
-    const MAX_POINTS = 84; // 7 días
-
-    // Evento al cargar el gráfico
-    const onChartLoad = function () {
-        const chart = this;
-
-        const t1 = chart.series[0];
-        const t2 = chart.series[1];
-        const t3 = chart.series[2];
-
-        setInterval(function () {
-            const x = (new Date()).getTime();
-
-            // 🔧 Datos simulados (después reemplazás por sensores reales)
-            const y1 = 2 + Math.random() * 4;   // temp1
-            const y2 = 2 + Math.random() * 4;   // temp2
-            const y3 = 2 + Math.random() * 4;   // temp3
-            
-
-            // Mantener cantidad constante
-            const shift = t1.data.length >= MAX_POINTS;
-
-            t1.addPoint([x, y1], true, shift);
-            t2.addPoint([x, y2], true, shift);
-            tProm.addPoint([x, yProm], true, shift);
-            tExt.addPoint([x, yExt], true, shift);
-
-        }, INTERVAL);
-    };
-
-    // Datos iniciales
-    const dataTensionL1 = [];
-    const dataTensionL2 = [];
-    const dataTensionL3 = [];
-
-    const time = new Date().getTime();
-
-    for (let i = -MAX_POINTS; i <= 0; i++) {
-        const x = time + i * INTERVAL;
-
-        const y1 = 2 + Math.random() * 4;
-        const y2 = 2 + Math.random() * 4;
-        const y3 = 2 + Math.random() * 4;
-        
-
-        dataTensionL1.push([x, y1]);
-        dataTensionL2.push([x, y2]);
-        dataTensionL3.push([x, y3]);
-    }
-
-    Highcharts.chart('container-5', {
-        chart: {
-            type: 'spline',
-            events: {
-                load: onChartLoad
-            }
-        },
-
-        time: {
-            useUTC: false
-        },
-
-        title: {
-            text: 'Histórico de Tensiones (1 Semana)'
-        },
-
-        xAxis: {
-            type: 'datetime'
-        },
-
-        yAxis: {
-            title: {
-                text: 'Tensión (V)'
-            }
-        },
-
-        legend: {
-            enabled: true // 🔥 importante para diferenciar líneas
-        },
-
-        exporting: {
-            enabled: false
-        },
-
-        series: [
-            {
-                name: 'Tensión L1',
-                data: dataTensionL1,
-            },
-            {
-                name: 'Tensión L2',
-                data: dataTensionL2,
-            },
-            {
-                name: 'Tensión L3  ',
-                data: dataTensionL3,
-                
-            },
-        ]
-    });
-
-});
-</script>
-<script>
-document.addEventListener("DOMContentLoaded", function () {
-
-    const INTERVAL = 4 * 60 * 60 * 1000; // 4 horas
-    const MAX_POINTS = 180; // 7 días
-
-    // Evento al cargar el gráfico
-    const onChartLoad = function () {
-        const chart = this;
-
-        const t1 = chart.series[0];
-        const t2 = chart.series[1];
-        const t3 = chart.series[2];
-
-        setInterval(function () {
-            const x = (new Date()).getTime();
-
-            // 🔧 Datos simulados (después reemplazás por sensores reales)
-            const y1 = 2 + Math.random() * 4;   // temp1
-            const y2 = 2 + Math.random() * 4;   // temp2
-            const y3 = 2 + Math.random() * 4;   // temp3
-            
-
-            // Mantener cantidad constante
-            const shift = t1.data.length >= MAX_POINTS;
-
-            t1.addPoint([x, y1], true, shift);
-            t2.addPoint([x, y2], true, shift);
-            tProm.addPoint([x, yProm], true, shift);
-            tExt.addPoint([x, yExt], true, shift);
-
-        }, INTERVAL);
-    };
-
-    // Datos iniciales
-    const dataTensionL1 = [];
-    const dataTensionL2 = [];
-    const dataTensionL3 = [];
-
-    const time = new Date().getTime();
-
-    for (let i = -MAX_POINTS; i <= 0; i++) {
-        const x = time + i * INTERVAL;
-
-        const y1 = 2 + Math.random() * 4;
-        const y2 = 2 + Math.random() * 4;
-        const y3 = 2 + Math.random() * 4;
-        
-
-        dataTensionL1.push([x, y1]);
-        dataTensionL2.push([x, y2]);
-        dataTensionL3.push([x, y3]);
-    }
-
-    Highcharts.chart('container-6', {
-        chart: {
-            type: 'spline',
-            events: {
-                load: onChartLoad
-            }
-        },
-
-        time: {
-            useUTC: false
-        },
-
-        title: {
-            text: 'Histórico de Tensiones (1 Mes)'
-        },
-
-        xAxis: {
-            type: 'datetime'
-        },
-
-        yAxis: {
-            title: {
-                text: 'Tensión (V)'
-            }
-        },
-
-        legend: {
-            enabled: true // 🔥 importante para diferenciar líneas
-        },
-
-        exporting: {
-            enabled: false
-        },
-
-        series: [
-            {
-                name: 'Tensión L1',
-                data: dataTensionL1,
-            },
-            {
-                name: 'Tensión L2',
-                data: dataTensionL2,
-            },
-            {
-                name: 'Tensión L3  ',
-                data: dataTensionL3,
-                
-            },
-        ]
-    });
-
-});
-</script>
-
-
-
-<script>
-document.addEventListener("DOMContentLoaded", function () {
-
-    const INTERVAL = 600000; // 10 minutos
-    const MAX_POINTS = 144; // 7 días
-
-    // Evento al cargar el gráfico
-    const onChartLoad = function () {
-        const chart = this;
-
-        const t1 = chart.series[0];
-        const t2 = chart.series[1];
-        const t3 = chart.series[2];
-
-        setInterval(function () {
-            const x = (new Date()).getTime();
-
-            // 🔧 Datos simulados (después reemplazás por sensores reales)
-            const y1 = 2 + Math.random() * 4;   // temp1
-            const y2 = 2 + Math.random() * 4;   // temp2
-            const y3 = 2 + Math.random() * 4;   // temp3
-            
-
-            // Mantener cantidad constante
-            const shift = t1.data.length >= MAX_POINTS;
-
-            t1.addPoint([x, y1], true, shift);
-            t2.addPoint([x, y2], true, shift);
-            tProm.addPoint([x, yProm], true, shift);
-            tExt.addPoint([x, yExt], true, shift);
-
-        }, INTERVAL);
-    };
-
-    // Datos iniciales
-    const dataCorrienteL1 = [];
-    const dataCorrienteL2 = [];
-    const dataCorrienteL3 = [];
-
-    const time = new Date().getTime();
-
-    for (let i = -MAX_POINTS; i <= 0; i++) {
-        const x = time + i * INTERVAL;
-
-        const y1 = 2 + Math.random() * 4;
-        const y2 = 2 + Math.random() * 4;
-        const y3 = 2 + Math.random() * 4;
-        
-
-        dataCorrienteL1.push([x, y1]);
-        dataCorrienteL2.push([x, y2]);
-        dataCorrienteL3.push([x, y3]);
-    }
-
-    Highcharts.chart('container-7', {
-        chart: {
-            type: 'spline',
-            events: {
-                load: onChartLoad
-            }
-        },
-
-        time: {
-            useUTC: false
-        },
-
-        title: {
-            text: 'Histórico de Corrientes (24 hs)'
-        },
-
-        xAxis: {
-            type: 'datetime'
-        },
-
-        yAxis: {
-            title: {
-                text: 'Corriente (A)'
-            }
-        },
-
-        legend: {
-            enabled: true // 🔥 importante para diferenciar líneas
-        },
-
-        exporting: {
-            enabled: false
-        },
-
-        series: [
-            {
-                name: 'Corriente L1',
-                data: dataCorrienteL1,
-            },
-            {
-                name: 'Corriente L2',
-                data: dataCorrienteL2,
-            },
-            {
-                name: 'Corriente L3  ',
-                data: dataCorrienteL3,
-                
-            },
-        ]
-    });
-
-});
-</script>
-<script>
-document.addEventListener("DOMContentLoaded", function () {
-
-    const INTERVAL = 2 * 60 * 60 * 1000; // 2 horas
-    const MAX_POINTS = 84; // 7 días
-
-    // Evento al cargar el gráfico
-    const onChartLoad = function () {
-        const chart = this;
-
-        const t1 = chart.series[0];
-        const t2 = chart.series[1];
-        const t3 = chart.series[2];
-
-        setInterval(function () {
-            const x = (new Date()).getTime();
-
-            // 🔧 Datos simulados (después reemplazás por sensores reales)
-            const y1 = 2 + Math.random() * 4;   // temp1
-            const y2 = 2 + Math.random() * 4;   // temp2
-            const y3 = 2 + Math.random() * 4;   // temp3
-            
-
-            // Mantener cantidad constante
-            const shift = t1.data.length >= MAX_POINTS;
-
-            t1.addPoint([x, y1], true, shift);
-            t2.addPoint([x, y2], true, shift);
-            tProm.addPoint([x, yProm], true, shift);
-            tExt.addPoint([x, yExt], true, shift);
-
-        }, INTERVAL);
-    };
-
-    // Datos iniciales
-    const dataCorrienteL1 = [];
-    const dataCorrienteL2 = [];
-    const dataCorrienteL3 = [];
-
-    const time = new Date().getTime();
-
-    for (let i = -MAX_POINTS; i <= 0; i++) {
-        const x = time + i * INTERVAL;
-
-        const y1 = 2 + Math.random() * 4;
-        const y2 = 2 + Math.random() * 4;
-        const y3 = 2 + Math.random() * 4;
-        
-
-        dataCorrienteL1.push([x, y1]);
-        dataCorrienteL2.push([x, y2]);
-        dataCorrienteL3.push([x, y3]);
-    }
-
-    Highcharts.chart('container-8', {
-        chart: {
-            type: 'spline',
-            events: {
-                load: onChartLoad
-            }
-        },
-
-        time: {
-            useUTC: false
-        },
-
-        title: {
-            text: 'Histórico de Corrientes (1 Semana)'
-        },
-
-        xAxis: {
-            type: 'datetime'
-        },
-
-        yAxis: {
-            title: {
-                text: 'Corriente (A)'
-            }
-        },
-
-        legend: {
-            enabled: true // 🔥 importante para diferenciar líneas
-        },
-
-        exporting: {
-            enabled: false
-        },
-
-        series: [
-            {
-                name: 'Corriente L1',
-                data: dataCorrienteL1,
-            },
-            {
-                name: 'Corriente L2',
-                data: dataCorrienteL2,
-            },
-            {
-                name: 'Corriente L3  ',
-                data: dataCorrienteL3,
-                
-            },
-        ]
-    });
-
-});
-</script>
-<script>
-document.addEventListener("DOMContentLoaded", function () {
-
-    const INTERVAL = 4 * 60 * 60 * 1000; // 4 horas
-    const MAX_POINTS = 180; // 30 días
-
-    const onChartLoad = function () {
-        const chart = this;
-
-        const t1 = chart.series[0];
-        const t2 = chart.series[1];
-        const t3 = chart.series[2];
-
-        setInterval(function () {
-            const x = (new Date()).getTime();
-
-            const y1 = 2 + Math.random() * 4;
-            const y2 = 2 + Math.random() * 4;
-            const y3 = 2 + Math.random() * 4;
-
-            const shift = t1.data.length >= MAX_POINTS;
-
-            t1.addPoint([x, y1], true, shift);
-            t2.addPoint([x, y2], true, shift);
-            t3.addPoint([x, y3], true, shift);
-
-        }, INTERVAL);
-    };
-
-    const dataCorrienteL1 = [];
-    const dataCorrienteL2 = [];
-    const dataCorrienteL3 = [];
-
-    const time = new Date().getTime();
-
-    for (let i = -MAX_POINTS; i <= 0; i++) {
-        const x = time + i * INTERVAL;
-
-        const y1 = 2 + Math.random() * 4;
-        const y2 = 2 + Math.random() * 4;
-        const y3 = 2 + Math.random() * 4;
-
-        dataCorrienteL1.push([x, y1]);
-        dataCorrienteL2.push([x, y2]);
-        dataCorrienteL3.push([x, y3]);
-    }
-
-    Highcharts.chart('container-9', {
-        chart: {
-            type: 'spline',
-            zoomType: 'x', // 🔥 clave para moverte en el mes
-            events: {
-                load: onChartLoad
-            }
-        },
-
-        time: {
-            useUTC: false
-        },
-
-        title: {
-            text: 'Histórico de Corrientes (1 Mes)'
-        },
-
-        xAxis: {
-            type: 'datetime'
-        },
-
-        yAxis: {
-            title: {
-                text: 'Corriente (A)'
-            }
-        },
-
-        legend: {
-            enabled: true
-        },
-
-        exporting: {
-            enabled: false
-        },
-
-        series: [
-            {
-                name: 'Corriente L1',
-                data: dataCorrienteL1
-            },
-            {
-                name: 'Corriente L2',
-                data: dataCorrienteL2
-            },
-            {
-                name: 'Corriente L3',
-                data: dataCorrienteL3
-            }
-        ]
+    Object.values(CONFIGS).forEach(cfg => {
+        crearGrafico(cfg);
     });
 
 });

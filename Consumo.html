@@ -339,19 +339,19 @@ saveBtn.addEventListener("click", () => {
     const alarmaBajaCorriente = parseFloat(stagedConfig.alarmaCorrienteBaja ?? config.alarmaCorrienteBaja);
 
     if(avisoBajaTension <= alarmaBajaTension){
-        alert("El aviso de tensión baja debe ser mayor que la alarma de tensión baja.");
+        alert("ERROR: El aviso de tensión baja debe ser mayor que la alarma de tensión baja.");
         return;
     }
     if(avisoAltaTension >= alarmaAltaTension){
-        alert("El aviso de tensión alta debe ser menor que la alarma de tensión alta.");
+        alert("ERROR: El aviso de tensión alta debe ser menor que la alarma de tensión alta.");
         return;
     }
     if(avisoBajaCorriente <= alarmaBajaCorriente){
-        alert("El aviso de corriente baja debe ser mayor que la alarma de corriente baja.");
+        alert("ERROR: El aviso de corriente baja debe ser mayor que la alarma de corriente baja.");
         return;
     }
     if(avisoAltaCorriente >= alarmaAltaCorriente){
-        alert("El aviso de corriente alta debe ser menor que la alarma de corriente alta.");
+        alert("ERROR:El aviso de corriente alta debe ser menor que la alarma de corriente alta.");
         return;
     }
 
@@ -376,6 +376,37 @@ saveBtn.addEventListener("click", () => {
             console.error("Error al escribir en Firebase:", err);
         });
 });
+});
+//----------------------------------------------------------------------------------------------------------------
+const datosRef = ref(db, "camara/actual");
+onValue(datosRef, (snapshot) => {
+
+  const data = snapshot.val();
+  console.log("Snapshot:", data);
+
+  if (!data) return;
+
+  if (data.tensionL1 !== undefined)
+    document.getElementById("tensionL1").innerText = data.tensionL1;
+/*
+  if (data.tensionL2 !== undefined)
+    document.getElementById("tensionL2").innerText = data.tensionL2;
+
+  if (data.tensionL3 !== undefined)
+    document.getElementById("tensionL3").innerText = data.tensionL3;
+*/
+  if (data.corrienteL1 !== undefined)
+    document.getElementById("corrienteL1").innerText = data.corrienteL1;
+ /*
+  if (data.corrienteL2 !== undefined)
+    document.getElementById("corrienteL2").innerText = data.corrienteL2;
+
+  if (data.corrienteL3 !== undefined)
+    document.getElementById("corrienteL3").innerText = data.corrienteL3;
+*/
+  if (data.potenciaAparente !== undefined)
+    document.getElementById("potenciaAparente").innerText = data.potenciaAparente;
+
 });
 </script>
 

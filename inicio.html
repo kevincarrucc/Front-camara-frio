@@ -143,6 +143,9 @@ btnLuz.addEventListener("click", async () => {
        si dice Encender → mandamos 1 */
     const accion = btnLuz.textContent === "Apagar" ? 0 : 1;
 
+    // feedback inmediato
+    actualizarBotonLuz(accion ? "Encendida" : "Apagada");
+
     console.log("Enviando comando luz:", accion);
 
     try {
@@ -150,6 +153,17 @@ btnLuz.addEventListener("click", async () => {
         console.log("Estado guardado en Firebase");
     } catch (err) {
         console.error("Error al escribir en la base:", err);
+    }
+});
+
+onValue(ref(db, "camara/actual/luzCamara"), (snapshot) => {
+
+    const estado = snapshot.val();
+
+    if (estado == 1) {
+        actualizarBotonLuz("Encendida");
+    } else {
+        actualizarBotonLuz("Apagada");
     }
 });
 
@@ -199,17 +213,6 @@ onValue(datosRef, (snapshot) => {
 
 if(data.potenciaAparente !== undefined)
     document.getElementById("consumo").innerText = data.potenciaAparente;
-
-if (data.estadoLuzCamara !== undefined) {
-
-    const luz = Number(data.estadoLuzCamara);
-
-    const estadoTexto = luz === 0 ? "Apagada" : "Encendida";
-
-    document.getElementById("LuzCamara").innerText = estadoTexto;
-
-    actualizarBotonLuz(estadoTexto);
-}
 
 });
 </script>

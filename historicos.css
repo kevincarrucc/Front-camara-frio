@@ -276,6 +276,72 @@ nav a{
     padding:10px;
 }
 
+.Potencia24h-container{
+    flex:1; /* 🔥 empuja el footer abajo */
+    
+    margin-top:10px; /* 🔥 separa del header fijo */
+    margin-bottom:40px;
+
+    display:flex;
+    justify-content:center;
+    align-items:center;
+}
+
+/* 📊 GRÁFICO */
+#container-10{
+    width:90%;
+    max-width:1400px;
+    height:400px;
+
+    background:#635d5e;
+    border-radius:10px;
+    padding:10px;
+}
+
+.Potencia1sem-container{
+    flex:1; /* 🔥 empuja el footer abajo */
+    
+    margin-top:10px; /* 🔥 separa del header fijo */
+    margin-bottom:40px;
+
+    display:flex;
+    justify-content:center;
+    align-items:center;
+}
+
+/* 📊 GRÁFICO */
+#container-11{
+    width:90%;
+    max-width:1400px;
+    height:400px;
+
+    background:#635d5e;
+    border-radius:10px;
+    padding:10px;
+}
+
+.Potencia1mes-container{
+    flex:1; /* 🔥 empuja el footer abajo */
+    
+    margin-top:10px; /* 🔥 separa del header fijo */
+    margin-bottom:40px;
+
+    display:flex;
+    justify-content:center;
+    align-items:center;
+}
+
+/* 📊 GRÁFICO */
+#container-12{
+    width:90%;
+    max-width:1400px;
+    height:400px;
+
+    background:#635d5e;
+    border-radius:10px;
+    padding:10px;
+}
+
 /* 🟣 FOOTER SIEMPRE ABAJO */
 footer{
     background:#6b0f1a;
@@ -358,7 +424,10 @@ footer{
     #container-6,
     #container-7,
     #container-8,
-    #container-9{
+    #container-9,
+    #container-10,
+    #container-11,
+    #container-12{
         height:250px;
         width:95%;
     }
