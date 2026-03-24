@@ -6,7 +6,7 @@
 <title>Temperatura - Cámara de Frío</title>
 
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="Temperatura.css?v=3">
+<link rel="stylesheet" href="Temperatura.css?v=5">
 
 <script src="code/highcharts.js"></script>
 <script src="code/modules/exporting.js"></script>
@@ -35,22 +35,22 @@
 
     <div class="grid-4">
 
-        <div class="card">
+        <div class="status-card" id="cardTempPromedio">
             <h3>Temp. Promedio</h3>
             <div><span id="tempProm">--</span> °C</div>
         </div>
 
-        <div class="card">
+        <div class="status-card" id="cardTemp1">
             <h3>Espacio 1</h3>
             <div><span id="temp1">--</span> °C</div>
         </div>
 
-        <div class="card">
+        <div class="status-card" id="cardTemp2">
             <h3>Espacio 2</h3>
             <div><span id="temp2">--</span> °C</div>
         </div>
 
-        <div class="card">
+        <div class="status-card">
             <h3>Exterior</h3>
             <div><span id="tempExt">--</span> °C</div>
         </div>
@@ -387,41 +387,159 @@ onValue(datosRef, (snapshot) => {
   if (data.temperatura2 !== undefined)
     document.getElementById("temp2").innerText = data.temperatura2;
 
+    if (data.temperatura1 !== undefined && data.temperatura2 !== undefined) {
+
     const tempProm = (data.temperatura1 + data.temperatura2) / 2;
     document.getElementById("tempProm").innerText = tempProm.toFixed(1);
 
+    evaluarTemperaturaPromedio(
+        document.getElementById("cardTempPromedio"),
+        tempProm
+    );
+    }
+    
   if (data.temperaturaExterior !== undefined)
     document.getElementById("tempExt").innerText = data.temperaturaExterior;
 
+    // =====================
+    // EVALUAR UMBRALES
+    // =====================
 
-});
-//-------------------------------GRAFICA---------------------------------------------------------------------------------
+    evaluarTemperatura1(
+      document.getElementById("cardTemp1"),
+      data.temperatura1
+    );
+
+    evaluarTemperatura2(
+      document.getElementById("cardTemp2"),
+      data.temperatura2
+    );  
+
+    });
+
+    // ============================
+    // CARGA DE CONFIGURACIÓN
+    // ============================
+
+    const configRef = ref(db, "camara/config");
+
+    let config = {};
+
+    onValue(configRef, (snapshot) => {
+    config = snapshot.val();
+    console.log("CONFIG:", config);
+    });
+
+    // ============================
+    // FUNCIÓN GENÉRICA DE COLORES
+    // ============================
+
+    function setCardEstado(card, estado) {
+    card.classList.remove("aviso", "alarma");
+
+    if (estado === "alarma")
+        card.classList.add("alarma");
+    else if (estado === "aviso")
+        card.classList.add("aviso");
+    }
+
+    // ============================
+    // EVALUACIÓN DE TEMPERATURA
+    // ============================
+
+    function evaluarTemperaturaPromedio(card, t1) {
+
+    if (!config) return;
+
+    const promedio = Number(t1);
+
+    if (promedio >= config.alarmaTemperaturaAlta ||
+        promedio <= config.alarmaTemperaturaBaja) {
+
+        setCardEstado(card, "alarma");
+        
+
+    } else if (promedio >= config.avisoTemperaturaAlta ||
+               promedio <= config.avisoTemperaturaBaja) {
+
+        setCardEstado(card, "aviso");
+        // alert("¡Aviso de Temperatura! El promedio es " + promedio.toFixed(2) + " °C");
+    } else {
+        setCardEstado(card, "normal");
+    }
+    }
+
+    function evaluarTemperatura1(card, t1) {
+
+    if (!config) return;
+
+    const temp1 = Number(t1);
+
+    if (temp1 >= config.alarmaTemperaturaAlta ||
+        temp1 <= config.alarmaTemperaturaBaja) {
+
+        setCardEstado(card, "alarma");
+        
+
+    } else if (temp1 >= config.avisoTemperaturaAlta ||
+               temp1 <= config.avisoTemperaturaBaja) {
+
+        setCardEstado(card, "aviso");
+        // alert("¡Aviso de Temperatura! El promedio es " + promedio.toFixed(2) + " °C");
+    } else {
+        setCardEstado(card, "normal");
+    }
+    }
+
+    function evaluarTemperatura2(card, t2) {
+
+    if (!config) return;
+
+    const temp2 = Number(t2);
+
+    if (temp2 >= config.alarmaTemperaturaAlta ||
+        temp2 <= config.alarmaTemperaturaBaja) {
+
+        setCardEstado(card, "alarma");
+        
+
+    } else if (temp2 >= config.avisoTemperaturaAlta ||
+               temp2 <= config.avisoTemperaturaBaja) {
+
+        setCardEstado(card, "aviso");
+        // alert("¡Aviso de Temperatura! El promedio es " + promedio.toFixed(2) + " °C");
+    } else {
+        setCardEstado(card, "normal");
+    }
+    }
+
+    //-------------------------------GRAFICA---------------------------------------------------------------------------------
 
     // =========================
-// FIRESTORE + RTDB GRÁFICA
-// =========================
+    // FIRESTORE + RTDB GRÁFICA
+    // =========================
 
-// datos en tiempo real desde RTDB
-let data = {
+    // datos en tiempo real desde RTDB
+    let data = {
     temperatura1: 0,
     temperatura2: 0,
-    temperaturaExterior: 0
-};
+    temperaturaExterior: 0 
+    };
 
-onValue(ref(db, "camara/actual"), (snapshot) => {
+    onValue(ref(db, "camara/actual"), (snapshot) => {
     const firebaseData = snapshot.val();
     if (!firebaseData) return;
     data = firebaseData;
-});
+    });
 
-const INTERVAL = 600000; // 10 minutos
-const MAX_POINTS = 144;  // 24 horas
+    const INTERVAL = 600000; // 10 minutos
+    const MAX_POINTS = 144;  // 24 horas
 
-// =========================
-// Cargar histórico Firestore
-// =========================
+    // =========================
+    // Cargar histórico Firestore
+    // =========================
 
-async function cargarHistorico() {
+    async function cargarHistorico() {
 
     const q = query(
         collection(firestore, "historial"),
@@ -443,10 +561,10 @@ async function cargarHistorico() {
 
         const x = d.timestamp.toDate().getTime();
 
-        const y1 = d.temperatura1 / 10;
-        const y2 = d.temperatura2 / 10;
+        const y1 = d.temperatura1;
+        const y2 = d.temperatura2;
         const yProm = (y1 + y2) / 2;
-        const yExt = d.temperaturaExterior / 10;
+        const yExt = d.temperaturaExterior;
 
         dataT1.push([x, y1]);
         dataT2.push([x, y2]);
@@ -461,13 +579,13 @@ async function cargarHistorico() {
     dataExt.reverse();
 
     crearGrafica(dataT1, dataT2, dataProm, dataExt);
-}
+    }
 
-// =========================
-// Crear gráfica Highcharts
-// =========================
+    // =========================
+    // Crear gráfica Highcharts
+    // =========================
 
-function crearGrafica(dataT1, dataT2, dataProm, dataExt) {
+    function crearGrafica(dataT1, dataT2, dataProm, dataExt) {
 
     Highcharts.chart('container-1', {
 
