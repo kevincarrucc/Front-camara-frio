@@ -12,7 +12,7 @@ body{
     padding:110px 40px 80px 40px;
     background:
         linear-gradient(rgba(0,0,0,0.55), rgba(0,0,0,0.55)),
-        url('imagenes/fondo-productos.jpg') center/cover no-repeat;
+        url('imagenes/fondo-productos.jpg') center/cover fixed;
     min-height:100vh;
 }
 
