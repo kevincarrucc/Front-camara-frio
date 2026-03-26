@@ -177,3 +177,158 @@ footer{
 .color.rojo {
     background: #e53935;
 }
+
+/* =========================================
+   ESTADO POR DEFECTO (ESCRITORIO)
+   ========================================= */
+
+nav {
+    display: flex;
+    align-items: center;
+}
+
+/* botón hamburguesa oculto en desktop */
+.menu-toggle {
+    display: none;
+}
+
+/* =========================================
+   RESPONSIVE - CELULARES
+   ========================================= */
+
+@media (max-width: 768px) {
+
+    header {
+        padding: 0 20px;
+        height: 70px;
+    }
+
+    .logo {
+        height: 45px;
+    }
+
+    /* hamburguesa visible */
+    .menu-toggle {
+        display: block;
+        font-size: 28px;
+        cursor: pointer;
+        color: white;
+    }
+
+    /* menú oculto por defecto */
+    nav {
+        display: none;
+        position: absolute;
+        top: 70px;
+        right: 0;
+        width: 100%;
+        background: #6b0f1a;
+        flex-direction: column;
+        text-align: center;
+        z-index: 999;
+    }
+
+    /* menú desplegado */
+    nav.active {
+        display: flex;
+    }
+
+    nav a {
+        margin: 0;
+        padding: 15px;
+        border-top: 1px solid rgba(255,255,255,0.2);
+    }
+
+    /* dashboard en una sola columna */
+    .dashboard {
+        padding: 100px 15px 60px 15px;
+    }
+
+    .dashboard-grid {
+        grid-template-columns: 1fr;
+        gap: 20px;
+    }
+
+    .status-card {
+        height: auto;
+        padding: 20px;
+    }
+
+    footer {
+        font-size: 12px;
+        padding: 15px;
+    }
+}
+
+/* =========================================
+   MENÚ DESPLEGABLE ELEGANTE (DEBAJO DEL HEADER)
+   ========================================= */
+
+.menu-toggle {
+    display: none;
+}
+
+/* overlay oscuro */
+.menu-overlay {
+    display: none;
+}
+
+@media (max-width: 768px) {
+
+    /* botón hamburguesa visible */
+    .menu-toggle {
+        display: block;
+        font-size: 28px;
+        cursor: pointer;
+        color: white;
+    }
+
+    /* panel de navegación */
+    nav {
+        position: absolute;
+        top: 80px;              /* altura del header */
+        right: 15px;            /* margen desde el borde */
+        width: 220px;           /* más chico */
+        background: #6b0f1a;
+        border-radius: 12px;
+        overflow: hidden;
+
+        display: none;
+        flex-direction: column;
+
+        box-shadow: 0 10px 25px rgba(0,0,0,0.4);
+        z-index: 1001;
+    }
+
+    nav.active {
+        display: flex;
+    }
+
+    nav a {
+        padding: 14px 18px;
+        border-bottom: 1px solid rgba(255,255,255,0.15);
+        font-size: 15px;
+    }
+
+    nav a:last-child {
+        border-bottom: none;
+    }
+
+    nav a:hover {
+        background: rgba(255,255,255,0.1);
+    }
+
+    /* overlay opcional */
+    .menu-overlay.active {
+        display: block;
+        position: fixed;
+        inset: 0;
+        background: rgba(0,0,0,0.4);
+        z-index: 1000;
+    }
+
+    /* dashboard en columna */
+    .dashboard-grid {
+        grid-template-columns: 1fr;
+    }
+}
