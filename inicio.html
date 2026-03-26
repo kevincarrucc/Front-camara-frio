@@ -58,14 +58,14 @@ if(!token){
             <div><span id="tempProm">--</span> °C</div>
         </div>
         
-        <div class="status-card" id="cardTension">
+        <div class="status-card">
             <h3>Tensión</h3>
             <div><span id="tensionL1">--</span> V</div>
             <div><span id="tensionL2">--</span> V</div>
             <div><span id="tensionL3">--</span> V</div>
         </div>
 
-        <div class="status-card" id="cardCorriente">
+        <div class="status-card">
             <h3>Corriente</h3>
             <div><span id="corrienteL1">--</span> A</div>
             <div><span id="corrienteL2">--</span> A</div>
@@ -252,27 +252,13 @@ function toggleMenu() {
     document.getElementById("consumo").innerText = data.potenciaAparente;
 
     // =====================
-    // EVALUAR UMBRALES
+    // EVALUAR UMBRAL
     // =====================
 
     evaluarTemperatura(
       document.getElementById("cardTempPromedio"),
       data.temperatura1,
       data.temperatura2
-    );
-
-    evaluarCorriente(
-      document.getElementById("cardCorriente"),
-      data.corrienteL1,
-      data.corrienteL2,
-      data.corrienteL3
-    );
-
-    evaluarTension(
-      document.getElementById("cardTension"),
-      data.tensionL1,
-      data.tensionL2,
-      data.tensionL3
     );
 
     });
@@ -315,7 +301,6 @@ function toggleMenu() {
 
     if (promedio >= config.alarmaTemperaturaAlta ||
         promedio <= config.alarmaTemperaturaBaja) {
-
         setCardEstado(card, "alarma");
         
 
@@ -323,64 +308,7 @@ function toggleMenu() {
                (promedio <= config.avisoTemperaturaBaja && promedio > config.alarmaTemperaturaBaja)) {
 
         setCardEstado(card, "aviso");
-        // alert("¡Aviso de Temperatura! El promedio es " + promedio.toFixed(2) + " °C");
     } else {
-        setCardEstado(card, "normal");
-    }
-    }
-
-    // ============================
-    // EVALUACIÓN DE CORRIENTE
-    // ============================
-
-    function evaluarCorriente(card, i1, i2, i3) {
-
-    if (!config) return;
-
-    const corrientes = [i1, i2, i3].map(Number);
-
-    if (corrientes.some(i =>
-        i >= config.alarmaCorrienteAlta ||
-        i <= config.alarmaCorrienteBaja)) {
-
-        setCardEstado(card, "alarma");
-        // alert("¡Alerta de Corriente! Alguna fase está fuera de rango.");
-
-    } else if (corrientes.some(i =>
-        (i >= config.avisoCorrienteAlta && i < config.alarmaCorrienteAlta) ||
-        (i <= config.avisoCorrienteBaja && i > config.alarmaCorrienteBaja))) {
-
-        setCardEstado(card, "aviso");
-        // alert("¡Aviso de Corriente! Alguna fase está cerca de los límites.");
-    } else {
-        setCardEstado(card, "normal");
-    }
-    }
-
-    // ============================
-    // EVALUACIÓN DE TENSIÓN
-    // ============================
-
-    function evaluarTension(card, v1, v2, v3) {
-
-    if (!config) return;
-
-    const tensiones = [v1, v2, v3].map(Number);
-
-    if (tensiones.some(v =>
-        (v >= config.avisoTensionAlta && v < config.alarmaTensionAlta) ||
-        (v <= config.avisoTensionBaja && v > config.alarmaTensionBaja))) {
-
-        setCardEstado(card, "aviso");
-        // alert("¡Aviso de Tensión! Alguna fase está cerca de los límites.");
-    } else if (tensiones.some(v =>
-        v >= config.alarmaTensionAlta ||
-        v <= config.alarmaTensionBaja)) {
-
-        setCardEstado(card, "alarma");
-        // alert("¡Alerta de Tensión! Alguna fase está fuera de rango.");
-        }
-    else {
         setCardEstado(card, "normal");
     }
     }
