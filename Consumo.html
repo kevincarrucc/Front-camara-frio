@@ -6,20 +6,25 @@
 <title>Consumo Eléctrico - Cámara de Frío</title>
 
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="consumo.css?v=4">
+<link rel="stylesheet" href="consumo.css?v=5">
 
 </head>
 <body>
 
 <header>
-    <h1>Panel Eléctrico</h1>
-    <nav>
+    <img src="imagenes/logo.jpg" alt="Logo El Abuelo Distribuciones" class="logo">
+
+    <div class="menu-toggle" onclick="toggleMenu()">☰</div>
+
+    <nav id="mobileMenu">
         <a href="inicio.html">Inicio</a>
         <a href="Temperatura.html">Temperatura</a>
         <a href="Consumo.html">Consumo Eléctrico</a>
         <a href="Historicos.html">Historicos</a>
         <a href="#" onclick="logout()">Cerrar sesión</a>
     </nav>
+
+    <div class="menu-overlay" onclick="toggleMenu()"></div>
 </header>
 
 <section class="dashboard">
@@ -76,6 +81,16 @@
 <footer>
     © 2026 El Abuelo Distribuciones
 </footer>
+
+<script>
+function toggleMenu() {
+    const nav = document.getElementById("mobileMenu");
+    const overlay = document.querySelector(".menu-overlay");
+
+    nav.classList.toggle("active");
+    overlay.classList.toggle("active");
+}
+</script>
 
 <script type="module">console.log("🔌 Conectando a Firebase...") ;
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
