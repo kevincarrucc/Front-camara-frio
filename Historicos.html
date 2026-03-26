@@ -6,7 +6,7 @@
 <title>Históricos - Cámara de Frío</title>
 
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="historicos.css?v=3">
+<link rel="stylesheet" href="historicos.css?v=8">
 
 <!-- Highcharts -->
 <script src="code/highcharts.js"></script>
@@ -183,28 +183,6 @@ function mostrarSeccion(event, tipo){
     © 2026 El Abuelo Distribuciones
 </footer>
 
-<script>// simulación de eventos cada 3 segundos (después reemplazás por eventos reales del backend)
-/*
-setInterval(() => {
-    const tipos = ["info", "aviso", "alarma"];
-    const mensajes = [
-        "Sistema iniciado",
-        "Temperatura alta",
-        "Falla de sensor",
-        "Puerta abierta"
-    ];
-
-    const tipo = tipos[Math.floor(Math.random() * tipos.length)];
-    const mensaje = mensajes[Math.floor(Math.random() * mensajes.length)];
-
-    agregarEvento(mensaje, tipo);
-}, 3000);
-*/
-</script>
-
-
-
-
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import { 
@@ -215,6 +193,7 @@ import {
     collection,
     query,
     orderBy,
+    where,
     limit,
     getDocs,
     onSnapshot
@@ -239,15 +218,35 @@ const firestore = getFirestore(app);
 // 🔹 FUNCION UI EVENTOS
 // =======================
 
+function formatearFecha(ts){
+  const d = ts
+    ? new Date(ts.seconds * 1000)
+    : new Date();
+
+  const fecha = d.toLocaleDateString();
+  const hora  = d.toLocaleTimeString();
+
+  return `${fecha} - ${hora}`;
+}
+
 function agregarEvento(mensaje, tipo, timestamp) {
   const eventList = document.getElementById("eventList");
 
   const nuevoEvento = document.createElement("div");
   nuevoEvento.classList.add("event", tipo);
 
-  const fecha = timestamp
-    ? new Date(timestamp.seconds * 1000).toLocaleTimeString()
-    : new Date().toLocaleTimeString();
+  const d = timestamp
+    ? new Date(timestamp.seconds * 1000)
+    : new Date();
+
+  const fecha = d.toLocaleString('es-AR', {
+  day: '2-digit',
+  month: '2-digit',
+  year: 'numeric',
+  hour: '2-digit',
+  minute: '2-digit',
+  second: '2-digit'
+});
 
   nuevoEvento.innerHTML = `
     <strong>${fecha}</strong> - ${mensaje}
@@ -363,33 +362,36 @@ onValue(ref(db, "camara/actual"), (snapshot) => {
 // =========================
 
 const CONFIGS = {
-    temp24:  { container: "container-1", intervalo: 600000, puntos: 144, titulo: "Histórico de Temperaturas (24 hs)", campos: ["temperatura1","temperatura2","promedio","temperaturaExterior"] },
-    temp7:   { container: "container-2", intervalo: 7200000, puntos: 84, titulo: "Histórico de Temperaturas (1 Semana)", campos: ["temperatura1","temperatura2","promedio","temperaturaExterior"] },
-    temp30:  { container: "container-3", intervalo: 14400000, puntos: 180, titulo: "Histórico de Temperaturas (1 Mes)", campos: ["temperatura1","temperatura2","promedio","temperaturaExterior"] },
+    temp24:  { container: "container-1", rangoMs: 24*60*60*1000,    intervalo: 600000,   titulo: "Histórico de Temperaturas (24 hs)", campos: ["temperatura1","temperatura2","promedio","temperaturaExterior"] },
+    temp7:   { container: "container-2", rangoMs: 7*24*60*60*1000,  intervalo: 7200000,  titulo: "Histórico de Temperaturas (1 Semana)", campos: ["temperatura1","temperatura2","promedio","temperaturaExterior"] },
+    temp30:  { container: "container-3", rangoMs: 30*24*60*60*1000, intervalo: 14400000, titulo: "Histórico de Temperaturas (1 Mes)", campos: ["temperatura1","temperatura2","promedio","temperaturaExterior"] },
+    
+    tens24:  { container: "container-4", rangoMs: 24*60*60*1000,    intervalo: 600000,   titulo: "Histórico de Tensiones (24 hs)", campos: ["tensionL1","tensionL2","tensionL3"] },
+    tens7:   { container: "container-5", rangoMs: 7*24*60*60*1000,  intervalo: 7200000,  titulo: "Histórico de Tensiones (1 Semana)", campos: ["tensionL1","tensionL2","tensionL3"] },
+    tens30:  { container: "container-6", rangoMs: 30*24*60*60*1000, intervalo: 14400000, titulo: "Histórico de Tensiones (1 Mes)", campos: ["tensionL1","tensionL2","tensionL3"] },
 
-    tens24:  { container: "container-4", intervalo: 600000, puntos: 144, titulo: "Histórico de Tensiones (24 hs)", campos: ["tensionL1","tensionL2","tensionL3"] },
-    tens7:   { container: "container-5", intervalo: 7200000, puntos: 84, titulo: "Histórico de Tensiones (1 Semana)", campos: ["tensionL1","tensionL2","tensionL3"] },
-    tens30:  { container: "container-6", intervalo: 14400000, puntos: 180, titulo: "Histórico de Tensiones (1 Mes)", campos: ["tensionL1","tensionL2","tensionL3"] },
+    corr24:  { container: "container-7", rangoMs: 24*60*60*1000,    intervalo: 600000,   titulo: "Histórico de Corrientes (24 hs)", campos: ["corrienteL1","corrienteL2","corrienteL3"] },
+    corr7:   { container: "container-8", rangoMs: 7*24*60*60*1000,  intervalo: 7200000,  titulo: "Histórico de Corrientes (1 Semana)", campos: ["corrienteL1","corrienteL2","corrienteL3"] },
+    corr30:  { container: "container-9", rangoMs: 30*24*60*60*1000, intervalo: 14400000, titulo: "Histórico de Corrientes (1 Mes)", campos: ["corrienteL1","corrienteL2","corrienteL3"] },
 
-    corr24:  { container: "container-7", intervalo: 600000, puntos: 144, titulo: "Histórico de Corrientes (24 hs)", campos: ["corrienteL1","corrienteL2","corrienteL3"] },
-    corr7:   { container: "container-8", intervalo: 7200000, puntos: 84, titulo: "Histórico de Corrientes (1 Semana)", campos: ["corrienteL1","corrienteL2","corrienteL3"] },
-    corr30:  { container: "container-9", intervalo: 14400000, puntos: 180, titulo: "Histórico de Corrientes (1 Mes)", campos: ["corrienteL1","corrienteL2","corrienteL3"] },
-
-    pot24:   { container: "container-10", intervalo: 600000, puntos: 144, titulo: "Histórico de Potencias (24 hs)", campos: ["potenciaAparente" ] },
-    pot7:    { container: "container-11", intervalo: 7200000, puntos: 84, titulo: "Histórico de Potencias (1 Semana)", campos: ["potenciaAparente" ] },
-    pot30:   { container: "container-12", intervalo: 14400000, puntos: 180, titulo: "Histórico de Potencias (1 Mes)", campos: ["potenciaAparente" ] }
-};
+    pot24:   { container: "container-10", rangoMs: 24*60*60*1000,   intervalo: 600000,   titulo: "Histórico de Potencias (24 hs)", campos: ["potenciaAparente" ] },
+    pot7:    { container: "container-11", rangoMs: 7*24*60*60*1000, intervalo: 7200000,  titulo: "Histórico de Potencias (1 Semana)", campos: ["potenciaAparente" ] },
+    pot30:   { container: "container-12", rangoMs: 30*24*60*60*1000,intervalo: 14400000, titulo: "Histórico de Potencias (1 Mes)", campos: ["potenciaAparente" ] }
+    
+    };
 
 // =========================
 // Cargar histórico Firestore
 // =========================
 
-async function cargarHistorico(campos, maxPoints) {
+async function cargarHistorico(campos, rangoMs) {
+
+    const fechaInicio = new Date(Date.now() - rangoMs);
 
     const q = query(
         collection(firestore, "historial"),
-        orderBy("timestamp", "desc"),
-        limit(maxPoints)
+        where("timestamp", ">=", fechaInicio),
+        orderBy("timestamp", "asc")
     );
 
     const snapshot = await getDocs(q);
@@ -404,25 +406,48 @@ async function cargarHistorico(campos, maxPoints) {
 
         campos.forEach((campo, i) => {
 
-    let y = null;
+            let y = null;
 
-    if (campo === "promedio") {
-        if (d.temperatura1 != null && d.temperatura2 != null)
-            y = ((d.temperatura1 + d.temperatura2) / 2) / 10;
+            if (campo === "promedio") {
+                if (d.temperatura1 != null && d.temperatura2 != null)
+                    y = ((d.temperatura1 + d.temperatura2) / 2) / 10;
             } else if (d[campo] != null) {
-                    y = campo.startsWith("temperatura")
+                y = campo.startsWith("temperatura")
                     ? d[campo] / 10
                     : d[campo];
-                }
+            }
 
             if (y != null)
-            series[i].push([x, y]);
+                series[i].push([x, y]);
         });
     });
 
-    series.forEach(s => s.reverse());
-
     return series;
+}
+
+
+// =========================
+// animacion de carga
+// =========================
+
+function mostrarLoading(containerId) {
+    const cont = document.getElementById(containerId);
+
+    const overlay = document.createElement("div");
+    overlay.className = "chart-loading-overlay";
+    overlay.innerHTML = `
+        <div class="spinner"></div>
+        <div style="margin-top:8px;">Cargando...</div>
+    `;
+
+    cont.style.position = "relative";
+    cont.appendChild(overlay);
+}
+
+function ocultarLoading(containerId) {
+    const cont = document.getElementById(containerId);
+    const overlay = cont.querySelector(".chart-loading-overlay");
+    if (overlay) overlay.remove();
 }
 
 // =========================
@@ -431,34 +456,36 @@ async function cargarHistorico(campos, maxPoints) {
 
 async function crearGrafico(config) {
 
-    const seriesData = await cargarHistorico(config.campos, config.puntos);
+        mostrarLoading(config.container);
+
+    const seriesData = await cargarHistorico(config.campos, config.rangoMs);
 
     Highcharts.chart(config.container, {
 
         chart: {
             type: "spline",
-            zoomType: config.puntos > 100 ? "x" : undefined,
+            //zoomType: config.puntos > 100 ? "x" : undefined,
             events: {
                 load: function () {
-
+                        ocultarLoading(config.container);
                     const chart = this;
 
                     setInterval(() => {
 
                         const x = Date.now();
-                        const shift = chart.series[0].data.length >= config.puntos;
+                        //const shift = chart.series[0].data.length >= config.puntos;
 
                         config.campos.forEach((campo, i) => {
 
                             let y;
 
                             if (campo === "promedio") {
-                                y = ((data.temperatura1 + data.temperatura2) / 2) / 10;
+                                y = ((data.temperatura1 + data.temperatura2) / 2);
                                 } else {
                                  y = data[campo];
 
                                     if (campo.startsWith("temperatura"))
-                                        y = y / 10;
+                                        y = y;
                                 }
 
                             chart.series[i].addPoint([x, y], true, shift);
