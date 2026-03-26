@@ -459,8 +459,8 @@ onValue(datosRef, (snapshot) => {
         setCardEstado(card, "alarma");
         
 
-    } else if (promedio >= config.avisoTemperaturaAlta ||
-               promedio <= config.avisoTemperaturaBaja) {
+    } else if ((promedio >= config.avisoTemperaturaAlta && promedio < config.alarmaTemperaturaAlta) ||
+               (promedio <= config.avisoTemperaturaBaja && promedio > config.alarmaTemperaturaBaja)) {
 
         setCardEstado(card, "aviso");
         // alert("¡Aviso de Temperatura! El promedio es " + promedio.toFixed(2) + " °C");
@@ -481,8 +481,8 @@ onValue(datosRef, (snapshot) => {
         setCardEstado(card, "alarma");
         
 
-    } else if (temp1 >= config.avisoTemperaturaAlta ||
-               temp1 <= config.avisoTemperaturaBaja) {
+    } else if ((temp1 >= config.avisoTemperaturaAlta && temp1 < config.alarmaTemperaturaAlta) ||
+               (temp1 <= config.avisoTemperaturaBaja && temp1 > config.alarmaTemperaturaBaja)) {
 
         setCardEstado(card, "aviso");
         // alert("¡Aviso de Temperatura! El promedio es " + promedio.toFixed(2) + " °C");
@@ -503,8 +503,8 @@ onValue(datosRef, (snapshot) => {
         setCardEstado(card, "alarma");
         
 
-    } else if (temp2 >= config.avisoTemperaturaAlta ||
-               temp2 <= config.avisoTemperaturaBaja) {
+    } else if ((temp2 >= config.avisoTemperaturaAlta && temp2 < config.alarmaTemperaturaAlta) ||
+               (temp2 <= config.avisoTemperaturaBaja && temp2 > config.alarmaTemperaturaBaja)) {
 
         setCardEstado(card, "aviso");
         // alert("¡Aviso de Temperatura! El promedio es " + promedio.toFixed(2) + " °C");

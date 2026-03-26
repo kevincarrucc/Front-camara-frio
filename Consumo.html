@@ -71,94 +71,6 @@
         </div>
     </div>
 
-    <h2>Configuración de avisos</h2>
-
-    <div class="grid-2">
-        <div class="card control-card">
-            <h3>Aviso tensión baja</h3>
-            <div class="control" data-param="avisoTensionBaja">
-                <button class="minus">-</button>
-                <span class="value">200 V</span>
-                <button class="plus">+</button>
-            </div>
-        </div>
-
-        <div class="card control-card">
-            <h3>Aviso tensión alta</h3>
-            <div class="control" data-param="avisoTensionAlta">
-                <button class="minus">-</button>
-                <span class="value">250 V</span>
-                <button class="plus">+</button>
-            </div>
-        </div>
-    </div>
-
-    <div class="grid-2">
-        <div class="card control-card">
-            <h3>Aviso corriente baja</h3>
-            <div class="control" data-param="avisoCorrienteBaja">
-                <button class="minus">-</button>
-                <span class="value">1.5 A</span>
-                <button class="plus">+</button>
-            </div>
-        </div>
-
-        <div class="card control-card">
-            <h3>Aviso corriente alta</h3>
-            <div class="control" data-param="avisoCorrienteAlta">
-                <button class="minus">-</button>
-                <span class="value">15 A</span>
-                <button class="plus">+</button>
-            </div>
-        </div>
-    </div>
-
-    <h2>Configuración de alarmas</h2>
-
-    <div class="grid-2">
-        <div class="card control-card">
-            <h3>Alarma tensión baja</h3>
-            <div class="control" data-param="alarmaTensionBaja">
-                <button class="minus">-</button>
-                <span class="value">190 V</span>
-                <button class="plus">+</button>
-            </div>
-        </div>
-
-        <div class="card control-card">
-            <h3>Alarma tensión alta</h3>
-            <div class="control" data-param="alarmaTensionAlta">
-                <button class="minus">-</button>
-                <span class="value">260 V</span>
-                <button class="plus">+</button>
-            </div>
-        </div>
-    </div>
-
-    <div class="grid-2">
-        <div class="card control-card">
-            <h3>Alarma corriente baja</h3>
-            <div class="control" data-param="alarmaCorrienteBaja">
-                <button class="minus">-</button>
-                <span class="value">1 A</span>
-                <button class="plus">+</button>
-            </div>
-        </div>
-
-        <div class="card control-card">
-            <h3>Alarma corriente alta</h3>
-            <div class="control" data-param="alarmaCorrienteAlta">
-                <button class="minus">-</button>
-                <span class="value">15 A</span>
-                <button class="plus">+</button>
-            </div>
-        </div>
-    </div>
-
-    <div class="save-container">
-        <button id="saveBtn" class="save-btn">Cargar valores</button>
-    </div>
-
 </section>
 
 <footer>
@@ -178,19 +90,7 @@
 
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
-    let configCargada = false;
-    let config = {
-    avisoTensionBaja: 200,
-    avisoTensionAlta: 250,
-    avisoCorrienteBaja: 1.5,
-    avisoCorrienteAlta: 15,
-    alarmaTensionBaja: 190,
-    alarmaTensionAlta: 260,
-    alarmaCorrienteBaja: 1,
-    alarmaCorrienteAlta: 15
-    };
-
-    
+    let configCargada = false;   
 
     const datosRef = ref(db, "camara/actual");
     onValue(datosRef, (snapshot) => {
@@ -201,317 +101,32 @@
   // Tensiones
   if (data.tensionL1 !== undefined) {
     document.getElementById("tensionL1").innerText = data.tensionL1;
-    evaluarTension(
-        document.getElementById("cardTensionL1"),
-        data.tensionL1
-    );
   }
   /*
   if (data.tensionL2 !== undefined) {
     document.getElementById("tensionL2").innerText = data.tensionL2;
-    evaluarTension(
-        document.getElementById("cardTensionL2"),
-        data.tensionL2
-    );
   }
 
   if (data.tensionL3 !== undefined) {
     document.getElementById("tensionL3").innerText = data.tensionL3;
-    evaluarTension(
-        document.getElementById("cardTensionL3"),
-        data.tensionL3
-    );
   }
   */
   // Corrientes
   if (data.corrienteL1 !== undefined) {
     document.getElementById("corrienteL1").innerText = data.corrienteL1;
-    evaluarCorriente(
-        document.getElementById("cardCorrienteL1"),
-        data.corrienteL1
-    );
   }
  /*
   if (data.corrienteL2 !== undefined) {
     document.getElementById("corrienteL2").innerText = data.corrienteL2;
-    evaluarCorriente(
-        document.getElementById("cardCorrienteL2"),
-        data.corrienteL2
-    );
   }
 
   if (data.corrienteL3 !== undefined) {
     document.getElementById("corrienteL3").innerText = data.corrienteL3;
-    evaluarCorriente(
-        document.getElementById("cardCorrienteL3"),
-        data.corrienteL3
-    );
   }
     */
   if (data.potenciaAparente !== undefined)
     document.getElementById("potenciaAparente").innerText = data.potenciaAparente;
-
-    });
-  //---------------------------------------------  
-  // ============================
-    // FUNCIÓN GENÉRICA DE COLORES
-    // ============================
-
-    function setCardEstado(card, estado) {
-    card.classList.remove("aviso", "alarma");
-
-    if (estado === "alarma")
-        card.classList.add("alarma");
-    else if (estado === "aviso")
-        card.classList.add("aviso");
-    }
-
-   // ============================
-    // EVALUACIÓN DE TENSIÓN
-    // ============================
-
-    function evaluarTension(card, valor) {
-
-    if (!configCargada || valor === undefined) return;
-
-    const v = Number(valor);
-
-    if (v >= config.alarmaTensionAlta ||
-        v <= config.alarmaTensionBaja) {
-
-        setCardEstado(card, "alarma");
-
-    } else if (v >= config.avisoTensionAlta ||
-               v <= config.avisoTensionBaja) {
-
-        setCardEstado(card, "aviso");
-
-    } else {
-        setCardEstado(card, "normal");
-    }
-    }
-    // ============================
-    // EVALUACIÓN DE CORRIENTE
-    // ============================
-
-    function evaluarCorriente(card, valor) {
-
-    if (!configCargada || valor === undefined) return;
-
-    const i = Number(valor);
-
-    if (i >= config.alarmaCorrienteAlta ||
-        i <= config.alarmaCorrienteBaja) {
-
-        setCardEstado(card, "alarma");
-
-    } else if (i >= config.avisoCorrienteAlta ||
-               i <= config.avisoCorrienteBaja) {
-
-        setCardEstado(card, "aviso");
-
-    } else {
-        setCardEstado(card, "normal");
-    }
-    }
-    //--------------------------------------------
-
-document.addEventListener("DOMContentLoaded", function () {
-// copi editable
-const stagedConfig = { ...config };
-
-// parámetros modificados
-const modified = new Set();
-const saveBtn = document.getElementById("saveBtn");
-const configRef = ref(db, "camara/config");
-
-onValue(configRef, (snapshot) => {
-    const data = snapshot.val();
-    if (!data) return;
-
-    Object.assign(config, data);
-    Object.assign(stagedConfig, data);
-    configCargada = true;
-
-    // reevaluar cards con los valores actuales en pantalla
-    evaluarTension(
-    document.getElementById("cardTensionL1"),
-    document.getElementById("tensionL1").innerText
-    );
-
-evaluarCorriente(
-    document.getElementById("cardCorrienteL1"),
-    document.getElementById("corrienteL1").innerText
-);
-
-    document.querySelectorAll(".control").forEach(control => {
-        const param = control.dataset.param;
-        const unit = control.querySelector(".value").textContent.includes("A") ? "A" : "V";
-        updateDisplay(control, stagedConfig[param], unit);
-    });
 });
-
-
-function updateSaveButton() {
-    if (modified.size === 0) {
-        saveBtn.classList.remove("enabled");
-        saveBtn.classList.add("disabled");
-    } else {
-        saveBtn.classList.remove("disabled");
-        saveBtn.classList.add("enabled");
-    }
-}
-updateSaveButton();
-
-// =========================
-// Límites
-// =========================
-
-const limitsA = {
-    avisoTensionBaja: { min: 150, max: 220 },
-    avisoTensionAlta: { min: 230, max: 280 },
-    avisoCorrienteBaja: { min: 0.5, max: 5 },
-    avisoCorrienteAlta: { min: 5, max: 25 },
-    alarmaTensionBaja: { min: 150, max: 220 },
-    alarmaTensionAlta: { min: 230, max: 300 },
-    alarmaCorrienteBaja: { min: 0.5, max: 5 },
-    alarmaCorrienteAlta: { min: 5, max: 30 }
-};
-
-function round1(v){ return Math.round(v*10)/10; }
-function clamp(v,min,max){ return Math.min(Math.max(v,min),max); }
-
-function updateDisplay(control, value, unit) {
-    control.querySelector(".value").textContent = value + " " + unit;
-}
-
-function markPending(control){
-    control.querySelector(".value").classList.add("pending");
-}
-
-// =========================
-// Botones +/-
-// =========================
-
-document.querySelectorAll(".control").forEach(control => {
-
-    const param = control.dataset.param;
-    const plus = control.querySelector(".plus");
-    const minus = control.querySelector(".minus");
-
-    const unit = control.querySelector(".value").textContent.includes("A") ? "A" : "V";
-
-    /* 🔧 AQUÍ SE DEFINE EL PASO SEGÚN EL TIPO DE VARIABLE */
-    const step = param.toLowerCase().includes("corriente") ? 0.1 : 1;
-
-    plus.addEventListener("click", () => {
-        let v = stagedConfig[param] + step;
-
-        if(step === 0.1) v = round1(v);
-
-        v = clamp(v, limitsA[param].min, limitsA[param].max);
-
-        if(v === stagedConfig[param]) return;
-
-        stagedConfig[param] = v;
-        modified.add(param);
-
-        updateDisplay(control, v, unit);
-        markPending(control);
-        updateSaveButton();
-    });
-
-    minus.addEventListener("click", () => {
-        let v = stagedConfig[param] - step;
-
-        if(step === 0.1) v = round1(v);
-
-        v = clamp(v, limitsA[param].min, limitsA[param].max);
-
-        if(v === stagedConfig[param]) return;
-
-        stagedConfig[param] = v;
-        modified.add(param);
-
-        updateDisplay(control, v, unit);
-        markPending(control);
-        updateSaveButton();
-    });
-    
-});
-
-// =========================
-// Botón Cargar valores
-// =========================
-
-saveBtn.addEventListener("click", () => {
-
-    if(modified.size === 0){
-        console.log("No hay cambios para enviar");
-        return;
-    }
-
-    const cambios = {};
-
-    modified.forEach(param => {
-        cambios[param] = stagedConfig[param];
-    });
-
-    // =========================
-    // VALIDACIÓN DE PARÁMETROS
-    // =========================
-
-    const avisoAltaTension = parseFloat(stagedConfig.avisoTensionAlta ?? config.avisoTensionAlta);
-    const avisoBajaTension = parseFloat(stagedConfig.avisoTensionBaja ?? config.avisoTensionBaja);
-    const alarmaAltaTension = parseFloat(stagedConfig.alarmaTensionAlta ?? config.alarmaTensionAlta);
-    const alarmaBajaTension = parseFloat(stagedConfig.alarmaTensionBaja ?? config.alarmaTensionBaja);
-
-    const avisoAltaCorriente = parseFloat(stagedConfig.avisoCorrienteAlta ?? config.avisoCorrienteAlta);
-    const avisoBajaCorriente = parseFloat(stagedConfig.avisoCorrienteBaja ?? config.avisoCorrienteBaja);
-    const alarmaAltaCorriente = parseFloat(stagedConfig.alarmaCorrienteAlta ?? config.alarmaCorrienteAlta);
-    const alarmaBajaCorriente = parseFloat(stagedConfig.alarmaCorrienteBaja ?? config.alarmaCorrienteBaja);
-
-    if(avisoBajaTension <= alarmaBajaTension){
-        alert("ERROR: El aviso de tensión baja debe ser mayor que la alarma de tensión baja.");
-        return;
-    }
-    if(avisoAltaTension >= alarmaAltaTension){
-        alert("ERROR: El aviso de tensión alta debe ser menor que la alarma de tensión alta.");
-        return;
-    }
-    if(avisoBajaCorriente <= alarmaBajaCorriente){
-        alert("ERROR: El aviso de corriente baja debe ser mayor que la alarma de corriente baja.");
-        return;
-    }
-    if(avisoAltaCorriente >= alarmaAltaCorriente){
-        alert("ERROR:El aviso de corriente alta debe ser menor que la alarma de corriente alta.");
-        return;
-    }
-
-    // =========================
-    // SI PASA VALIDACIÓN, GUARDAR
-    // =========================
-
-    console.log("Subiendo a Firebase:", cambios);
-
-    update(configRef, cambios)
-        .then(() => {
-            console.log("Configuración actualizada en RTDB");
-
-            document.querySelectorAll(".value").forEach(v => {
-                v.classList.remove("pending");
-            });
-
-            modified.clear();
-            updateSaveButton();
-        })
-        .catch(err => {
-            console.error("Error al escribir en Firebase:", err);
-        });
-});
-});
-//----------------------------------------------------------------------------------------------------------------
-
 </script>
 
 <script src="Auth.js"></script>
