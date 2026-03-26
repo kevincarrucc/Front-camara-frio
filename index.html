@@ -9,7 +9,7 @@
 
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
 
-<link rel="stylesheet" href="Index.css">
+<link rel="stylesheet" href="Index.css?v=6">
 
 <!-- Iconos -->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
@@ -22,13 +22,17 @@
 
 <img src="imagenes/logo.jpg" alt="Logo El Abuelo Distribuciones" class="logo">
 
-<nav>
-<a href="">Inicio</a>
-<a href="">Temperatura</a>
-<a href="">Consumo Eléctrico</a>
-<a href="">Historicos</a>
-<a href="">Cerrar sesión</a>
-</nav>
+    <div class="menu-toggle" onclick="toggleMenu()">☰</div>
+
+    <nav id="mobileMenu">
+        <a href="">Inicio</a>
+        <a href="">Temperatura</a>
+        <a href="">Consumo Eléctrico</a>
+        <a href="">Historicos</a>
+        <a href="" onclick="logout()">Cerrar sesión</a>
+    </nav>
+
+    <div class="menu-overlay" onclick="toggleMenu()"></div>
 
 </header>
 
@@ -70,6 +74,15 @@ Usuario o contraseña incorrectos
 © 2026 El Abuelo Distribuciones - Todos los derechos reservados
 </footer>
 
+<script>
+function toggleMenu() {
+    const nav = document.getElementById("mobileMenu");
+    const overlay = document.querySelector(".menu-overlay");
+
+    nav.classList.toggle("active");
+    overlay.classList.toggle("active");
+}
+</script>
 
 <script>
 
