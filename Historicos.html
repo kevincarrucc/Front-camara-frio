@@ -6,7 +6,7 @@
 <title>Históricos - Cámara de Frío</title>
 
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="historicos.css?v=8">
+<link rel="stylesheet" href="historicos.css?v=9">
 
 <!-- Highcharts -->
 <script src="code/highcharts.js"></script>
@@ -35,17 +35,19 @@ if(!token){
 
 
 <header>
-    <h1>Históricos del Sistema</h1>
+    <img src="imagenes/logo.jpg" alt="Logo El Abuelo Distribuciones" class="logo">
 
-    
+    <div class="menu-toggle" onclick="toggleMenu()">☰</div>
 
-    <nav>
+    <nav id="mobileMenu">
         <a href="inicio.html">Inicio</a>
         <a href="Temperatura.html">Temperatura</a>
         <a href="Consumo.html">Consumo Eléctrico</a>
-        <a href="Historicos.html">Históricos</a>
+        <a href="Historicos.html">Historicos</a>
         <a href="#" onclick="logout()">Cerrar sesión</a>
     </nav>
+
+    <div class="menu-overlay" onclick="toggleMenu()"></div>
 </header>
 
 <div class="selector-graficos">
@@ -187,6 +189,16 @@ function mostrarSeccion(event, tipo){
 <footer>
     © 2026 El Abuelo Distribuciones
 </footer>
+
+<script>
+function toggleMenu() {
+    const nav = document.getElementById("mobileMenu");
+    const overlay = document.querySelector(".menu-overlay");
+
+    nav.classList.toggle("active");
+    overlay.classList.toggle("active");
+}
+</script>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
