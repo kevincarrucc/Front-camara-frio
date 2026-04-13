@@ -79,12 +79,12 @@ if(!token){
 
         <div class="status-card"> 
             <h3>Motor Principal</h3>
-            <div><span id="motorPrincipal">--</span></div>
+            <div><span id="motor1">--</span></div>
         </div>
 
         <div class="status-card">
             <h3>Motor Secundario</h3>
-            <div><span id="motorSecundario">--</span></div>
+            <div><span id="motor2">--</span></div>
         </div>
 
         <div class="status-card">
@@ -223,16 +223,17 @@ function toggleMenu() {
     */
     if (data.tensionL1 !== undefined)
     document.getElementById("tensionL1").innerText = data.tensionL1;
-    /*
+    
     if (data.tensionL2 !== undefined)
     document.getElementById("tensionL2").innerText = data.tensionL2;
 
     if (data.tensionL3 !== undefined)
     document.getElementById("tensionL3").innerText = data.tensionL3;
-    */
+    /*
+    AGREGAR CUANDO ESTE EL ADS1015 CONECTADO
     if (data.corrienteL1 !== undefined)
     document.getElementById("corrienteL1").innerText = data.corrienteL1;
-    /*
+    
     if (data.corrienteL2 !== undefined)
     document.getElementById("corrienteL2").innerText = data.corrienteL2;
 
@@ -246,6 +247,18 @@ function toggleMenu() {
     document.getElementById("puerta").innerText =
     puerta === 1 ? "Abierta" : "Cerrada";
 
+    }
+
+    if(data.estadoMotor1 !== undefined){
+        const motor1 = Number(data.estadoMotor1);
+        document.getElementById("motor1").innerText =
+        motor1 === 1 ? "Encendido" : "Apagado";
+    }
+
+    if(data.estadoMotor2 !== undefined){
+        const motor2 = Number(data.estadoMotor2);
+        document.getElementById("motor2").innerText =
+        motor2 === 1 ? "Encendido" : "Apagado";
     }
 
     if(data.potenciaAparente !== undefined)
