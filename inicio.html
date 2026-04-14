@@ -87,7 +87,7 @@ if(!token){
             <div><span id="motor2">--</span></div>
         </div>
 
-        <div class="status-card">
+        <div class="status-card" id="cardPuerta">
             <h3>Puerta</h3>
             <div><span id="puerta">--</span></div>
         </div>
@@ -96,6 +96,11 @@ if(!token){
             <h3>Luces</h3>
             <div><span id="LuzCamara">--</span></div>
             <button id="btnLuz" class="btn-control">Cargando...</button>
+        </div>
+
+        <div class="status-card" id="cardEstadoSistema">
+            <h3>Estado del Sistema</h3>
+            <div><span id="estadoSistema">--</span></div>
         </div>
 
     </div>
@@ -167,10 +172,15 @@ function toggleMenu() {
         btnLuz.textContent = "Apagar";
         btnLuz.classList.remove("off");
         btnLuz.classList.add("on");
-    } else {
+
+    } else if (estado === "Apagada") {
         btnLuz.textContent = "Encender";
         btnLuz.classList.remove("on");
         btnLuz.classList.add("off");
+
+    } else {
+        // estado intermedio opcional
+        btnLuz.textContent = "....";
     }
 }
 
@@ -182,7 +192,6 @@ function toggleMenu() {
 
     // feedback inmediato
     actualizarBotonLuz(accion ? "Encendida" : "Apagada");
-
     console.log("Enviando comando luz:", accion);
 
     try {
@@ -193,7 +202,7 @@ function toggleMenu() {
     }
 });
 
-    onValue(ref(db, "camara/actual/luzCamara"), (snapshot) => {
+    onValue(ref(db, "camara/actual/estadoLuzCamara"), (snapshot) => {
 
     const estado = snapshot.val();
 
@@ -202,6 +211,7 @@ function toggleMenu() {
     } else {
         actualizarBotonLuz("Apagada");
     }
+
 });
 
     onValue(datosRef, (snapshot) => {
@@ -249,6 +259,13 @@ function toggleMenu() {
 
     }
 
+    if (data.estadoAlertaPuerta !== undefined){
+
+        const estadoAlertaPuerta = Number(data.estadoAlertaPuerta);
+        document.getElementById("puerta").innerText =
+        estadoAlertaPuerta === 1 ? "Abierta" : "Cerrada";
+    }
+
     if(data.estadoMotor1 !== undefined){
         const motor1 = Number(data.estadoMotor1);
         document.getElementById("motor1").innerText =
@@ -259,6 +276,12 @@ function toggleMenu() {
         const motor2 = Number(data.estadoMotor2);
         document.getElementById("motor2").innerText =
         motor2 === 1 ? "Encendido" : "Apagado";
+    }
+
+    if(data.estadoAnomalia !== undefined){
+        const estadoAnomaliaSistema = Number(data.estadoAnomalia);
+        document.getElementById("estadoSistema").innerText =
+        estadoAnomaliaSistema === 1 ? "Anomalia Detectada" : "Funcionando Normal";
     }
 
     if(data.potenciaAparente !== undefined)
@@ -272,6 +295,16 @@ function toggleMenu() {
       document.getElementById("cardTempPromedio"),
       data.temperatura1,
       data.temperatura2
+    );
+
+    evaluarAlarmaPuerta(
+        document.getElementById("cardPuerta"),
+        Number(data.estadoAlertaPuerta)
+     );
+
+    evaluarAnomalia(
+        document.getElementById("cardEstadoSistema"),
+        Number(data.estadoAnomalia)
     );
 
     });
@@ -324,6 +357,28 @@ function toggleMenu() {
     } else {
         setCardEstado(card, "normal");
     }
+    }
+
+    function evaluarAlarmaPuerta(card, estadoAlertaPuerta){
+        
+        
+        if (estadoAlertaPuerta === 1) {
+            setCardEstado(card, "alarma");  
+        }
+        else {
+            setCardEstado(card, "normal");
+        }
+    }
+
+    function evaluarAnomalia(card, estadoAnomalia){
+        
+        
+        if (estadoAnomalia === 1) {
+            setCardEstado(card, "alarma");  
+        }
+        else {
+            setCardEstado(card, "normal");
+        }
     }
 </script>
 <script src="Auth.js" ></script>
