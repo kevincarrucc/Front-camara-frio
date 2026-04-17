@@ -103,6 +103,11 @@ if(!token){
             <div><span id="estadoSistema">--</span></div>
         </div>
 
+        <div class="status-card" id="cardEstadoConexion">
+            <h3>Estado de Conexión</h3>
+            <div><span id="estadoConexion">--</span></div>
+        </div>
+
     </div>
 
     <div class="notas">
@@ -163,6 +168,8 @@ function toggleMenu() {
 
     const estadoLuz = document.getElementById("LuzCamara");
     const btnLuz = document.getElementById("btnLuz");
+
+    let ultimoTimestamp = null;
 
     /* función que actualiza botón según estado */
     function actualizarBotonLuz(estado) {
@@ -227,10 +234,10 @@ function toggleMenu() {
     document.getElementById("tempProm").innerText = tempProm.toFixed(1);
     }
 
-    /*
-    if (data.temperaturaExterior !== undefined)
-    document.getElementById("tempExt").innerText = data.temperaturaExterior;
-    */
+    if (data.timestamp !== undefined) {
+        ultimoTimestamp = Date.now();
+    }
+
     if (data.tensionL1 !== undefined)
     document.getElementById("tensionL1").innerText = data.tensionL1;
     
@@ -306,8 +313,21 @@ function toggleMenu() {
         document.getElementById("cardEstadoSistema"),
         Number(data.estadoAnomalia)
     );
+    evaluarConexion(
+        document.getElementById("cardEstadoConexion"),
+        data.timestamp
+     );
 
     });
+
+    setInterval(() => {
+
+    evaluarConexion(
+        document.getElementById("cardEstadoConexion"),
+        ultimoTimestamp
+    );
+
+    }, 5000);
 
     // ============================
     // CARGA DE CONFIGURACIÓN
@@ -380,6 +400,56 @@ function toggleMenu() {
             setCardEstado(card, "normal");
         }
     }
+
+    let alertaDisparada = false;
+
+function evaluarConexion(card, timestamp) {
+
+    if (!timestamp) {
+        setCardEstado(card, "alarma");
+        document.getElementById("estadoConexion").innerText = "Desconectado";
+
+        if (!alertaDisparada) {
+            alert("⚠️ Se perdió la conexión con el dispositivo");
+            alertaDisparada = true;
+        }
+
+        return;
+    }
+
+    let tiempoUltimoDato;
+
+    if (typeof timestamp === "number") {
+        tiempoUltimoDato = timestamp;
+    } else {
+        tiempoUltimoDato = new Date(timestamp).getTime();
+    }
+
+    if (isNaN(tiempoUltimoDato)) {
+        setCardEstado(card, "alarma");
+        document.getElementById("estadoConexion").innerText = "Error timestamp";
+        return;
+    }
+
+    const ahora = Date.now();
+    const diferenciaMs = ahora - tiempoUltimoDato;
+
+    // 🔴 MÁS DE 30 SEGUNDOS → ALARMA
+    if (diferenciaMs > 30000) {
+        setCardEstado(card, "alarma");
+        document.getElementById("estadoConexion").innerText = "Desconectado";
+
+        if (!alertaDisparada) {
+            alert("⚠️ Se perdió la conexión con el dispositivo");
+            alertaDisparada = true;
+        }
+    } else {
+        setCardEstado(card, "normal");
+        document.getElementById("estadoConexion").innerText = "Conectado";
+
+        alertaDisparada = false;
+    }
+}
 </script>
 <script src="Auth.js" ></script>
 </body>
