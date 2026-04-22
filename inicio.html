@@ -186,15 +186,15 @@ function toggleMenu() {
         btnLuz.classList.add("off");
 
     } else {
-        // estado intermedio opcional
+       
         btnLuz.textContent = "....";
     }
 }
 
     btnLuz.addEventListener("click", async () => {
 
-    /* si el botón dice Apagar → mandamos 0
-       si dice Encender → mandamos 1 */
+    //si el botón dice Apagar → mandamos 0
+    //  si dice Encender → mandamos 1 
     const accion = btnLuz.textContent === "Apagar" ? 0 : 1;
 
     // feedback inmediato
@@ -207,6 +207,7 @@ function toggleMenu() {
     } catch (err) {
         console.error("Error al escribir en la base:", err);
     }
+    
 });
 
     onValue(ref(db, "camara/actual/estadoLuzCamara"), (snapshot) => {
@@ -235,7 +236,7 @@ function toggleMenu() {
     }
 
     if (data.timestamp !== undefined) {
-        ultimoTimestamp = Date.now();
+        ultimoTimestamp = data.timestamp;
     }
 
     if (data.tensionL1 !== undefined)
@@ -266,12 +267,12 @@ function toggleMenu() {
 
     }
 
+    
     if (data.estadoAlertaPuerta !== undefined){
 
         const estadoAlertaPuerta = Number(data.estadoAlertaPuerta);
-        document.getElementById("puerta").innerText =
-        estadoAlertaPuerta === 1 ? "Abierta" : "Cerrada";
     }
+    
 
     if(data.estadoMotor1 !== undefined){
         const motor1 = Number(data.estadoMotor1);
@@ -327,7 +328,7 @@ function toggleMenu() {
         ultimoTimestamp
     );
 
-    }, 5000);
+    }, 5000);//
 
     // ============================
     // CARGA DE CONFIGURACIÓN
