@@ -1,457 +1,417 @@
 <!DOCTYPE html>
 <html lang="es">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>El Abuelo Distribuciones</title>
+        <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
+        <!-- Vinculación del CSS -->
+        <link rel="stylesheet" href="Inicio.css?v=12">
+    </head>
 
-<title>El Abuelo Distribuciones</title>
+    <body>
+        <script>
+            /* =========================================================
+    PROTECCIÓN DE PÁGINA - SOLO PARA DESARROLLO
+    BORRAR CUANDO EL BACKEND ESTE FUNCIONANDO
+    ========================================================= */
+            const token = localStorage.getItem("token");
+            /* si no existe token -> volver al login */
+            if(!token){
+                window.location.href = "index.html";
+            }
+        </script>
 
-<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
+        <header>
+        <img src="imagenes/logo.jpg" alt="Logo El Abuelo Distribuciones" class="logo">
+            <div class="menu-toggle" onclick="toggleMenu()">☰</div>
+            <nav id="mobileMenu">
+                <a href="inicio.html">Inicio</a>
+                <a href="Temperatura.html">Temperatura</a>
+                <a href="Consumo.html">Consumo Eléctrico</a>
+                <a href="Historicos.html">Historicos</a>
+                <a href="#" onclick="logout()">Cerrar sesión</a>
+            </nav>
+            <div class="menu-overlay" onclick="toggleMenu()"></div>
+        </header>
 
-<!-- Vinculación del CSS -->
-<link rel="stylesheet" href="Inicio.css?v=12">
+        <section class="dashboard">
 
-</head>
+            <h2>Panel de Visualización - Cámara de Frío</h2>
 
-<body>
-    <script>
+            <div class="dashboard-grid">
 
-/* =========================================================
-   PROTECCIÓN DE PÁGINA - SOLO PARA DESARROLLO
-   BORRAR CUANDO EL BACKEND ESTE FUNCIONANDO
-   ========================================================= */
-
-const token = localStorage.getItem("token");
-
-/* si no existe token -> volver al login */
-if(!token){
-    window.location.href = "index.html";
-}
-
-</script>
-
-<header>
-    
-    <img src="imagenes/logo.jpg" alt="Logo El Abuelo Distribuciones" class="logo">
-
-    <div class="menu-toggle" onclick="toggleMenu()">☰</div>
-
-    <nav id="mobileMenu">
-        <a href="inicio.html">Inicio</a>
-        <a href="Temperatura.html">Temperatura</a>
-        <a href="Consumo.html">Consumo Eléctrico</a>
-        <a href="Historicos.html">Historicos</a>
-        <a href="#" onclick="logout()">Cerrar sesión</a>
-    </nav>
-
-    <div class="menu-overlay" onclick="toggleMenu()"></div>
-</header>
-
-<section class="dashboard">
-
-    <h2>Panel de Visualización - Cámara de Frío</h2>
-
-    <div class="dashboard-grid">
-
-        <div class="status-card" id="cardTempPromedio">
-            <h3>Temperatura</h3>
-            <div><span id="tempProm">--</span> °C</div>
-        </div>
+                <div class="status-card" id="cardTempPromedio">
+                    <h3>Temperatura</h3>
+                    <div><span id="tempProm">--</span> °C</div>
+                </div>
         
-        <div class="status-card">
-            <h3>Tensión</h3>
-            <div><span id="tensionL1">--</span> V</div>
-            <div><span id="tensionL2">--</span> V</div>
-            <div><span id="tensionL3">--</span> V</div>
-        </div>
+                <div class="status-card" id="cardTension">
+                    <h3>Tensión</h3>
+                    <div><span id="tensionL1">--</span> V</div>
+                    <div><span id="tensionL2">--</span> V</div>
+                    <div><span id="tensionL3">--</span> V</div>
+                </div>
 
-        <div class="status-card">
-            <h3>Corriente</h3>
-            <div><span id="corrienteL1">--</span> A</div>
-            <div><span id="corrienteL2">--</span> A</div>
-            <div><span id="corrienteL3">--</span> A</div>
-        </div>
+                <div class="status-card">
+                    <h3>Corriente</h3>
+                    <div><span id="corrienteL1">--</span> A</div>
+                    <div><span id="corrienteL2">--</span> A</div>
+                    <div><span id="corrienteL3">--</span> A</div>
+                </div>
 
-        <div class="status-card">
-            <h3>Consumo</h3>
-            <div><span id="consumo">--</span> VA</div>
-        </div>
+                <div class="status-card">
+                    <h3>Consumo</h3>
+                    <div><span id="consumo">--</span> VA</div>
+                </div>
 
-        <div class="status-card"> 
-            <h3>Motor Principal</h3>
-            <div><span id="motor1">--</span></div>
-        </div>
+                <div class="status-card"> 
+                    <h3>Motor Principal</h3>
+                    <div><span id="motor1">--</span></div>
+                </div>
 
-        <div class="status-card">
-            <h3>Motor Secundario</h3>
-            <div><span id="motor2">--</span></div>
-        </div>
+                <div class="status-card">
+                    <h3>Motor Secundario</h3>
+                    <div><span id="motor2">--</span></div>
+                </div>
 
-        <div class="status-card" id="cardPuerta">
-            <h3>Puerta</h3>
-            <div><span id="puerta">--</span></div>
-        </div>
+                <div class="status-card" id="cardPuerta">
+                    <h3>Puerta</h3>
+                    <div><span id="puerta">--</span></div>
+                </div>
 
-        <div class="status-card">
-            <h3>Luces</h3>
-            <div><span id="LuzCamara">--</span></div>
-            <button id="btnLuz" class="btn-control">Cargando...</button>
-        </div>
+                <div class="status-card">
+                    <h3>Luces</h3>
+                    <div><span id="LuzCamara">--</span></div>
+                    <button id="btnLuz" class="btn-control">Cargando...</button>
+                </div>
 
-        <div class="status-card" id="cardEstadoSistema">
-            <h3>Estado del Sistema</h3>
-            <div><span id="estadoSistema">--</span></div>
-        </div>
+                <div class="status-card" id="cardEstadoSistema">
+                    <h3>Estado del Sistema</h3>
+                    <div><span id="estadoSistema">--</span></div>
+                </div>
 
-        <div class="status-card" id="cardEstadoConexion">
-            <h3>Estado de Conexión</h3>
-            <div><span id="estadoConexion">--</span></div>
-        </div>
+                <div class="status-card" id="cardEstadoConexion">
+                    <h3>Estado de Conexión</h3>
+                    <div><span id="estadoConexion">--</span></div>
+                </div>
 
-    </div>
+            </div>
 
-    <div class="notas">
-        <p><strong>Nota:</strong> Los datos se actualizan en tiempo real. Si algún valor muestra "--", es posible que el dispositivo aún no haya enviado información o que haya un problema de conexión.</p>
+            <div class="notas">
+                <p><strong>Nota:</strong> Los datos se actualizan en tiempo real. Si algún valor muestra "--", es posible que el dispositivo aún no haya enviado información o que haya un problema de conexión.</p>
+            </div>
+
+            <div class="leyenda-estados">
+                <div class="estado">
+                    <span class="color blanco"></span>
+                    <span>Valores normales</span>
+                </div>
+
+                <div class="estado">
+                    <span class="color amarillo"></span>
+                    <span>Aviso por valores fuera de rango</span>
+                </div>
+
+                <div class="estado">
+                    <span class="color rojo"></span>
+                    <span>Alarma por valores peligrosos</span>
+                </div>
+            </div>
+        </section>
+
+        <footer>
+            © 2026 El Abuelo Distribuciones - Todos los derechos reservados
+        </footer>
+
+        <script>
+            function toggleMenu() {
+                const nav = document.getElementById("mobileMenu");
+                const overlay = document.querySelector(".menu-overlay");
+                nav.classList.toggle("active");
+                overlay.classList.toggle("active");
+            }
+        </script>
+
+        <script type="module">console.log("🔌 Conectando a Firebase...") ;
+            import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+            import { getDatabase, ref, onValue, set } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+
+            const firebaseConfig = {
+            apiKey: "AIzaSyA7BNbFNzdARWEGM_dAMKe7WUNUTI_0h-0",
+            authDomain: "camara-frio-elabuelo.firebaseapp.com",
+            databaseURL: "https://camara-frio-elabuelo-default-rtdb.firebaseio.com",
+            projectId: "camara-frio-elabuelo"
+            };
+            const app = initializeApp(firebaseConfig);
+            const db = getDatabase(app);
+            const datosRef = ref(db, "camara/actual");
+            const estadoLuz = document.getElementById("LuzCamara");
+            const btnLuz = document.getElementById("btnLuz");
+            let ultimoTimestamp = null;
+
+            /* función que actualiza botón según estado */
+            function actualizarBotonLuz(estado) {
+                estadoLuz.textContent = estado;
+
+                if (estado === "Encendida") {
+                    btnLuz.textContent = "Apagar";
+                    btnLuz.classList.remove("off");
+                    btnLuz.classList.add("on");
+
+                } else if (estado === "Apagada") {
+                    btnLuz.textContent = "Encender";
+                    btnLuz.classList.remove("on");
+                    btnLuz.classList.add("off");
+                } else {
+                    btnLuz.textContent = "....";
+                    btnLuz.classList.remove("on", "off");
+                }
+            }
+
+            btnLuz.addEventListener("click", async () => {
+                const accion = btnLuz.textContent === "Apagar" ? 0 : 1;//si el botón dice Apagar → mandamos 0 - si dice Encender → mandamos 1 
+                actualizarBotonLuz(accion ? "Encendida" : "Apagada");
+                console.log("Enviando comando luz:", accion);
+                try {
+                    await set(ref(db, "camara/actual/actuadorWebLuzCamara"), accion);
+                    console.log("Estado guardado en Firebase");
+                } catch (err) {
+                    console.error("Error al escribir en la base:", err);
+                }
+            });
+
+            onValue(ref(db, "camara/actual/estadoLuzCamara"), (snapshot) => {
+                const estado = snapshot.val();
+                if (estado == 1) {
+                    actualizarBotonLuz("Encendida");
+                } else {
+                    actualizarBotonLuz("Apagada");
+                }
+            });
+
+            onValue(datosRef, (snapshot) => {
+                const data = snapshot.val();
+                console.log("Snapshot:", data);
+                if (!data) return;
+                // calcular promedio solo si ambas existen
+                if (data.temperatura1 !== undefined && data.temperatura2 !== undefined) {
+                    const tempProm = (data.temperatura1 + data.temperatura2) / 2;
+                    document.getElementById("tempProm").innerText = tempProm.toFixed(1);
+                }
+
+                if (data.timestamp !== undefined) {
+                    ultimoTimestamp = data.timestamp;
+                }
+
+                if (data.tensionL1 !== undefined)
+                document.getElementById("tensionL1").innerText = data.tensionL1;
     
-    </div>
-
-    <div class="leyenda-estados">
-        <div class="estado">
-            <span class="color blanco"></span>
-            <span>Valores normales</span>
-        </div>
-
-        <div class="estado">
-            <span class="color amarillo"></span>
-            <span>Aviso por valores fuera de rango</span>
-        </div>
-
-        <div class="estado">
-            <span class="color rojo"></span>
-            <span>Alarma por valores peligrosos</span>
-        </div>
-    </div>
-
-
-</section>
-
-<footer>
-    © 2026 El Abuelo Distribuciones - Todos los derechos reservados
-</footer>
-
-<script>
-function toggleMenu() {
-    const nav = document.getElementById("mobileMenu");
-    const overlay = document.querySelector(".menu-overlay");
-
-    nav.classList.toggle("active");
-    overlay.classList.toggle("active");
-}
-</script>
-
-<script type="module">console.log("🔌 Conectando a Firebase...") ;
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-    import { getDatabase, ref, onValue, set } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
-
-    const firebaseConfig = {
-    apiKey: "AIzaSyA7BNbFNzdARWEGM_dAMKe7WUNUTI_0h-0",
-    authDomain: "camara-frio-elabuelo.firebaseapp.com",
-    databaseURL: "https://camara-frio-elabuelo-default-rtdb.firebaseio.com",
-    projectId: "camara-frio-elabuelo"
-    };
-
-    const app = initializeApp(firebaseConfig);
-
-    const db = getDatabase(app);
-
-    const datosRef = ref(db, "camara/actual");
-
-    const estadoLuz = document.getElementById("LuzCamara");
-    const btnLuz = document.getElementById("btnLuz");
-
-    let ultimoTimestamp = null;
-
-    /* función que actualiza botón según estado */
-    function actualizarBotonLuz(estado) {
-    estadoLuz.textContent = estado;
-
-    if (estado === "Encendida") {
-        btnLuz.textContent = "Apagar";
-        btnLuz.classList.remove("off");
-        btnLuz.classList.add("on");
-
-    } else if (estado === "Apagada") {
-        btnLuz.textContent = "Encender";
-        btnLuz.classList.remove("on");
-        btnLuz.classList.add("off");
-
-    } else {
-       
-        btnLuz.textContent = "....";
-    }
-}
-
-    btnLuz.addEventListener("click", async () => {
-
-    //si el botón dice Apagar → mandamos 0
-    //  si dice Encender → mandamos 1 
-    const accion = btnLuz.textContent === "Apagar" ? 0 : 1;
-
-    // feedback inmediato
-    actualizarBotonLuz(accion ? "Encendida" : "Apagada");
-    console.log("Enviando comando luz:", accion);
-
-    try {
-        await set(ref(db, "camara/actual/actuadorWebLuzCamara"), accion);
-        console.log("Estado guardado en Firebase");
-    } catch (err) {
-        console.error("Error al escribir en la base:", err);
-    }
-    
-});
-
-    onValue(ref(db, "camara/actual/estadoLuzCamara"), (snapshot) => {
-
-    const estado = snapshot.val();
-
-    if (estado == 1) {
-        actualizarBotonLuz("Encendida");
-    } else {
-        actualizarBotonLuz("Apagada");
-    }
-
-});
-
-    onValue(datosRef, (snapshot) => {
-
-    const data = snapshot.val();
-    console.log("Snapshot:", data);
-
-    if (!data) return;
-
-    // calcular promedio solo si ambas existen
-    if (data.temperatura1 !== undefined && data.temperatura2 !== undefined) {
-    const tempProm = (data.temperatura1 + data.temperatura2) / 2;
-    document.getElementById("tempProm").innerText = tempProm.toFixed(1);
-    }
-
-    if (data.timestamp !== undefined) {
-        ultimoTimestamp = data.timestamp;
-    }
-
-    if (data.tensionL1 !== undefined)
-    document.getElementById("tensionL1").innerText = data.tensionL1;
-    
-    if (data.tensionL2 !== undefined)
-    document.getElementById("tensionL2").innerText = data.tensionL2;
-
-    if (data.tensionL3 !== undefined)
-    document.getElementById("tensionL3").innerText = data.tensionL3;
-    /*
-    AGREGAR CUANDO ESTE EL ADS1015 CONECTADO
-    if (data.corrienteL1 !== undefined)
-    document.getElementById("corrienteL1").innerText = data.corrienteL1;
-    
-    if (data.corrienteL2 !== undefined)
-    document.getElementById("corrienteL2").innerText = data.corrienteL2;
-
-    if (data.corrienteL3 !== undefined)
-    document.getElementById("corrienteL3").innerText = data.corrienteL3;
-    */
-    if (data.estadoPuerta !== undefined) {
-
-    const puerta = Number(data.estadoPuerta);
-
-    document.getElementById("puerta").innerText =
-    puerta === 1 ? "Abierta" : "Cerrada";
-
-    }
-
-    
-    if (data.estadoAlertaPuerta !== undefined){
-
-        const estadoAlertaPuerta = Number(data.estadoAlertaPuerta);
-    }
-    
-
-    if(data.estadoMotor1 !== undefined){
-        const motor1 = Number(data.estadoMotor1);
-        document.getElementById("motor1").innerText =
-        motor1 === 1 ? "Encendido" : "Apagado";
-    }
-
-    if(data.estadoMotor2 !== undefined){
-        const motor2 = Number(data.estadoMotor2);
-        document.getElementById("motor2").innerText =
-        motor2 === 1 ? "Encendido" : "Apagado";
-    }
-
-    if(data.estadoAnomalia !== undefined){
-        const estadoAnomaliaSistema = Number(data.estadoAnomalia);
-        document.getElementById("estadoSistema").innerText =
-        estadoAnomaliaSistema === 1 ? "Anomalia Detectada" : "Funcionando Normal";
-    }
-
-    if(data.potenciaAparente !== undefined)
-    document.getElementById("consumo").innerText = data.potenciaAparente;
-
-    // =====================
-    // EVALUAR UMBRAL
-    // =====================
-
-    evaluarTemperatura(
-      document.getElementById("cardTempPromedio"),
-      data.temperatura1,
-      data.temperatura2
-    );
-
-    evaluarAlarmaPuerta(
-        document.getElementById("cardPuerta"),
-        Number(data.estadoAlertaPuerta)
-     );
-
-    evaluarAnomalia(
-        document.getElementById("cardEstadoSistema"),
-        Number(data.estadoAnomalia)
-    );
-    evaluarConexion(
-        document.getElementById("cardEstadoConexion"),
-        data.timestamp
-     );
-
-    });
-
-    setInterval(() => {
-
-    evaluarConexion(
-        document.getElementById("cardEstadoConexion"),
-        ultimoTimestamp
-    );
-
-    }, 5000);//
-
-    // ============================
-    // CARGA DE CONFIGURACIÓN
-    // ============================
-
-    const configRef = ref(db, "camara/config");
-
-    let config = {};
-
-    onValue(configRef, (snapshot) => {
-    config = snapshot.val();
-    console.log("CONFIG:", config);
-    });
-
-    // ============================
-    // FUNCIÓN GENÉRICA DE COLORES
-    // ============================
-
-    function setCardEstado(card, estado) {
-    card.classList.remove("aviso", "alarma");
-
-    if (estado === "alarma")
-        card.classList.add("alarma");
-    else if (estado === "aviso")
-        card.classList.add("aviso");
-    }
-
-    // ============================
-    // EVALUACIÓN DE TEMPERATURA
-    // ============================
-
-    function evaluarTemperatura(card, t1, t2) {
-
-    if (!config) return;
-
-    const promedio = (Number(t1) + Number(t2)) / 2;
-
-    if (promedio >= config.alarmaTemperaturaAlta ||
-        promedio <= config.alarmaTemperaturaBaja) {
-        setCardEstado(card, "alarma");
+                if (data.tensionL2 !== undefined)
+                document.getElementById("tensionL2").innerText = data.tensionL2;
+
+                if (data.tensionL3 !== undefined)
+                document.getElementById("tensionL3").innerText = data.tensionL3;
+                
+                if (data.estadoPresenciaFase !== undefined) {
+                    const estadoPresenciaFase = Number(data.estadoPresenciaFase);
         
+                }
+                /*
+                AGREGAR CUANDO ESTE EL ADS1015 CONECTADO
+                if (data.corrienteL1 !== undefined)
+                document.getElementById("corrienteL1").innerText = data.corrienteL1;
+    
+                if (data.corrienteL2 !== undefined)
+                document.getElementById("corrienteL2").innerText = data.corrienteL2;
 
-    } else if ((promedio >= config.avisoTemperaturaAlta && promedio < config.alarmaTemperaturaAlta) ||
-               (promedio <= config.avisoTemperaturaBaja && promedio > config.alarmaTemperaturaBaja)) {
+                if (data.corrienteL3 !== undefined)
+                document.getElementById("corrienteL3").innerText = data.corrienteL3;
+                */
+                if (data.estadoPuerta !== undefined) {
+                    const puerta = Number(data.estadoPuerta);
+                    document.getElementById("puerta").innerText =
+                    puerta === 1 ? "Abierta" : "Cerrada";
+                }
+    
+                if (data.estadoAlertaPuerta !== undefined){
+                    const estadoAlertaPuerta = Number(data.estadoAlertaPuerta);
+                }
+    
+                if(data.estadoMotor1 !== undefined){
+                    const motor1 = Number(data.estadoMotor1);
+                    document.getElementById("motor1").innerText =
+                    motor1 === 1 ? "Encendido" : "Apagado";
+                }
 
-        setCardEstado(card, "aviso");
-    } else {
-        setCardEstado(card, "normal");
-    }
-    }
+                if(data.estadoMotor2 !== undefined){
+                    const motor2 = Number(data.estadoMotor2);
+                    document.getElementById("motor2").innerText =
+                    motor2 === 1 ? "Encendido" : "Apagado";
+                }
 
-    function evaluarAlarmaPuerta(card, estadoAlertaPuerta){
+                if(data.estadoAnomalia !== undefined){
+                    const estadoAnomaliaSistema = Number(data.estadoAnomalia);
+                    document.getElementById("estadoSistema").innerText =
+                    estadoAnomaliaSistema === 1 ? "Anomalia Detectada" : "Funcionando Normal";
+                }
+
+                if(data.potenciaAparente !== undefined)
+                document.getElementById("consumo").innerText = data.potenciaAparente;
+
+                // =====================
+                // EVALUAR UMBRAL
+                // =====================
+
+                evaluarTemperatura(
+                    document.getElementById("cardTempPromedio"),
+                    data.temperatura1,
+                    data.temperatura2
+                );
+                
+                evaluarPresenciaFase(
+                    document.getElementById("cardTension"),
+                    Number(data.estadoPresenciaFase)
+                );
+
+                evaluarAlarmaPuerta(
+                    document.getElementById("cardPuerta"),
+                    Number(data.estadoAlertaPuerta)
+                );
+
+                evaluarAnomalia(
+                    document.getElementById("cardEstadoSistema"),
+                    Number(data.estadoAnomalia)
+                );
+
+                evaluarConexion(
+                    document.getElementById("cardEstadoConexion"),
+                    data.timestamp
+                );
+
+            });
+
+            setInterval(() => {
+                evaluarConexion(
+                    document.getElementById("cardEstadoConexion"),
+                    ultimoTimestamp
+                );
+            }, 5000);
+
+            // ============================
+            // CARGA DE CONFIGURACIÓN
+            // ============================
+            const configRef = ref(db, "camara/config");
+            let config = {};
+            onValue(configRef, (snapshot) => {
+                config = snapshot.val();
+                console.log("CONFIG:", config);
+            });
+
+            // ============================
+            // FUNCIÓN GENÉRICA DE COLORES
+            // ============================
+            function setCardEstado(card, estado) {
+                card.classList.remove("aviso", "alarma");
+                if (estado === "alarma")
+                card.classList.add("alarma");
+                else if (estado === "aviso")
+                card.classList.add("aviso");
+            }
+
+            // ============================
+            // EVALUACIÓN DE TEMPERATURA
+            // ============================
+            function evaluarTemperatura(card, t1, t2) {
+                if (!config) return;
+                const promedio = (Number(t1) + Number(t2)) / 2;
+
+                if (promedio >= config.alarmaTemperaturaAlta || promedio <= config.alarmaTemperaturaBaja) {
+                    setCardEstado(card, "alarma");
+                } else if ((promedio >= config.avisoTemperaturaAlta && promedio < config.alarmaTemperaturaAlta) ||
+                (promedio <= config.avisoTemperaturaBaja && promedio > config.alarmaTemperaturaBaja)) {
+                    setCardEstado(card, "aviso");
+                } else {
+                    setCardEstado(card, "normal");
+                }
+            }
+
+            function evaluarPresenciaFase(card, estadoPresenciaFase){
         
+                if (estadoPresenciaFase === 1) {
+                    setCardEstado(card, "alarma");  
+                }
+                else {
+                    setCardEstado(card, "normal");
+                }
+            }
+
+            function evaluarAlarmaPuerta(card, estadoAlertaPuerta){
         
-        if (estadoAlertaPuerta === 1) {
-            setCardEstado(card, "alarma");  
-        }
-        else {
-            setCardEstado(card, "normal");
-        }
-    }
+                if (estadoAlertaPuerta === 1) {
+                    setCardEstado(card, "alarma");  
+                }
+                else {
+                    setCardEstado(card, "normal");
+                }
+            }
 
-    function evaluarAnomalia(card, estadoAnomalia){
+            function evaluarAnomalia(card, estadoAnomalia){
         
-        
-        if (estadoAnomalia === 1) {
-            setCardEstado(card, "alarma");  
-        }
-        else {
-            setCardEstado(card, "normal");
-        }
-    }
+                if (estadoAnomalia === 1) {
+                    setCardEstado(card, "alarma");  
+                }
+                else {
+                    setCardEstado(card, "normal");
+                }
+            }
 
-    let alertaDisparada = false;
+            let alertaDisparada = false;
 
-function evaluarConexion(card, timestamp) {
+            function evaluarConexion(card, timestamp) {
 
-    if (!timestamp) {
-        setCardEstado(card, "alarma");
-        document.getElementById("estadoConexion").innerText = "Desconectado";
+                if (!timestamp) {
+                    setCardEstado(card, "alarma");
+                    document.getElementById("estadoConexion").innerText = "Desconectado";
+                    if (!alertaDisparada) {
+                        alert("⚠️ Se perdió la conexión con el dispositivo");
+                        alertaDisparada = true;
+                    }
+                return;
+                }
 
-        if (!alertaDisparada) {
-            alert("⚠️ Se perdió la conexión con el dispositivo");
-            alertaDisparada = true;
-        }
+                let tiempoUltimoDato;
 
-        return;
-    }
+                if (typeof timestamp === "number") {
+                    tiempoUltimoDato = timestamp;
+                } else {
+                    tiempoUltimoDato = new Date(timestamp).getTime();
+                }
 
-    let tiempoUltimoDato;
+                if (isNaN(tiempoUltimoDato)) {
+                    setCardEstado(card, "alarma");
+                    document.getElementById("estadoConexion").innerText = "Error timestamp";
+                    return;
+                }
 
-    if (typeof timestamp === "number") {
-        tiempoUltimoDato = timestamp;
-    } else {
-        tiempoUltimoDato = new Date(timestamp).getTime();
-    }
+                const ahora = Date.now();
+                const diferenciaMs = ahora - tiempoUltimoDato;
 
-    if (isNaN(tiempoUltimoDato)) {
-        setCardEstado(card, "alarma");
-        document.getElementById("estadoConexion").innerText = "Error timestamp";
-        return;
-    }
-
-    const ahora = Date.now();
-    const diferenciaMs = ahora - tiempoUltimoDato;
-
-    // 🔴 MÁS DE 30 SEGUNDOS → ALARMA
-    if (diferenciaMs > 30000) {
-        setCardEstado(card, "alarma");
-        document.getElementById("estadoConexion").innerText = "Desconectado";
-
-        if (!alertaDisparada) {
-            alert("⚠️ Se perdió la conexión con el dispositivo");
-            alertaDisparada = true;
-        }
-    } else {
-        setCardEstado(card, "normal");
-        document.getElementById("estadoConexion").innerText = "Conectado";
-
-        alertaDisparada = false;
-    }
-}
-</script>
-<script src="Auth.js" ></script>
-</body>
+                // 🔴 MÁS DE 30 SEGUNDOS → ALARMA
+                if (diferenciaMs > 30000) {
+                    setCardEstado(card, "alarma");
+                    document.getElementById("estadoConexion").innerText = "Desconectado";
+                    if (!alertaDisparada) {
+                        alert("⚠️ Se perdió la conexión con el dispositivo");
+                        alertaDisparada = true;
+                    }
+                } else {
+                    setCardEstado(card, "normal");
+                    document.getElementById("estadoConexion").innerText = "Conectado";
+                    alertaDisparada = false;
+                }
+            }
+        </script>
+        <script src="Auth.js" ></script>
+    </body>
 </html>
