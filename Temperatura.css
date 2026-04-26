@@ -238,6 +238,33 @@ footer{
     color:#000000;
 }
 
+.chart-loading-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(99, 93, 94, 0.95);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: 600;
+    z-index: 999;
+    border-radius: 10px;
+}
+
+.spinner {
+    width: 32px;
+    height: 32px;
+    border: 4px solid white;
+    border-top-color: transparent;
+    border-radius: 50%;
+    animation: girar 1s linear infinite;
+}
+
+@keyframes girar {
+    to { transform: rotate(360deg); }
+}
+
 /* =========================================
    ESTADO POR DEFECTO (ESCRITORIO)
    ========================================= */

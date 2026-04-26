@@ -260,9 +260,6 @@ import {
 // =========================
 // Firebase init
 // =========================
-
-
-
 const firebaseConfig = {
     apiKey: "AIzaSyA7BNbFNzdARWEGM_dAMKe7WUNUTI_0h-0",
     authDomain: "camara-frio-elabuelo.firebaseapp.com",
@@ -554,12 +551,10 @@ async function crearGrafico(config) {
                             let y;
 
                             if (campo === "promedio") {
-                                y = ((data.temperatura1 + data.temperatura2) / 2);
+                                    y = ((data.temperatura1 + data.temperatura2) / 2);
                                 } else {
-                                 y = data[campo];
-
-                                    if (campo.startsWith("temperatura"))
-                                        y = y;
+                                    y = data[campo];
+                                    if (campo.startsWith("temperatura")) y = y;
                                 }
 
                             chart.series[i].addPoint([x, y], true, false);
