@@ -1,151 +1,145 @@
 <!DOCTYPE html>
 <html lang="es">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Consumo Eléctrico - Cámara de Frío</title>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Consumo Eléctrico - Cámara de Frío</title>
+        <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
+        <link rel="stylesheet" href="consumo.css?v=5">
+    </head>
+    <body>
+        <header>
+            <img src="imagenes/logo.jpg" alt="Logo El Abuelo Distribuciones" class="logo">
+            <div class="menu-toggle" onclick="toggleMenu()">☰</div>
+            <nav id="mobileMenu">
+                <a href="inicio.html">Inicio</a>
+                <a href="Temperatura.html">Temperatura</a>
+                <a href="Consumo.html">Consumo Eléctrico</a>
+                <a href="Historicos.html">Historicos</a>
+                <a href="#" onclick="logout()">Cerrar sesión</a>
+            </nav>
+            <div class="menu-overlay" onclick="toggleMenu()"></div>
+        </header>
 
-<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="consumo.css?v=5">
+        <section class="dashboard">
 
-</head>
-<body>
+            <h2>Tensiones de Fase</h2>
 
-<header>
-    <img src="imagenes/logo.jpg" alt="Logo El Abuelo Distribuciones" class="logo">
+            <div class="grid-3">
 
-    <div class="menu-toggle" onclick="toggleMenu()">☰</div>
+                <div class="status-card">
+                    <h3>Tensión L1</h3>
+                    <div><span id="tensionL1">--</span> V</div>
+                </div>
 
-    <nav id="mobileMenu">
-        <a href="inicio.html">Inicio</a>
-        <a href="Temperatura.html">Temperatura</a>
-        <a href="Consumo.html">Consumo Eléctrico</a>
-        <a href="Historicos.html">Historicos</a>
-        <a href="#" onclick="logout()">Cerrar sesión</a>
-    </nav>
+                <div class="status-card">
+                    <h3>Tensión L2</h3>
+                    <div><span id="tensionL2">--</span> V</div>
+                </div>
 
-    <div class="menu-overlay" onclick="toggleMenu()"></div>
-</header>
+                <div class="status-card">
+                    <h3>Tensión L3</h3>
+                    <div><span id="tensionL3">--</span> V</div>
+                </div>
+            </div>
 
-<section class="dashboard">
+            <h2>Corrientes de Fase</h2>
 
-    <h2>Tensiones de Fase</h2>
+            <div class="grid-3">
 
-    <div class="grid-3">
-        <div class="status-card">
-            <h3>Tensión L1</h3>
-            <div><span id="tensionL1">--</span> V</div>
-        </div>
+                <div class="status-card">
+                    <h3>Corriente Fase 1</h3>
+                    <div><span id="corrienteL1">--</span> A</div>
+                </div>
 
-        <div class="status-card">
-            <h3>Tensión L2</h3>
-            <div><span id="tensionL2">--</span> V</div>
-        </div>
+                <div class="status-card">
+                    <h3>Corriente Fase 2</h3>
+                    <div><span id="corrienteL2">--</span> A</div>
+                </div>
 
-        <div class="status-card">
-            <h3>Tensión L3</h3>
-            <div><span id="tensionL3">--</span> V</div>
-        </div>
-    </div>
+                <div class="status-card">
+                    <h3>Corriente Fase 3</h3>
+                    <div><span id="corrienteL3">--</span> A</div>
+                </div>
+            </div>
 
-    <h2>Corrientes de Fase</h2>
+            <h2>Consumo Total</h2>
 
-    <div class="grid-3">
-        <div class="status-card">
-            <h3>Corriente Fase 1</h3>
-            <div><span id="corrienteL1">--</span> A</div>
-        </div>
+            <div class="grid-1">
+                <div class="status-card">
+                    <h3>Potencia Aparente</h3>
+                    <div><span id="potenciaAparente">--</span> VA</div>
+                </div>
+            </div>
+        </section>
 
-        <div class="status-card">
-            <h3>Corriente Fase 2</h3>
-            <div><span id="corrienteL2">--</span> A</div>
-        </div>
+        <footer>
+            © 2026 El Abuelo Distribuciones
+        </footer>
 
-        <div class="status-card">
-            <h3>Corriente Fase 3</h3>
-            <div><span id="corrienteL3">--</span> A</div>
-        </div>
-    </div>
+        <script>
+            function toggleMenu() {
+                const nav = document.getElementById("mobileMenu");
+                const overlay = document.querySelector(".menu-overlay");
+                nav.classList.toggle("active");
+                overlay.classList.toggle("active");
+            }
+        </script>
 
-    <h2>Consumo Total</h2>
-
-    <div class="grid-1">
-        <div class="status-card">
-            <h3>Potencia Aparente</h3>
-            <div><span id="potenciaAparente">--</span> VA</div>
-        </div>
-    </div>
-
-</section>
-
-<footer>
-    © 2026 El Abuelo Distribuciones
-</footer>
-
-<script>
-function toggleMenu() {
-    const nav = document.getElementById("mobileMenu");
-    const overlay = document.querySelector(".menu-overlay");
-
-    nav.classList.toggle("active");
-    overlay.classList.toggle("active");
-}
-</script>
-
-<script type="module">
+        <script type="module">
     
-    console.log("🔌 Conectando a Firebase...") ;
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-    import { getDatabase, ref, onValue, update } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+            console.log("🔌 Conectando a Firebase...") ;
+            import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+            import { getDatabase, ref, onValue, update } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
 
-    const firebaseConfig = {
-    apiKey: "AIzaSyA7BNbFNzdARWEGM_dAMKe7WUNUTI_0h-0",
-    authDomain: "camara-frio-elabuelo.firebaseapp.com",
-    databaseURL: "https://camara-frio-elabuelo-default-rtdb.firebaseio.com",
-    projectId: "camara-frio-elabuelo"
-  };
+            const firebaseConfig = {
+                apiKey: "AIzaSyA7BNbFNzdARWEGM_dAMKe7WUNUTI_0h-0",
+                authDomain: "camara-frio-elabuelo.firebaseapp.com",
+                databaseURL: "https://camara-frio-elabuelo-default-rtdb.firebaseio.com",
+                projectId: "camara-frio-elabuelo"
+            };
 
-    const app = initializeApp(firebaseConfig);
-    const db = getDatabase(app);
-    let configCargada = false;   
+            const app = initializeApp(firebaseConfig);
+            const db = getDatabase(app);
+            let configCargada = false;   
 
-    const datosRef = ref(db, "camara/actual");
-    onValue(datosRef, (snapshot) => {
+            const datosRef = ref(db, "camara/actual");
+            onValue(datosRef, (snapshot) => {
 
-  const data = snapshot.val();
-  if (!data) return;
+                const data = snapshot.val();
+                if (!data) return;
 
-  // Tensiones
-  if (data.tensionL1 !== undefined) {
-    document.getElementById("tensionL1").innerText = data.tensionL1;
-  }
+                // Tensiones
+                if (data.tensionL1 !== undefined) {
+                    document.getElementById("tensionL1").innerText = data.tensionL1;
+                }
   
-  if (data.tensionL2 !== undefined) {
-    document.getElementById("tensionL2").innerText = data.tensionL2;
-  }
+                if (data.tensionL2 !== undefined) {
+                    document.getElementById("tensionL2").innerText = data.tensionL2;
+                }
 
-  if (data.tensionL3 !== undefined) {
-    document.getElementById("tensionL3").innerText = data.tensionL3;
-  }
-  /* AGREGAR CUANDO ESTE EL ADS1015 CONECTADO
-  // Corrientes
-  if (data.corrienteL1 !== undefined) {
-    document.getElementById("corrienteL1").innerText = data.corrienteL1;
-  }
+                if (data.tensionL3 !== undefined) {
+                    document.getElementById("tensionL3").innerText = data.tensionL3;
+                }
+                /* AGREGAR CUANDO ESTE EL ADS1015 CONECTADO
+                // Corrientes
+                if (data.corrienteL1 !== undefined) {
+                    document.getElementById("corrienteL1").innerText = data.corrienteL1;
+                }
 
-  if (data.corrienteL2 !== undefined) {
-    document.getElementById("corrienteL2").innerText = data.corrienteL2;
-  }
+                if (data.corrienteL2 !== undefined) {
+                    document.getElementById("corrienteL2").innerText = data.corrienteL2;
+                }
 
-  if (data.corrienteL3 !== undefined) {
-    document.getElementById("corrienteL3").innerText = data.corrienteL3;
-  }
-    */
-  if (data.potenciaAparente !== undefined)
-    document.getElementById("potenciaAparente").innerText = data.potenciaAparente;
-});
-</script>
-
-<script src="Auth.js"></script>
-</body>
+                if (data.corrienteL3 !== undefined) {
+                    document.getElementById("corrienteL3").innerText = data.corrienteL3;
+                }
+                */
+                if (data.potenciaAparente !== undefined) {
+                    document.getElementById("potenciaAparente").innerText = data.potenciaAparente;
+                }
+            });
+        </script>
+        <script src="Auth.js"></script>
+    </body>
 </html>

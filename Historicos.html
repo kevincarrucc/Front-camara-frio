@@ -1,603 +1,569 @@
 <!DOCTYPE html>
 <html lang="es">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Históricos - Cámara de Frío</title>
-
-<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="historicos.css?v=9">
-
-<!-- Highcharts -->
-<script src="code/highcharts.js"></script>
-<script src="code/modules/exporting.js"></script>
-<script src="code/modules/export-data.js"></script>
-<script src="code/modules/accessibility.js"></script>
-
-</head>
-<body>
-
-<script>
-
-/* =========================================================
-   PROTECCIÓN DE PÁGINA - SOLO PARA DESARROLLO
-   BORRAR CUANDO EL BACKEND ESTE FUNCIONANDO
-   ========================================================= */
-
-const token = localStorage.getItem("token");
-
-/* si no existe token -> volver al login */
-if(!token){
-    window.location.href = "index.html";
-}
-
-</script>
-
-
-<header>
-    <img src="imagenes/logo.jpg" alt="Logo El Abuelo Distribuciones" class="logo">
-
-    <div class="menu-toggle" onclick="toggleMenu()">☰</div>
-
-    <nav id="mobileMenu">
-        <a href="inicio.html">Inicio</a>
-        <a href="Temperatura.html">Temperatura</a>
-        <a href="Consumo.html">Consumo Eléctrico</a>
-        <a href="Historicos.html">Historicos</a>
-        <a href="#" onclick="logout()">Cerrar sesión</a>
-    </nav>
-
-    <div class="menu-overlay" onclick="toggleMenu()"></div>
-</header>
-
-<div class="selector-graficos">
-    <button class="activo" onclick="mostrarSeccion(event, 'temp')">Temperatura</button>
-    <button onclick="mostrarSeccion(event, 'tension')">Tensión</button>
-    <button onclick="mostrarSeccion(event, 'corriente')">Corriente</button>
-    <button onclick="mostrarSeccion(event, 'potencia')">Potencia</button>
-    <button onclick="mostrarSeccion(event, 'eventos')">Eventos</button>
-</div>
-
-
-<script>
-        let eventosUnsubscribe = null;
-    let eventosInicializados = false;
-    let primeraCarga = true;
-    let graficosCreados = {};
-
-function cargarGraficosSiHaceFalta(tipo){
-
-    if(tipo === 'temp' && !graficosCreados.temp){
-        crearGrafico(CONFIGS.temp24);
-        crearGrafico(CONFIGS.temp7);
-        crearGrafico(CONFIGS.temp30);
-        graficosCreados.temp = true;
-    }
-
-    if(tipo === 'tension' && !graficosCreados.tension){
-        crearGrafico(CONFIGS.tens24);
-        crearGrafico(CONFIGS.tens7);
-        crearGrafico(CONFIGS.tens30);
-        graficosCreados.tension = true;
-    }
-
-    if(tipo === 'corriente' && !graficosCreados.corriente){
-        crearGrafico(CONFIGS.corr24);
-        crearGrafico(CONFIGS.corr7);
-        crearGrafico(CONFIGS.corr30);
-        graficosCreados.corriente = true;
-    }
-
-    if(tipo === 'potencia' && !graficosCreados.potencia){
-        crearGrafico(CONFIGS.pot24);
-        crearGrafico(CONFIGS.pot7);
-        crearGrafico(CONFIGS.pot30);
-        graficosCreados.potencia = true;
-    }
-}
-
-function mostrarSeccion(event, tipo){
-    
-
-    const todos = document.querySelectorAll(
-        '.Temperatura24h-container, .Temperatura1sem-container, .Temperatura1mes-container, \
-         .Tensión24h-container, .Tensión1sem-container, .Tensión1mes-container, \
-         .Corriente24h-container, .Corriente1sem-container, .Corriente1mes-container, \
-         .Potencia24h-container, .Potencia1sem-container, .Potencia1mes-container, \
-         #event-panel '
-    );
-
-    // 🔴 ocultar todo
-    todos.forEach(el => el.classList.add('oculto'));
-
-    // 🟢 mostrar según botón
-    if(tipo === 'temp'){
-        document.querySelectorAll(
-            '.Temperatura24h-container, .Temperatura1sem-container, .Temperatura1mes-container'
-        ).forEach(el => el.classList.remove('oculto'));
-    }
-
-    if(tipo === 'tension'){
-        document.querySelectorAll(
-            '.Tensión24h-container, .Tensión1sem-container, .Tensión1mes-container'
-        ).forEach(el => el.classList.remove('oculto'));
-    }
-
-    if(tipo === 'corriente'){
-        document.querySelectorAll(
-            '.Corriente24h-container, .Corriente1sem-container, .Corriente1mes-container'
-        ).forEach(el => el.classList.remove('oculto'));
-    }
-
-    if(tipo === 'potencia'){
-            document.querySelectorAll(
-                '.Potencia24h-container, .Potencia1sem-container, .Potencia1mes-container'
-        ).forEach(el => el.classList.remove('oculto'));
-    }
-
-    if(tipo === 'eventos'){
-        document.getElementById('event-panel').classList.remove('oculto');
-        iniciarListenerEventos();
-    }
-    else {
-        document.getElementById('event-panel').classList.add('oculto');
-        if(eventosUnsubscribe){
-        eventosUnsubscribe();
-        eventosUnsubscribe = null;
-        eventosInicializados = false;
-        primeraCarga = true;
-    }
-    }
-    
-
-    // 🔵 botón activo
-    const botones = document.querySelectorAll('.selector-graficos button');
-    botones.forEach(btn => btn.classList.remove('activo'));
-
-    if(event){
-        event.target.classList.add('activo');
-    } else {
-        
-        document.querySelector('.selector-graficos button')
-            .classList.add('activo');
-    }
-
-    setTimeout(() => {
-    window.dispatchEvent(new Event('resize'));
-    }, 100);
-
-    cargarGraficosSiHaceFalta(tipo);
-}
-</script>
-
-<!-- Contenedor del gráfico -->
-<div class="Temperatura24h-container">
-    <div id="container-1"></div>
-</div>
-
-<div class="Temperatura1sem-container">
-    <div id="container-2"></div>
-</div>
-
-<div class="Temperatura1mes-container">
-    <div id="container-3"></div>
-</div>
-
-<div class="Tensión24h-container">
-    <div id="container-4"></div>
-</div>
-
-<div class="Tensión1sem-container">
-    <div id="container-5"></div>
-</div>
-
-<div class="Tensión1mes-container">
-    <div id="container-6"></div>
-</div>
-
-<div class="Corriente24h-container">
-    <div id="container-7"></div>
-</div>
-
-<div class="Corriente1sem-container">
-    <div id="container-8"></div>
-</div>
-
-<div class="Corriente1mes-container">
-    <div id="container-9"></div>
-</div>
-
-<div class="Potencia24h-container">
-    <div id="container-10"></div>
-</div>
-
-<div class="Potencia1sem-container">
-    <div id="container-11"></div>
-</div>
-
-<div class="Potencia1mes-container">
-    <div id="container-12"></div>
-</div>
-
-<div id="event-panel" class="oculto">
-    <div id="eventList"></div>
-</div>
-
-
-<footer>
-    © 2026 El Abuelo Distribuciones
-</footer>
-
-<script>
-
-
-
-function toggleMenu() {
-    const nav = document.getElementById("mobileMenu");
-    const overlay = document.querySelector(".menu-overlay");
-
-    nav.classList.toggle("active");
-    overlay.classList.toggle("active");
-}
-</script>
-
-<script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { 
-    getDatabase, ref, onValue 
-} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
-import {
-    getFirestore,
-    collection,
-    query,
-    orderBy,
-    where,
-    limit,
-    getDocs,
-    onSnapshot
-} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
-
-// =========================
-// Firebase init
-// =========================
-const firebaseConfig = {
-    apiKey: "AIzaSyA7BNbFNzdARWEGM_dAMKe7WUNUTI_0h-0",
-    authDomain: "camara-frio-elabuelo.firebaseapp.com",
-    databaseURL: "https://camara-frio-elabuelo-default-rtdb.firebaseio.com",
-    projectId: "camara-frio-elabuelo"
-};
-
-const app = initializeApp(firebaseConfig);
-const db = getDatabase(app);
-const firestore = getFirestore(app);
-
-// =======================
-// 🔹 FUNCION UI EVENTOS
-// =======================
-
-function formatearFecha(ts){
-  const d = ts
-    ? new Date(ts.seconds * 1000)
-    : new Date();
-
-  const fecha = d.toLocaleDateString();
-  const hora  = d.toLocaleTimeString();
-
-  return `${fecha} - ${hora}`;
-}
-
-function agregarEvento(mensaje, tipo, timestamp) {
-  const eventList = document.getElementById("eventList");
-
-  const nuevoEvento = document.createElement("div");
-  nuevoEvento.classList.add("event", tipo);
-
-  const d = timestamp
-    ? new Date(timestamp.seconds * 1000)
-    : new Date();
-
-  const fecha = d.toLocaleString('es-AR', {
-  day: '2-digit',
-  month: '2-digit',
-  year: 'numeric',
-  hour: '2-digit',
-  minute: '2-digit',
-  second: '2-digit'
-});
-
-  nuevoEvento.innerHTML = `
-    <strong>${fecha}</strong> - ${mensaje}
-  `;
-
-  eventList.prepend(nuevoEvento);
-}
-
-// =======================
-// 🔹 MAPEO DE TIPOS
-// =======================
-
-function mapearTipo(tipoFirestore) {
-  switch (tipoFirestore) {
-    case "puerta":
-    case "luz":
-      return "info";
-
-    case "aviso":
-      return "aviso";
-
-    case "alarma":
-      return "alarma";
-
-    default:
-      return "info";
-  }
-}
-
-// =======================
-// 🔹 ESCUCHAR EVENTOS
-// =======================
-
-
-function iniciarListenerEventos(){
-
-  if(eventosInicializados) return;
-
-  const eventosRef = collection(firestore, "eventos");
-
-  const q = query(
-    eventosRef,
-    orderBy("timestamp", "desc"),
-    limit(50)
-  );
-
-  eventosUnsubscribe = onSnapshot(q, (snapshot) => {
-
-    if (primeraCarga) {
-
-      document.getElementById("eventList").innerHTML = "";
-
-      const docs = snapshot.docs.reverse();
-
-      docs.forEach(doc => {
-        const data = doc.data();
-        if (!data.timestamp) return;
-
-        agregarEvento(
-          data.descripcion,
-          mapearTipo(data.tipo),
-          data.timestamp
-        );
-      });
-
-      primeraCarga = false;
-      return;
-    }
-
-    snapshot.docChanges().forEach((change) => {
-
-      if (change.type === "added") {
-        const data = change.doc.data();
-        if (!data.timestamp) return;
-
-        agregarEvento(
-          data.descripcion,
-          mapearTipo(data.tipo),
-          data.timestamp
-        );
-      }
-
-    });
-  });
-
-  eventosInicializados = true;
-}
-window.iniciarListenerEventos = iniciarListenerEventos;
-// =========================
-// Datos en vivo desde RTDB
-// =========================
-
-let data = {
-    temperatura1: 0,
-    temperatura2: 0,
-    temperaturaExterior: 0,
-    tensionL1: 0,
-    tensionL2: 0,
-    tensionL3: 0,
-    corrienteL1: 0,
-    corrienteL2: 0,
-    corrienteL3: 0,
-    potenciaAparente: 0
-};
-
-onValue(ref(db, "camara/actual"), (snapshot) => {
-    const firebaseData = snapshot.val();
-    if (!firebaseData) return;
-    data = firebaseData;
-});
-
-// =========================
-// Configuraciones de gráficos
-// =========================
-
-const CONFIGS = {
-    temp24:  { container: "container-1", rangoMs: 24*60*60*1000,    intervalo: 600000,   titulo: "Histórico de Temperaturas (24 hs)", campos: ["temperatura1","temperatura2","promedio","temperaturaExterior"], coleccion: "historial" },
-    temp7:   { container: "container-2", rangoMs: 7*24*60*60*1000,  intervalo: 7200000,  titulo: "Histórico de Temperaturas (1 Semana)", campos: ["temperatura1","temperatura2","promedio","temperaturaExterior"], coleccion: "historialxhora" },
-    temp30:  { container: "container-3", rangoMs: 30*24*60*60*1000, intervalo: 14400000, titulo: "Histórico de Temperaturas (1 Mes)", campos: ["temperatura1","temperatura2","promedio","temperaturaExterior"], coleccion: "historialxhora" },
-    
-    tens24:  { container: "container-4", rangoMs: 24*60*60*1000,    intervalo: 600000,   titulo: "Histórico de Tensiones (24 hs)", campos: ["tensionL1","tensionL2","tensionL3"], coleccion: "historial" },
-    tens7:   { container: "container-5", rangoMs: 7*24*60*60*1000,  intervalo: 7200000,  titulo: "Histórico de Tensiones (1 Semana)", campos: ["tensionL1","tensionL2","tensionL3"], coleccion: "historialxhora" },
-    tens30:  { container: "container-6", rangoMs: 30*24*60*60*1000, intervalo: 14400000, titulo: "Histórico de Tensiones (1 Mes)", campos: ["tensionL1","tensionL2","tensionL3"], coleccion: "historialxhora" },
-
-    corr24:  { container: "container-7", rangoMs: 24*60*60*1000,    intervalo: 600000,   titulo: "Histórico de Corrientes (24 hs)", campos: ["corrienteL1","corrienteL2","corrienteL3"], coleccion: "historial" },
-    corr7:   { container: "container-8", rangoMs: 7*24*60*60*1000,  intervalo: 7200000,  titulo: "Histórico de Corrientes (1 Semana)", campos: ["corrienteL1","corrienteL2","corrienteL3"], coleccion: "historialxhora" },
-    corr30:  { container: "container-9", rangoMs: 30*24*60*60*1000, intervalo: 14400000, titulo: "Histórico de Corrientes (1 Mes)", campos: ["corrienteL1","corrienteL2","corrienteL3"], coleccion: "historialxhora" },
-
-    pot24:   { container: "container-10", rangoMs: 24*60*60*1000,   intervalo: 600000,   titulo: "Histórico de Potencias (24 hs)", campos: ["potenciaAparente" ], coleccion: "historial" },
-    pot7:    { container: "container-11", rangoMs: 7*24*60*60*1000, intervalo: 7200000,  titulo: "Histórico de Potencias (1 Semana)", campos: ["potenciaAparente" ], coleccion: "historialxhora" },
-    pot30:   { container: "container-12", rangoMs: 30*24*60*60*1000,intervalo: 14400000, titulo: "Histórico de Potencias (1 Mes)", campos: ["potenciaAparente" ], coleccion: "historialxhora" }
-    
-    };
-    window.CONFIGS = CONFIGS;
-
-// =========================
-// Cargar histórico Firestore
-// =========================
-
-async function cargarHistorico(campos, rangoMs, coleccionNombre) {
-    const cacheHistorico = {};
-    const fechaInicio = new Date(Date.now() - rangoMs);
-
-    const q = query(
-        collection(firestore, coleccionNombre),
-        where("timestamp", ">=", fechaInicio),
-        orderBy("timestamp", "asc"),
-        limit(5000)
-    );
-
-    const key = campos.join(",") + rangoMs;
-
-    if(cacheHistorico[key]){
-    return cacheHistorico[key];
-    }   
-
-
-    const snapshot = await getDocs(q);
-
-    const series = campos.map(() => []);
-
-    snapshot.forEach(doc => {
-        const d = doc.data();
-        if (!d.timestamp) return;
-
-        const x = d.timestamp.toDate().getTime();
-
-        campos.forEach((campo, i) => {
-
-            let y = null;
-
-            if (campo === "promedio") {
-                if (d.temperatura1 != null && d.temperatura2 != null)
-                    y = ((d.temperatura1 + d.temperatura2) / 2);
-            } else if (d[campo] != null) {
-                y = campo.startsWith("temperatura")
-                    ? d[campo]
-                    : d[campo];
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Históricos - Cámara de Frío</title>
+        <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
+        <link rel="stylesheet" href="historicos.css?v=9">
+        <!-- Highcharts -->
+        <script src="code/highcharts.js"></script>
+        <script src="code/modules/exporting.js"></script>
+        <script src="code/modules/export-data.js"></script>
+        <script src="code/modules/accessibility.js"></script>
+    </head>
+    <body>
+
+        <script>
+            /* =========================================================
+            PROTECCIÓN DE PÁGINA - SOLO PARA DESARROLLO
+            BORRAR CUANDO EL BACKEND ESTE FUNCIONANDO
+            ========================================================= */
+            const token = localStorage.getItem("token");
+            /* si no existe token -> volver al login */
+            if(!token){
+                window.location.href = "index.html";
             }
-
-            if (y != null)
-                series[i].push([x, y]);
-        });
-    });
-
-    cacheHistorico[key] = series;
-    return series;
-}
+        </script>
 
 
-// =========================
-// animacion de carga
-// =========================
+        <header>
+            <img src="imagenes/logo.jpg" alt="Logo El Abuelo Distribuciones" class="logo">
+            <div class="menu-toggle" onclick="toggleMenu()">☰</div>
+            <nav id="mobileMenu">
+                <a href="inicio.html">Inicio</a>
+                <a href="Temperatura.html">Temperatura</a>
+                <a href="Consumo.html">Consumo Eléctrico</a>
+                <a href="Historicos.html">Historicos</a>
+                <a href="#" onclick="logout()">Cerrar sesión</a>
+            </nav>
+            <div class="menu-overlay" onclick="toggleMenu()"></div>
+        </header>
 
-function mostrarLoading(containerId) {
-    const cont = document.getElementById(containerId);
+        <div class="selector-graficos">
+            <button class="activo" onclick="mostrarSeccion(event, 'temp')">Temperatura</button>
+            <button onclick="mostrarSeccion(event, 'tension')">Tensión</button>
+            <button onclick="mostrarSeccion(event, 'corriente')">Corriente</button>
+            <button onclick="mostrarSeccion(event, 'potencia')">Potencia</button>
+            <button onclick="mostrarSeccion(event, 'eventos')">Eventos</button>
+        </div>
 
-    const overlay = document.createElement("div");
-    overlay.className = "chart-loading-overlay";
-    overlay.innerHTML = `
-        <div class="spinner"></div>
-        <div style="margin-top:8px;">Cargando...</div>
-    `;
 
-    cont.style.position = "relative";
-    cont.appendChild(overlay);
-}
+        <script>
+            let eventosUnsubscribe = null;
+            let eventosInicializados = false;
+            let primeraCarga = true;
+            let graficosCreados = {};
 
-function ocultarLoading(containerId) {
-    const cont = document.getElementById(containerId);
-    const overlay = cont.querySelector(".chart-loading-overlay");
-    if (overlay) overlay.remove();
-}
+            function cargarGraficosSiHaceFalta(tipo){
 
-// =========================
-// Crear gráfico genérico
-// =========================
+                if(tipo === 'temp' && !graficosCreados.temp){
+                    crearGrafico(CONFIGS.temp24);
+                    crearGrafico(CONFIGS.temp7);
+                    crearGrafico(CONFIGS.temp30);
+                    graficosCreados.temp = true;
+                }
 
-async function crearGrafico(config) {
+                if(tipo === 'tension' && !graficosCreados.tension){
+                    crearGrafico(CONFIGS.tens24);
+                    crearGrafico(CONFIGS.tens7);
+                    crearGrafico(CONFIGS.tens30);
+                    graficosCreados.tension = true;
+                }
 
-        mostrarLoading(config.container);
+                if(tipo === 'corriente' && !graficosCreados.corriente){
+                    crearGrafico(CONFIGS.corr24);
+                    crearGrafico(CONFIGS.corr7);
+                    crearGrafico(CONFIGS.corr30);
+                    graficosCreados.corriente = true;
+                }
 
-    const seriesData = await cargarHistorico(
-    config.campos,
-    config.rangoMs,
-    config.coleccion
-    );
-
-    Highcharts.chart(config.container, {
-
-        chart: {
-            type: "spline",
-            //zoomType: config.puntos > 100 ? "x" : undefined,
-            events: {
-                load: function () {
-                        ocultarLoading(config.container);
-                    const chart = this;
-
-                    setInterval(() => {
-
-                        const x = Date.now();
-
-                        config.campos.forEach((campo, i) => {
-
-                            let y;
-
-                            if (campo === "promedio") {
-                                    y = ((data.temperatura1 + data.temperatura2) / 2);
-                                } else {
-                                    y = data[campo];
-                                    if (campo.startsWith("temperatura")) y = y;
-                                }
-
-                            chart.series[i].addPoint([x, y], true, false);
-                        });
-
-                    }, config.intervalo);
+                if(tipo === 'potencia' && !graficosCreados.potencia){
+                    crearGrafico(CONFIGS.pot24);
+                    crearGrafico(CONFIGS.pot7);
+                    crearGrafico(CONFIGS.pot30);
+                    graficosCreados.potencia = true;
                 }
             }
-        },
 
-        time: { useUTC: false },
+            function mostrarSeccion(event, tipo){
+    
 
-        title: { text: config.titulo },
+                const todos = document.querySelectorAll(
+                    '.Temperatura24h-container, .Temperatura1sem-container, .Temperatura1mes-container, \
+                    .Tensión24h-container, .Tensión1sem-container, .Tensión1mes-container, \
+                    .Corriente24h-container, .Corriente1sem-container, .Corriente1mes-container, \
+                    .Potencia24h-container, .Potencia1sem-container, .Potencia1mes-container, \
+                    #event-panel '
+                );
 
-        xAxis: { type: "datetime" },
+                // 🔴 ocultar todo
+                todos.forEach(el => el.classList.add('oculto'));
 
-        yAxis: {
-            title: { text: "" }
-        },
+                // 🟢 mostrar según botón
+                if(tipo === 'temp'){
+                    document.querySelectorAll(
+                        '.Temperatura24h-container, .Temperatura1sem-container, .Temperatura1mes-container'
+                    ).forEach(el => el.classList.remove('oculto'));
+                }
 
-        legend: { enabled: true },
-        exporting: { enabled: false },
+                if(tipo === 'tension'){
+                    document.querySelectorAll(
+                        '.Tensión24h-container, .Tensión1sem-container, .Tensión1mes-container'
+                    ).forEach(el => el.classList.remove('oculto'));
+                }
 
-        series: config.campos.map((campo, i) => ({
-            name: campo,
-            data: seriesData[i],
-            dashStyle: campo === "promedio" ? "ShortDash" : "Solid"
-        }))
-    });
-}
-// 👇 hacer visible fuera del module
-window.crearGrafico = crearGrafico;
-// =========================
-// Inicialización
-// =========================
+                if(tipo === 'corriente'){
+                    document.querySelectorAll(
+                        '.Corriente24h-container, .Corriente1sem-container, .Corriente1mes-container'
+                    ).forEach(el => el.classList.remove('oculto'));
+                }
+
+                if(tipo === 'potencia'){
+                    document.querySelectorAll(
+                        '.Potencia24h-container, .Potencia1sem-container, .Potencia1mes-container'
+                    ).forEach(el => el.classList.remove('oculto'));
+                }
+
+                if(tipo === 'eventos'){
+                    document.getElementById('event-panel').classList.remove('oculto');
+                    iniciarListenerEventos();
+                }
+                else {
+                    document.getElementById('event-panel').classList.add('oculto');
+                    if(eventosUnsubscribe){
+                        eventosUnsubscribe();
+                        eventosUnsubscribe = null;
+                        eventosInicializados = false;
+                        primeraCarga = true;
+                    }
+                }
+    
+
+                // 🔵 botón activo
+                const botones = document.querySelectorAll('.selector-graficos button');
+                botones.forEach(btn => btn.classList.remove('activo'));
+
+                if(event){
+                    event.target.classList.add('activo');
+                } else {
+                    document.querySelector('.selector-graficos button')
+                    .classList.add('activo');
+                }
+
+                setTimeout(() => {
+                    window.dispatchEvent(new Event('resize'));
+                }, 100);
+
+                cargarGraficosSiHaceFalta(tipo);
+            }
+        </script>
+
+        <!-- Contenedor del gráfico -->
+        <div class="Temperatura24h-container">
+            <div id="container-1"></div>
+        </div>
+
+        <div class="Temperatura1sem-container">
+            <div id="container-2"></div>
+        </div>
+
+        <div class="Temperatura1mes-container">
+            <div id="container-3"></div>
+        </div>
+
+        <div class="Tensión24h-container">
+            <div id="container-4"></div>
+        </div>
+
+        <div class="Tensión1sem-container">
+            <div id="container-5"></div>
+        </div>
+
+        <div class="Tensión1mes-container">
+            <div id="container-6"></div>
+        </div>
+
+        <div class="Corriente24h-container">
+            <div id="container-7"></div>
+        </div>
+
+        <div class="Corriente1sem-container">
+            <div id="container-8"></div>
+        </div>
+
+        <div class="Corriente1mes-container">
+            <div id="container-9"></div>
+        </div>
+
+        <div class="Potencia24h-container">
+            <div id="container-10"></div>
+        </div>
+
+        <div class="Potencia1sem-container">
+            <div id="container-11"></div>
+        </div>
+
+        <div class="Potencia1mes-container">
+            <div id="container-12"></div>
+        </div>
+
+        <div id="event-panel" class="oculto">
+            <div id="eventList"></div>
+        </div>
+
+        <footer>
+            © 2026 El Abuelo Distribuciones
+        </footer>
+
+        <script>
+            function toggleMenu() {
+                const nav = document.getElementById("mobileMenu");
+                const overlay = document.querySelector(".menu-overlay");
+                nav.classList.toggle("active");
+                overlay.classList.toggle("active");
+            }
+        </script>
+
+        <script type="module">
+            import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+            import { 
+                getDatabase, ref, onValue 
+            } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+            import {
+                getFirestore,
+                collection,
+                query,
+                orderBy,
+                where,
+                limit,
+                getDocs,
+                onSnapshot
+            } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+            // =========================
+            // Firebase init
+            // =========================
+            const firebaseConfig = {
+                apiKey: "AIzaSyA7BNbFNzdARWEGM_dAMKe7WUNUTI_0h-0",
+                authDomain: "camara-frio-elabuelo.firebaseapp.com",
+                databaseURL: "https://camara-frio-elabuelo-default-rtdb.firebaseio.com",
+                projectId: "camara-frio-elabuelo"
+            };
+
+            const app = initializeApp(firebaseConfig);
+            const db = getDatabase(app);
+            const firestore = getFirestore(app);
+
+            // =======================
+            // 🔹 FUNCION UI EVENTOS
+            // =======================
+
+            function formatearFecha(ts){
+                const d = ts
+                ? new Date(ts.seconds * 1000)
+                : new Date();
+                const fecha = d.toLocaleDateString();
+                const hora  = d.toLocaleTimeString();
+                return `${fecha} - ${hora}`;
+            }
+
+            function agregarEvento(mensaje, tipo, timestamp) {
+                const eventList = document.getElementById("eventList");
+
+                const nuevoEvento = document.createElement("div");
+                nuevoEvento.classList.add("event", tipo);
+
+                const d = timestamp
+                ? new Date(timestamp.seconds * 1000)
+                : new Date();
+
+                const fecha = d.toLocaleString('es-AR', {
+                    day: '2-digit',
+                    month: '2-digit',
+                    year: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    second: '2-digit'
+                });
+
+                nuevoEvento.innerHTML = `
+                    <strong>${fecha}</strong> - ${mensaje}
+                `;
+
+                eventList.prepend(nuevoEvento);
+            }
+
+            // =======================
+            // 🔹 MAPEO DE TIPOS
+            // =======================
+
+            function mapearTipo(tipoFirestore) {
+                switch (tipoFirestore) {
+                    case "puerta":
+                    case "luz":
+                    return "info";
+
+                    case "aviso":
+                    return "aviso";
+
+                    case "alarma":
+                    return "alarma";
+
+                    default:
+                    return "info";
+                }
+            }
+
+            // =======================
+            // 🔹 ESCUCHAR EVENTOS
+            // =======================
 
 
-document.addEventListener("DOMContentLoaded", () => {
-    mostrarSeccion(null, 'temp');
-});
-</script>
+            function iniciarListenerEventos(){
+                if(eventosInicializados) return;
+                const eventosRef = collection(firestore, "eventos");
+                const q = query(
+                    eventosRef,
+                    orderBy("timestamp", "desc"),
+                    limit(50)
+                );
+
+                eventosUnsubscribe = onSnapshot(q, (snapshot) => {
+
+                    if (primeraCarga) {
+
+                        document.getElementById("eventList").innerHTML = "";
+
+                        const docs = snapshot.docs.reverse();
+
+                        docs.forEach(doc => {
+                            const data = doc.data();
+                            if (!data.timestamp) return;
+
+                            agregarEvento(
+                                data.descripcion,
+                                mapearTipo(data.tipo),
+                                data.timestamp
+                            );
+                        });
+
+                        primeraCarga = false;
+                        return;
+                    }
+
+                    snapshot.docChanges().forEach((change) => {
+
+                        if (change.type === "added") {
+                            const data = change.doc.data();
+                            if (!data.timestamp) return;
+
+                            agregarEvento(
+                                data.descripcion,
+                                mapearTipo(data.tipo),
+                                data.timestamp
+                            );
+                        }
+                    });
+                });
+
+                eventosInicializados = true;
+            }
+            window.iniciarListenerEventos = iniciarListenerEventos;
+            // =========================
+            // Datos en vivo desde RTDB
+            // =========================
+
+            let data = {
+                temperatura1: 0,
+                temperatura2: 0,
+                temperaturaExterior: 0,
+                tensionL1: 0,
+                tensionL2: 0,
+                tensionL3: 0,
+                corrienteL1: 0,
+                corrienteL2: 0,
+                corrienteL3: 0,
+                potenciaAparente: 0
+            };
+
+            onValue(ref(db, "camara/actual"), (snapshot) => {
+                const firebaseData = snapshot.val();
+                if (!firebaseData) return;
+                data = firebaseData;
+            });
+
+            // =========================
+            // Configuraciones de gráficos
+            // =========================
+
+            const CONFIGS = {
+                temp24:  { container: "container-1", rangoMs: 24*60*60*1000,    intervalo: 600000,   titulo: "Histórico de Temperaturas (24 hs)", campos: ["temperatura1","temperatura2","promedio","temperaturaExterior"], coleccion: "historial" },
+                temp7:   { container: "container-2", rangoMs: 7*24*60*60*1000,  intervalo: 7200000,  titulo: "Histórico de Temperaturas (1 Semana)", campos: ["temperatura1","temperatura2","promedio","temperaturaExterior"], coleccion: "historialxhora" },
+                temp30:  { container: "container-3", rangoMs: 30*24*60*60*1000, intervalo: 14400000, titulo: "Histórico de Temperaturas (1 Mes)", campos: ["temperatura1","temperatura2","promedio","temperaturaExterior"], coleccion: "historialxhora" },
+    
+                tens24:  { container: "container-4", rangoMs: 24*60*60*1000,    intervalo: 600000,   titulo: "Histórico de Tensiones (24 hs)", campos: ["tensionL1","tensionL2","tensionL3"], coleccion: "historial" },
+                tens7:   { container: "container-5", rangoMs: 7*24*60*60*1000,  intervalo: 7200000,  titulo: "Histórico de Tensiones (1 Semana)", campos: ["tensionL1","tensionL2","tensionL3"], coleccion: "historialxhora" },
+                tens30:  { container: "container-6", rangoMs: 30*24*60*60*1000, intervalo: 14400000, titulo: "Histórico de Tensiones (1 Mes)", campos: ["tensionL1","tensionL2","tensionL3"], coleccion: "historialxhora" },
+
+                corr24:  { container: "container-7", rangoMs: 24*60*60*1000,    intervalo: 600000,   titulo: "Histórico de Corrientes (24 hs)", campos: ["corrienteL1","corrienteL2","corrienteL3"], coleccion: "historial" },
+                corr7:   { container: "container-8", rangoMs: 7*24*60*60*1000,  intervalo: 7200000,  titulo: "Histórico de Corrientes (1 Semana)", campos: ["corrienteL1","corrienteL2","corrienteL3"], coleccion: "historialxhora" },
+                corr30:  { container: "container-9", rangoMs: 30*24*60*60*1000, intervalo: 14400000, titulo: "Histórico de Corrientes (1 Mes)", campos: ["corrienteL1","corrienteL2","corrienteL3"], coleccion: "historialxhora" },
+
+                pot24:   { container: "container-10", rangoMs: 24*60*60*1000,   intervalo: 600000,   titulo: "Histórico de Potencias (24 hs)", campos: ["potenciaAparente" ], coleccion: "historial" },
+                pot7:    { container: "container-11", rangoMs: 7*24*60*60*1000, intervalo: 7200000,  titulo: "Histórico de Potencias (1 Semana)", campos: ["potenciaAparente" ], coleccion: "historialxhora" },
+                pot30:   { container: "container-12", rangoMs: 30*24*60*60*1000,intervalo: 14400000, titulo: "Histórico de Potencias (1 Mes)", campos: ["potenciaAparente" ], coleccion: "historialxhora" }
+    
+            };
+            window.CONFIGS = CONFIGS;
+
+            // =========================
+            // Cargar histórico Firestore
+            // =========================
+
+            async function cargarHistorico(campos, rangoMs, coleccionNombre) {
+                const cacheHistorico = {};
+                const fechaInicio = new Date(Date.now() - rangoMs);
+
+                const q = query(
+                    collection(firestore, coleccionNombre),
+                    where("timestamp", ">=", fechaInicio),
+                    orderBy("timestamp", "asc"),
+                    limit(5000)
+                );
+
+                const key = campos.join(",") + rangoMs;
+
+                if(cacheHistorico[key]){
+                    return cacheHistorico[key];
+                }   
 
 
+                const snapshot = await getDocs(q);
 
-</body>
+                const series = campos.map(() => []);
+
+                snapshot.forEach(doc => {
+                    const d = doc.data();
+                    if (!d.timestamp) return;
+
+                    const x = d.timestamp.toDate().getTime();
+
+                    campos.forEach((campo, i) => {
+
+                        let y = null;
+
+                        if (campo === "promedio") {
+                            if (d.temperatura1 != null && d.temperatura2 != null)
+                            y = ((d.temperatura1 + d.temperatura2) / 2);
+                        } else if (d[campo] != null) {
+                            y = campo.startsWith("temperatura")
+                            ? d[campo]
+                            : d[campo];
+                        }
+
+                        if (y != null)
+                        series[i].push([x, y]);
+                    });
+                });
+
+                cacheHistorico[key] = series;
+                return series;
+            }
+
+
+            // =========================
+            // animacion de carga
+            // =========================
+
+            function mostrarLoading(containerId) {
+                const cont = document.getElementById(containerId);
+                const overlay = document.createElement("div");
+                overlay.className = "chart-loading-overlay";
+                overlay.innerHTML = `
+                    <div class="spinner"></div>
+                    <div style="margin-top:8px;">Cargando...</div>
+                `;
+                cont.style.position = "relative";
+                cont.appendChild(overlay);
+            }
+
+            function ocultarLoading(containerId) {
+                const cont = document.getElementById(containerId);
+                const overlay = cont.querySelector(".chart-loading-overlay");
+                if (overlay) overlay.remove();
+            }
+
+            // =========================
+            // Crear gráfico genérico
+            // =========================
+
+            async function crearGrafico(config) {
+                mostrarLoading(config.container);
+                const seriesData = await cargarHistorico(
+                    config.campos,
+                    config.rangoMs,
+                    config.coleccion
+                );
+
+                Highcharts.chart(config.container, {
+
+                    chart: {
+                        type: "spline",
+                        //zoomType: config.puntos > 100 ? "x" : undefined,
+                        events: {
+                            load: function () {
+                                ocultarLoading(config.container);
+                                const chart = this;
+                                setInterval(() => {
+
+                                    const x = Date.now();
+
+                                    config.campos.forEach((campo, i) => {
+
+                                        let y;
+
+                                        if (campo === "promedio") {
+                                            y = ((data.temperatura1 + data.temperatura2) / 2);
+                                        } else {
+                                            y = data[campo];
+                                        if (campo.startsWith("temperatura")) y = y;
+                                        }
+                                        chart.series[i].addPoint([x, y], true, false);
+                                    });
+                                }, config.intervalo);
+                            }
+                        }
+                    },
+
+                    time: { useUTC: false },
+
+                    title: { text: config.titulo },
+
+                    xAxis: { type: "datetime" },
+
+                    yAxis: {
+                        title: { text: "" }
+                    },
+
+                    legend: { enabled: true },
+                    exporting: { enabled: false },
+
+                    series: config.campos.map((campo, i) => ({
+                        name: campo,
+                        data: seriesData[i],
+                        dashStyle: campo === "promedio" ? "ShortDash" : "Solid"
+                    }))
+                });
+            }
+            // 👇 hacer visible fuera del module
+            window.crearGrafico = crearGrafico;
+            // =========================
+            // Inicialización
+            // =========================
+            document.addEventListener("DOMContentLoaded", () => {
+                mostrarSeccion(null, 'temp');
+            });
+        </script>
+    </body>
 </html>
