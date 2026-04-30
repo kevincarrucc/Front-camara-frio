@@ -132,7 +132,11 @@
             © 2026 El Abuelo Distribuciones
         </footer>
 
+        <script src="Auth.js"></script>
+
         <script>
+            window.addEventListener("load", verificarSesion);
+
             function toggleMenu() {
                 const nav = document.getElementById("mobileMenu");
                 const overlay = document.querySelector(".menu-overlay");
@@ -586,6 +590,6 @@
                 crearGrafico(CONFIGS.temp24);
             });
         </script>
-        <script src="Auth.js"></script>
+        
     </body>
 </html>

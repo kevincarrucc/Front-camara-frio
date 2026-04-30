@@ -68,7 +68,7 @@
             <div class="grid-1">
                 <div class="status-card">
                     <h3>Potencia Aparente</h3>
-                    <div><span id="potenciaAparente">--</span> VA</div>
+                    <div><span id="consumo">--</span> KVA</div>
                 </div>
             </div>
         </section>
@@ -77,7 +77,11 @@
             © 2026 El Abuelo Distribuciones
         </footer>
 
+        <script src="Auth.js"></script>
+
         <script>
+            window.addEventListener("load", verificarSesion);
+
             function toggleMenu() {
                 const nav = document.getElementById("mobileMenu");
                 const overlay = document.querySelector(".menu-overlay");
@@ -87,31 +91,41 @@
         </script>
 
         <script type="module">
+            // el script es type module para poder usar importaciones dinámicas de Firebase
     
             console.log("🔌 Conectando a Firebase...") ;
-            import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-            import { getDatabase, ref, onValue, update } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+            import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js"; // esto importa la funcion para inicializar Firebase
+            import { getDatabase, ref, onValue, update } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js"; // esto importa las funciones para trabajar con la base de datos en tiempo real, son herramientas para leer y escribir datos que luego usaremos en el codigo
 
             const firebaseConfig = {
                 apiKey: "AIzaSyA7BNbFNzdARWEGM_dAMKe7WUNUTI_0h-0",
                 authDomain: "camara-frio-elabuelo.firebaseapp.com",
                 databaseURL: "https://camara-frio-elabuelo-default-rtdb.firebaseio.com",
                 projectId: "camara-frio-elabuelo"
-            };
+            }; // son todos las claves y urls necesarias para vincular la aplicacion web con las funciones de firebase que usamos
 
-            const app = initializeApp(firebaseConfig);
-            const db = getDatabase(app);
-            let configCargada = false;   
+            const app = initializeApp(firebaseConfig);// iniciamos la aplicacion de firebase con la configuracion que definimos
+            const db = getDatabase(app);// obtenemos una referencia a la base de datos para poder leer y escribir datos en ella
 
-            const datosRef = ref(db, "camara/actual");
+            const datosRef = ref(db, "camara/actual"); // datos ref es una referencia a la ubicacion en la base de datos donde se guardan los datos actuales de la camara, esto es lo que vamos a leer para mostrar en la pagina
+            /*Lectura de datos en tiempo real de la RTDB
+             con la funcion ONVALUE podemos escuchar cambios en la base de datos en tiempo real, cada vez que los datos en la ubicacion "camara/actual" cambien, esta funcion se ejecutara y nos dara el nuevo valor de esos datos, esto es lo que nos permite mostrar informacion actualizada al instante en la pagina sin necesidad de recargarla.
+            */
             onValue(datosRef, (snapshot) => {
+                //on value es la funcion que escucha los cambios, datosref es que debe escuchar y snapshot es el valor que nos da cada vez que hay un cambio, es una captura de los datos en ese momento
+                const data = snapshot.val(); // snapshot es una captura de todos los datos en esa ubicacion en el momento que se produjo uncambio
+                if (!data) return; // si no hay datos nos devolvemos para evitar errores
 
-                const data = snapshot.val();
-                if (!data) return;
-
+                // a partir de aqui decidimos que datos leer con la condicion if y mostrar en la pagina o implementar el dato en alguna logica
                 // Tensiones
                 if (data.tensionL1 !== undefined) {
-                    document.getElementById("tensionL1").innerText = data.tensionL1;
+                    /*ejemplo
+                    el valor proveniente de la base de datos en el casillero  de tensionL1 se asigna al elemento del html con id tensionL1, que es un casillero,
+                    esto hace que cada vez que cambie el valor de tensionL1 en la base de datos, el valor mostrado en la pagina se actualice
+                    automaticamente, esto es lo que nos permite tener una pagina dinamica y en tiempo real sin necesidad de recargarla para
+                    ver los cambios.
+                    */
+                    document.getElementById("tensionL1").innerText = data.tensionL1; 
                 }
   
                 if (data.tensionL2 !== undefined) {
@@ -121,7 +135,7 @@
                 if (data.tensionL3 !== undefined) {
                     document.getElementById("tensionL3").innerText = data.tensionL3;
                 }
-                /* AGREGAR CUANDO ESTE EL ADS1015 CONECTADO
+                
                 // Corrientes
                 if (data.corrienteL1 !== undefined) {
                     document.getElementById("corrienteL1").innerText = data.corrienteL1;
@@ -134,12 +148,29 @@
                 if (data.corrienteL3 !== undefined) {
                     document.getElementById("corrienteL3").innerText = data.corrienteL3;
                 }
-                */
-                if (data.potenciaAparente !== undefined) {
-                    document.getElementById("potenciaAparente").innerText = data.potenciaAparente;
-                }
+
+                calculoPotenciaAparente(
+                    data.tensionL1,
+                    data.tensionL2,
+                    data.tensionL3,
+                    data.corrienteL1,
+                    data.corrienteL2,
+                    data.corrienteL3
+                );
+                
+                
             });
+
+            function calculoPotenciaAparente(tensionL1, tensionL2, tensionL3, corrienteL1, corrienteL2, corrienteL3) {
+                const consumo = document.getElementById("consumo");
+                const potenciaL1 = tensionL1 * corrienteL1;
+                const potenciaL2 = tensionL2 * corrienteL2;
+                const potenciaL3 = tensionL3 * corrienteL3;
+                const potenciaTotal = (potenciaL1 + potenciaL2 + potenciaL3)/1000;
+                consumo.textContent = potenciaTotal.toFixed(1);
+            }
+
         </script>
-        <script src="Auth.js"></script>
+        
     </body>
 </html>

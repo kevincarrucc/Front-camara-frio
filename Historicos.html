@@ -14,19 +14,6 @@
     </head>
     <body>
 
-        <script>
-            /* =========================================================
-            PROTECCIÓN DE PÁGINA - SOLO PARA DESARROLLO
-            BORRAR CUANDO EL BACKEND ESTE FUNCIONANDO
-            ========================================================= */
-            const token = localStorage.getItem("token");
-            /* si no existe token -> volver al login */
-            if(!token){
-                window.location.href = "index.html";
-            }
-        </script>
-
-
         <header>
             <img src="imagenes/logo.jpg" alt="Logo El Abuelo Distribuciones" class="logo">
             <div class="menu-toggle" onclick="toggleMenu()">☰</div>
@@ -47,6 +34,7 @@
             <button onclick="mostrarSeccion(event, 'potencia')">Potencia</button>
             <button onclick="mostrarSeccion(event, 'eventos')">Eventos</button>
         </div>
+
 
 
         <script>
@@ -216,7 +204,11 @@
             © 2026 El Abuelo Distribuciones
         </footer>
 
+        <script src="Auth.js"></script>
+
         <script>
+            window.addEventListener("load", verificarSesion);
+
             function toggleMenu() {
                 const nav = document.getElementById("mobileMenu");
                 const overlay = document.querySelector(".menu-overlay");

@@ -1,28 +1,30 @@
-// obtener token guardado
-const token = localStorage.getItem("token");
+async function verificarSesion() {
+  const token = localStorage.getItem("token");
 
-// detectar en qué página estamos
-const paginaActual = window.location.pathname.split("/").pop();
+  if (!token) {
+    window.location.href = "index.html";
+    return;
+  }
 
-// lista de páginas que requieren login
-const paginasProtegidas = [
-"inicio.html",
-"temperatura.html",
-"consumo.html",
-"historicos.html"
-];
+  try {
+    const response = await fetch("https://back-camara-frio.onrender.com/verify-session", {
+      method: "POST",
+      headers: {
+        "Authorization": token
+      }
+    });
 
-// si la página necesita login y no hay token
-if(paginasProtegidas.includes(paginaActual) && !token){
+    if (!response.ok) {
+      window.location.href = "index.html";
+    }
 
-window.location.href = "index.html";
-
+  } catch (err) {
+    console.error(err);
+    window.location.href = "index.html";
+  }
 }
 
-// función para cerrar sesión
-function logout(){
-
-localStorage.removeItem("token");
-window.location.href = "index.html";
-
+function logout() {
+  localStorage.removeItem("token");
+  window.location.href = "index.html";
 }

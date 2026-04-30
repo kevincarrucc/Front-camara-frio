@@ -10,18 +10,7 @@
     </head>
 
     <body>
-        <script>
-            /* =========================================================
-    PROTECCIÓN DE PÁGINA - SOLO PARA DESARROLLO
-    BORRAR CUANDO EL BACKEND ESTE FUNCIONANDO
-    ========================================================= */
-            const token = localStorage.getItem("token");
-            /* si no existe token -> volver al login */
-            if(!token){
-                window.location.href = "index.html";
-            }
-        </script>
-
+    
         <header>
         <img src="imagenes/logo.jpg" alt="Logo El Abuelo Distribuciones" class="logo">
             <div class="menu-toggle" onclick="toggleMenu()">☰</div>
@@ -62,7 +51,7 @@
 
                 <div class="status-card">
                     <h3>Consumo</h3>
-                    <div><span id="consumo">--</span> VA</div>
+                    <div><span id="consumo">--</span> KVA</div>
                 </div>
 
                 <div class="status-card"> 
@@ -124,7 +113,11 @@
             © 2026 El Abuelo Distribuciones - Todos los derechos reservados
         </footer>
 
+        <script src="Auth.js" ></script>
+
         <script>
+            window.addEventListener("load", verificarSesion);
+
             function toggleMenu() {
                 const nav = document.getElementById("mobileMenu");
                 const overlay = document.querySelector(".menu-overlay");
@@ -133,15 +126,16 @@
             }
         </script>
 
-        <script type="module">console.log("🔌 Conectando a Firebase...") ;
+        <script type="module">
+            console.log("🔌 Conectando a Firebase...") ;
             import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
             import { getDatabase, ref, onValue, set } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
 
             const firebaseConfig = {
-            apiKey: "AIzaSyA7BNbFNzdARWEGM_dAMKe7WUNUTI_0h-0",
-            authDomain: "camara-frio-elabuelo.firebaseapp.com",
-            databaseURL: "https://camara-frio-elabuelo-default-rtdb.firebaseio.com",
-            projectId: "camara-frio-elabuelo"
+                apiKey: "AIzaSyA7BNbFNzdARWEGM_dAMKe7WUNUTI_0h-0",
+                authDomain: "camara-frio-elabuelo.firebaseapp.com",
+                databaseURL: "https://camara-frio-elabuelo-default-rtdb.firebaseio.com",
+                projectId: "camara-frio-elabuelo"
             };
             const app = initializeApp(firebaseConfig);
             const db = getDatabase(app);
@@ -168,7 +162,9 @@
                     btnLuz.classList.remove("on", "off");
                 }
             }
-
+            /*
+            "click" es un evento ya defindo en javascritp que se dispara cuando el usuario hace click en un elemento, en este caso el botón de luz, al hacer click se ejecuta la función que le pasamos como segundo argumento, esta función obtiene el estado actual del botón (si dice Apagar o Encender) y decide que valor enviar a firebase (0 o 1), luego actualiza el texto del botón para reflejar el nuevo estado y finalmente escribe el nuevo estado en la base de datos de firebase para que el dispositivo pueda leerlo y actuar en consecuencia.
+            */
             btnLuz.addEventListener("click", async () => {
                 const accion = btnLuz.textContent === "Apagar" ? 0 : 1;//si el botón dice Apagar → mandamos 0 - si dice Encender → mandamos 1 
                 actualizarBotonLuz(accion ? "Encendida" : "Apagada");
@@ -217,8 +213,7 @@
                     const estadoPresenciaFase = Number(data.estadoPresenciaFase);
         
                 }
-                /*
-                AGREGAR CUANDO ESTE EL ADS1015 CONECTADO
+                
                 if (data.corrienteL1 !== undefined)
                 document.getElementById("corrienteL1").innerText = data.corrienteL1;
     
@@ -227,7 +222,7 @@
 
                 if (data.corrienteL3 !== undefined)
                 document.getElementById("corrienteL3").innerText = data.corrienteL3;
-                */
+                
                 if (data.estadoPuerta !== undefined) {
                     const puerta = Number(data.estadoPuerta);
                     document.getElementById("puerta").innerText =
@@ -256,9 +251,9 @@
                     estadoAnomaliaSistema === 1 ? "Anomalia Detectada" : "Funcionando Normal";
                 }
 
-                if(data.potenciaAparente !== undefined)
-                document.getElementById("consumo").innerText = data.potenciaAparente;
-
+                //if(data.potenciaAparente !== undefined)
+                //document.getElementById("consumo").innerText = data.potenciaAparente;
+                
                 // =====================
                 // EVALUAR UMBRAL
                 // =====================
@@ -288,7 +283,15 @@
                     document.getElementById("cardEstadoConexion"),
                     data.timestamp
                 );
-
+                
+                calculoPotenciaAparente(
+                    data.tensionL1,
+                    data.tensionL2,
+                    data.tensionL3,
+                    data.corrienteL1,
+                    data.corrienteL2,
+                    data.corrienteL3
+                );
             });
 
             setInterval(() => {
@@ -297,6 +300,17 @@
                     ultimoTimestamp
                 );
             }, 5000);
+
+            function calculoPotenciaAparente(tensionL1, tensionL2, tensionL3, corrienteL1, corrienteL2, corrienteL3) {
+                    const consumo = document.getElementById("consumo");
+                    const potenciaL1 = tensionL1 * corrienteL1;
+                    const potenciaL2 = tensionL2 * corrienteL2;
+                    const potenciaL3 = tensionL3 * corrienteL3;
+                    const potenciaTotal = (potenciaL1 + potenciaL2 + potenciaL3)/1000; // dividir por 1000 para convertir a kVA
+                    consumo.textContent = potenciaTotal.toFixed(1);
+                }
+
+            
 
             // ============================
             // CARGA DE CONFIGURACIÓN
@@ -412,6 +426,6 @@
                 }
             }
         </script>
-        <script src="Auth.js" ></script>
+        
     </body>
 </html>
