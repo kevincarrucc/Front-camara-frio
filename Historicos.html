@@ -383,29 +383,28 @@
                 const firebaseData = snapshot.val();
                 if (!firebaseData) return;
                 data = firebaseData;
-            });
+            });// aqui obtenemos los datos en tiempo real desde la ruta "camara/actual" de la base de datos, y los guardamos en la variable global "data" para usarlos en los gráficos
 
             // =========================
             // Configuraciones de gráficos
             // =========================
 
             const CONFIGS = {
-                temp24:  { container: "container-1", rangoMs: 24*60*60*1000,    intervalo: 600000,   titulo: "Histórico de Temperaturas (24 hs)", campos: ["temperatura1","temperatura2","promedio","temperaturaExterior"], coleccion: "historial" },
+                temp24:  { container: "container-1", rangoMs: 24*60*60*1000,    intervalo: 600000,   titulo: "Histórico de Temperaturas (24 hs)",    campos: ["temperatura1","temperatura2","promedio","temperaturaExterior"], coleccion: "historial" },
                 temp7:   { container: "container-2", rangoMs: 7*24*60*60*1000,  intervalo: 7200000,  titulo: "Histórico de Temperaturas (1 Semana)", campos: ["temperatura1","temperatura2","promedio","temperaturaExterior"], coleccion: "historialxhora" },
-                temp30:  { container: "container-3", rangoMs: 30*24*60*60*1000, intervalo: 14400000, titulo: "Histórico de Temperaturas (1 Mes)", campos: ["temperatura1","temperatura2","promedio","temperaturaExterior"], coleccion: "historialxhora" },
+                temp30:  { container: "container-3", rangoMs: 30*24*60*60*1000, intervalo: 14400000, titulo: "Histórico de Temperaturas (1 Mes)",    campos: ["temperatura1","temperatura2","promedio","temperaturaExterior"], coleccion: "historialxhora" },
     
-                tens24:  { container: "container-4", rangoMs: 24*60*60*1000,    intervalo: 600000,   titulo: "Histórico de Tensiones (24 hs)", campos: ["tensionL1","tensionL2","tensionL3"], coleccion: "historial" },
-                tens7:   { container: "container-5", rangoMs: 7*24*60*60*1000,  intervalo: 7200000,  titulo: "Histórico de Tensiones (1 Semana)", campos: ["tensionL1","tensionL2","tensionL3"], coleccion: "historialxhora" },
-                tens30:  { container: "container-6", rangoMs: 30*24*60*60*1000, intervalo: 14400000, titulo: "Histórico de Tensiones (1 Mes)", campos: ["tensionL1","tensionL2","tensionL3"], coleccion: "historialxhora" },
+                tens24:  { container: "container-4", rangoMs: 24*60*60*1000,    intervalo: 600000,   titulo: "Histórico de Tensiones (24 hs)",       campos: ["tensionL1","tensionL2","tensionL3"], coleccion: "historial" },
+                tens7:   { container: "container-5", rangoMs: 7*24*60*60*1000,  intervalo: 7200000,  titulo: "Histórico de Tensiones (1 Semana)",    campos: ["tensionL1","tensionL2","tensionL3"], coleccion: "historialxhora" },
+                tens30:  { container: "container-6", rangoMs: 30*24*60*60*1000, intervalo: 14400000, titulo: "Histórico de Tensiones (1 Mes)",       campos: ["tensionL1","tensionL2","tensionL3"], coleccion: "historialxhora" },
 
-                corr24:  { container: "container-7", rangoMs: 24*60*60*1000,    intervalo: 600000,   titulo: "Histórico de Corrientes (24 hs)", campos: ["corrienteL1","corrienteL2","corrienteL3"], coleccion: "historial" },
-                corr7:   { container: "container-8", rangoMs: 7*24*60*60*1000,  intervalo: 7200000,  titulo: "Histórico de Corrientes (1 Semana)", campos: ["corrienteL1","corrienteL2","corrienteL3"], coleccion: "historialxhora" },
-                corr30:  { container: "container-9", rangoMs: 30*24*60*60*1000, intervalo: 14400000, titulo: "Histórico de Corrientes (1 Mes)", campos: ["corrienteL1","corrienteL2","corrienteL3"], coleccion: "historialxhora" },
+                corr24:  { container: "container-7", rangoMs: 24*60*60*1000,    intervalo: 600000,   titulo: "Histórico de Corrientes (24 hs)",      campos: ["corrienteL1","corrienteL2","corrienteL3"], coleccion: "historial" },
+                corr7:   { container: "container-8", rangoMs: 7*24*60*60*1000,  intervalo: 7200000,  titulo: "Histórico de Corrientes (1 Semana)",   campos: ["corrienteL1","corrienteL2","corrienteL3"], coleccion: "historialxhora" },
+                corr30:  { container: "container-9", rangoMs: 30*24*60*60*1000, intervalo: 14400000, titulo: "Histórico de Corrientes (1 Mes)",      campos: ["corrienteL1","corrienteL2","corrienteL3"], coleccion: "historialxhora" },
 
-                pot24:   { container: "container-10", rangoMs: 24*60*60*1000,   intervalo: 600000,   titulo: "Histórico de Potencias (24 hs)", campos: ["potenciaAparente" ], coleccion: "historial" },
-                pot7:    { container: "container-11", rangoMs: 7*24*60*60*1000, intervalo: 7200000,  titulo: "Histórico de Potencias (1 Semana)", campos: ["potenciaAparente" ], coleccion: "historialxhora" },
-                pot30:   { container: "container-12", rangoMs: 30*24*60*60*1000,intervalo: 14400000, titulo: "Histórico de Potencias (1 Mes)", campos: ["potenciaAparente" ], coleccion: "historialxhora" }
-    
+                pot24:   { container: "container-10", rangoMs: 24*60*60*1000,   intervalo: 600000,   titulo: "Histórico de Potencias (24 hs)",       campos: ["potenciaAparente" ], coleccion: "historial" },
+                pot7:    { container: "container-11", rangoMs: 7*24*60*60*1000, intervalo: 7200000,  titulo: "Histórico de Potencias (1 Semana)",    campos: ["potenciaAparente" ], coleccion: "historialxhora" },
+                pot30:   { container: "container-12", rangoMs: 30*24*60*60*1000,intervalo: 14400000, titulo: "Histórico de Potencias (1 Mes)",       campos: ["potenciaAparente" ], coleccion: "historialxhora" }
             };
             window.CONFIGS = CONFIGS;
 
@@ -523,28 +522,28 @@
                                         }
                                         chart.series[i].addPoint([x, y], true, false);
                                     });
-                                }, config.intervalo);
+                                }, config.intervalo);// tiempo entre cada nuevo punto, segun configuracion de cada grafico
                             }
                         }
                     },
 
-                    time: { useUTC: false },
+                    time: { useUTC: false },//hora local
 
-                    title: { text: config.titulo },
+                    title: { text: config.titulo }, //titulo correspindiente a cada variable y su tiempo
 
-                    xAxis: { type: "datetime" },
+                    xAxis: { type: "datetime" }, //eje x como tiempo
 
                     yAxis: {
-                        title: { text: "" }
+                        title: { text: config.titulo }//eje y sin titulo
                     },
 
-                    legend: { enabled: true },
-                    exporting: { enabled: false },
+                    legend: { enabled: true },// la leyenda muestra el nombre de cada serie 
+                    exporting: { enabled: true },//habilitar opciones de exportacion del grafico
 
-                    series: config.campos.map((campo, i) => ({
+                    series: config.campos.map((campo, i) => ({// funcion que mapea cada campo a una serie del grafico, asignando nombre, datos y estilo de linea segun si es promedio o no
                         name: campo,
-                        data: seriesData[i],
-                        dashStyle: campo === "promedio" ? "ShortDash" : "Solid"
+                        data: seriesData[i],// datos historicos cargados desde firestore
+                        dashStyle: campo === "promedio" ? "ShortDash" : "Solid"// si es promedio linea punteada, sino solida
                     }))
                 });
             }

@@ -302,15 +302,13 @@
             }, 5000);
 
             function calculoPotenciaAparente(tensionL1, tensionL2, tensionL3, corrienteL1, corrienteL2, corrienteL3) {
-                    const consumo = document.getElementById("consumo");
-                    const potenciaL1 = tensionL1 * corrienteL1;
-                    const potenciaL2 = tensionL2 * corrienteL2;
-                    const potenciaL3 = tensionL3 * corrienteL3;
-                    const potenciaTotal = (potenciaL1 + potenciaL2 + potenciaL3)/1000; // dividir por 1000 para convertir a kVA
-                    consumo.textContent = potenciaTotal.toFixed(1);
-                }
-
-            
+                const consumo = document.getElementById("consumo");
+                const potenciaL1 = tensionL1 * corrienteL1;
+                const potenciaL2 = tensionL2 * corrienteL2;
+                const potenciaL3 = tensionL3 * corrienteL3;
+                const potenciaTotal = (potenciaL1 + potenciaL2 + potenciaL3)/1000; // dividir por 1000 para convertir a kVA
+                consumo.textContent = potenciaTotal.toFixed(1);
+            }
 
             // ============================
             // CARGA DE CONFIGURACIÓN
@@ -396,7 +394,7 @@
 
                 let tiempoUltimoDato;
 
-                if (typeof timestamp === "number") {
+                if (typeof timestamp === "number") { 
                     tiempoUltimoDato = timestamp;
                 } else {
                     tiempoUltimoDato = new Date(timestamp).getTime();
@@ -411,8 +409,8 @@
                 const ahora = Date.now();
                 const diferenciaMs = ahora - tiempoUltimoDato;
 
-                // 🔴 MÁS DE 30 SEGUNDOS → ALARMA
-                if (diferenciaMs > 30000) {
+                // 🔴 MÁS DE 10 SEGUNDOS → ALARMA
+                if (diferenciaMs > 10000) {
                     setCardEstado(card, "alarma");
                     document.getElementById("estadoConexion").innerText = "Desconectado";
                     if (!alertaDisparada) {

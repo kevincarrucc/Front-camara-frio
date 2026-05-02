@@ -225,13 +225,13 @@
                     alarmaTemperaturaAlta:   { min: 10.0, max: 18.0 }
                 };
 
-                function round1(v){ return Math.round(v*10)/10; }
-                function clamp(v,min,max){ return Math.min(Math.max(v,min),max); }
-                function updateDisplay(control, value) {
+                function round1(v){ return Math.round(v*10)/10; }// esta funcion redondea a 1 decimal, para evitar problemas de precisión con números como 0.1+0.2
+                function clamp(v,min,max){ return Math.min(Math.max(v,min),max); }// esta función limita un valor entre un mínimo y un máximo
+                function updateDisplay(control, value) {// actualiza el valor mostrado en un control específico
                     control.querySelector(".value").textContent = value.toFixed(1)+"°C";
                 }
-                function markPending(control){
-                    control.querySelector(".value").classList.add("pending");
+                function markPending(control){// marca visualmente que un control tiene cambios no guardados
+                    control.querySelector(".value").classList.add("pending");//
                 }
 
                 // Botones +/- para cada parámetro
@@ -241,11 +241,11 @@
                     const minus = control.querySelector(".minus");
 
                     plus.addEventListener("click", () => {
-                        let v = round1(stagedConfig[param] + 0.1);
-                        v = clamp(v, limits[param].min, limits[param].max);
-                        if(v === stagedConfig[param]) return;
-                        stagedConfig[param] = v;
-                        modified.add(param);
+                        let v = round1(stagedConfig[param] + 0.1);// sumar 0.1 al valor actual
+                        v = clamp(v, limits[param].min, limits[param].max);// limitar el valor dentro de los rangos permitidos
+                        if(v === stagedConfig[param]) return;// si el valor no cambia, no hacer nada
+                        stagedConfig[param] = v;// actualizar el valor en la configuración temporal
+                        modified.add(param);// 
                         updateDisplay(control, v);
                         markPending(control);
                         updateSaveButton();
@@ -323,6 +323,7 @@
                     });
                 });
             });
+
             // data para grafica
             let data1 = {
                 temperatura1: 0,
@@ -330,7 +331,7 @@
                 temperaturaExterior: 0
             };
 
-            //----------------------------------------------------------------------------------------------------------------
+            //-------------Leemos los datos de la temperaturas y evaluamos el valor de estas para cambiar el estado del card-------------------------------------------------------------------------------------------
             const datosRef = ref(db, "camara/actual");
             onValue(datosRef, (snapshot) => {
                 const data = snapshot.val();
@@ -347,16 +348,17 @@
                 if (data.temperatura1 !== undefined && data.temperatura2 !== undefined) {
                     const tempProm = (data.temperatura1 + data.temperatura2) / 2;
                     document.getElementById("tempProm").innerText = tempProm.toFixed(1);
-                    evaluarTemperaturaPromedio(
-                        document.getElementById("cardTempPromedio"),
-                        tempProm
-                    );
                 }
     
                 if (data.temperaturaExterior !== undefined)
                 document.getElementById("tempExt").innerText = data.temperaturaExterior;
 
                 // EVALUAR UMBRALES
+
+                evaluarTemperaturaPromedio(
+                    document.getElementById("cardTempPromedio"),
+                    data.tempProm
+                );
     
                 evaluarTemperatura1(
                     document.getElementById("cardTemp1"),
@@ -371,10 +373,9 @@
             });
 
             // CARGA DE CONFIGURACIÓN
-
+            //cada vez que haya un cambio en la configuración en Firebase, se actualiza la variable global "config" con los nuevos valores, para que las funciones de evaluación puedan usar los umbrales correctos
             const configRef = ref(db, "camara/config");
             let config = {};
-
             onValue(configRef, (snapshot) => {
                 config = snapshot.val();
                 console.log("CONFIG:", config);
@@ -444,7 +445,7 @@
             const CONFIGS = {
                 temp24:  { container: "container-1", rangoMs: 24*60*60*1000,    intervalo: 600000,   titulo: "Histórico de Temperaturas (24 hs)", campos: ["temperatura1","temperatura2","promedio","temperaturaExterior"], coleccion: "historial" },
             };
-            window.CONFIGS = CONFIGS;
+            window.CONFIGS = CONFIGS;// estos valores se implementan en las librerias externas
             // =========================
             // Cargar histórico Firestore
             // =========================
@@ -452,18 +453,18 @@
             async function cargarHistorico(campos, rangoMs, coleccionNombre) {
                 const cacheHistorico = {};
                 const fechaInicio = new Date(Date.now() - rangoMs);
-                const q = query(
+                const q = query(// consulta a Firestore para obtener los datos del histórico dentro del rango de tiempo especificado, ordenados por timestamp y limitados a 5000 registros para evitar sobrecargar el navegador
                     collection(firestore, coleccionNombre),
                     where("timestamp", ">=", fechaInicio),
                     orderBy("timestamp", "asc"),
-                    limit(5000)
+                    limit(5000)// limite de registros a leer de firestore
                 );
-                const key = campos.join(",") + rangoMs;
+                const key = campos.join(",") + rangoMs;// clave para cachear resultados de consultas, basada en los campos y el rango de tiempo
                 if(cacheHistorico[key]){
                     return cacheHistorico[key];
                 }   
-                const snapshot = await getDocs(q);
-                const series = campos.map(() => []);
+                const snapshot = await getDocs(q);// ejecuta la consulta y obtiene los documentos que cumplen con los criterios
+                const series = campos.map(() => []);// inicializa un array de series vacío para cada campo a graficar
 
                 snapshot.forEach(doc => {
                     const d = doc.data();
@@ -571,11 +572,11 @@
                     xAxis: { type: "datetime" },
 
                     yAxis: {
-                        title: { text: "" }
+                        title: { text: "Temperatura (°C)" }
                     },
 
                     legend: { enabled: true },
-                    exporting: { enabled: false },
+                    exporting: { enabled: true },
 
                     series: config.campos.map((campo, i) => ({
                         name: campo,
