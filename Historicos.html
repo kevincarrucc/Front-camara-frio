@@ -35,118 +35,6 @@
             <button onclick="mostrarSeccion(event, 'eventos')">Eventos</button>
         </div>
 
-
-
-        <script>
-            let eventosUnsubscribe = null;
-            let eventosInicializados = false;
-            let primeraCarga = true;
-            let graficosCreados = {};
-
-            function cargarGraficosSiHaceFalta(tipo){
-
-                if(tipo === 'temp' && !graficosCreados.temp){
-                    crearGrafico(CONFIGS.temp24);
-                    crearGrafico(CONFIGS.temp7);
-                    crearGrafico(CONFIGS.temp30);
-                    graficosCreados.temp = true;
-                }
-
-                if(tipo === 'tension' && !graficosCreados.tension){
-                    crearGrafico(CONFIGS.tens24);
-                    crearGrafico(CONFIGS.tens7);
-                    crearGrafico(CONFIGS.tens30);
-                    graficosCreados.tension = true;
-                }
-
-                if(tipo === 'corriente' && !graficosCreados.corriente){
-                    crearGrafico(CONFIGS.corr24);
-                    crearGrafico(CONFIGS.corr7);
-                    crearGrafico(CONFIGS.corr30);
-                    graficosCreados.corriente = true;
-                }
-
-                if(tipo === 'potencia' && !graficosCreados.potencia){
-                    crearGrafico(CONFIGS.pot24);
-                    crearGrafico(CONFIGS.pot7);
-                    crearGrafico(CONFIGS.pot30);
-                    graficosCreados.potencia = true;
-                }
-            }
-
-            function mostrarSeccion(event, tipo){
-    
-
-                const todos = document.querySelectorAll(
-                    '.Temperatura24h-container, .Temperatura1sem-container, .Temperatura1mes-container, \
-                    .Tensión24h-container, .Tensión1sem-container, .Tensión1mes-container, \
-                    .Corriente24h-container, .Corriente1sem-container, .Corriente1mes-container, \
-                    .Potencia24h-container, .Potencia1sem-container, .Potencia1mes-container, \
-                    #event-panel '
-                );
-
-                // 🔴 ocultar todo
-                todos.forEach(el => el.classList.add('oculto'));
-
-                // 🟢 mostrar según botón
-                if(tipo === 'temp'){
-                    document.querySelectorAll(
-                        '.Temperatura24h-container, .Temperatura1sem-container, .Temperatura1mes-container'
-                    ).forEach(el => el.classList.remove('oculto'));
-                }
-
-                if(tipo === 'tension'){
-                    document.querySelectorAll(
-                        '.Tensión24h-container, .Tensión1sem-container, .Tensión1mes-container'
-                    ).forEach(el => el.classList.remove('oculto'));
-                }
-
-                if(tipo === 'corriente'){
-                    document.querySelectorAll(
-                        '.Corriente24h-container, .Corriente1sem-container, .Corriente1mes-container'
-                    ).forEach(el => el.classList.remove('oculto'));
-                }
-
-                if(tipo === 'potencia'){
-                    document.querySelectorAll(
-                        '.Potencia24h-container, .Potencia1sem-container, .Potencia1mes-container'
-                    ).forEach(el => el.classList.remove('oculto'));
-                }
-
-                if(tipo === 'eventos'){
-                    document.getElementById('event-panel').classList.remove('oculto');
-                    iniciarListenerEventos();
-                }
-                else {
-                    document.getElementById('event-panel').classList.add('oculto');
-                    if(eventosUnsubscribe){
-                        eventosUnsubscribe();
-                        eventosUnsubscribe = null;
-                        eventosInicializados = false;
-                        primeraCarga = true;
-                    }
-                }
-    
-
-                // 🔵 botón activo
-                const botones = document.querySelectorAll('.selector-graficos button');
-                botones.forEach(btn => btn.classList.remove('activo'));
-
-                if(event){
-                    event.target.classList.add('activo');
-                } else {
-                    document.querySelector('.selector-graficos button')
-                    .classList.add('activo');
-                }
-
-                setTimeout(() => {
-                    window.dispatchEvent(new Event('resize'));
-                }, 100);
-
-                cargarGraficosSiHaceFalta(tipo);
-            }
-        </script>
-
         <!-- Contenedor del gráfico -->
         <div class="Temperatura24h-container">
             <div id="container-1"></div>
@@ -204,16 +92,129 @@
             © 2026 El Abuelo Distribuciones
         </footer>
 
-        <script src="Auth.js"></script>
+        <script src="Auth.js">
+            //dwfinicion de las funciones verificarSesion y logout
+        </script>
 
         <script>
-            window.addEventListener("load", verificarSesion);
+            window.addEventListener("load", verificarSesion);//cuando la pagina este 100% cargada verificamos sesion 
 
             function toggleMenu() {
                 const nav = document.getElementById("mobileMenu");
                 const overlay = document.querySelector(".menu-overlay");
                 nav.classList.toggle("active");
                 overlay.classList.toggle("active");
+            }
+        </script>
+
+        <script>
+            let eventosUnsubscribe = null;
+            let eventosInicializados = false;
+            let primeraCarga = true;
+            let graficosCreados = {};
+
+            function cargarGraficosSiHaceFalta(tipo){
+
+                if(tipo === 'temp' && !graficosCreados.temp){
+                    crearGrafico(CONFIGS.temp24);
+                    crearGrafico(CONFIGS.temp7);
+                    crearGrafico(CONFIGS.temp30);
+                    graficosCreados.temp = true;
+                }
+
+                if(tipo === 'tension' && !graficosCreados.tension){
+                    crearGrafico(CONFIGS.tens24);
+                    crearGrafico(CONFIGS.tens7);
+                    crearGrafico(CONFIGS.tens30);
+                    graficosCreados.tension = true;
+                }
+
+                if(tipo === 'corriente' && !graficosCreados.corriente){
+                    crearGrafico(CONFIGS.corr24);
+                    crearGrafico(CONFIGS.corr7);
+                    crearGrafico(CONFIGS.corr30);
+                    graficosCreados.corriente = true;
+                }
+
+                if(tipo === 'potencia' && !graficosCreados.potencia){
+                    crearGrafico(CONFIGS.pot24);
+                    crearGrafico(CONFIGS.pot7);
+                    crearGrafico(CONFIGS.pot30);
+                    graficosCreados.potencia = true;
+                }
+            }
+
+            function mostrarSeccion(event, tipo){
+    
+
+                const todos = document.querySelectorAll(
+                    '.Temperatura24h-container, .Temperatura1sem-container, .Temperatura1mes-container, \
+                    .Tensión24h-container, .Tensión1sem-container, .Tensión1mes-container, \
+                    .Corriente24h-container, .Corriente1sem-container, .Corriente1mes-container, \
+                    .Potencia24h-container, .Potencia1sem-container, .Potencia1mes-container, \
+                    #event-panel '
+                );// el numeral es para seleccionar por id y el punto es para seleccionar por clase 
+
+                // 🔴 ocultar todo
+                todos.forEach(el => el.classList.add('oculto'));
+
+                // 🟢 mostrar según botón
+                if(tipo === 'temp'){
+                    document.querySelectorAll(
+                        '.Temperatura24h-container, .Temperatura1sem-container, .Temperatura1mes-container'
+                    ).forEach(el => el.classList.remove('oculto'));
+                }
+
+                if(tipo === 'tension'){
+                    document.querySelectorAll(
+                        '.Tensión24h-container, .Tensión1sem-container, .Tensión1mes-container'
+                    ).forEach(el => el.classList.remove('oculto'));
+                }
+
+                if(tipo === 'corriente'){
+                    document.querySelectorAll(
+                        '.Corriente24h-container, .Corriente1sem-container, .Corriente1mes-container'
+                    ).forEach(el => el.classList.remove('oculto'));
+                }
+
+                if(tipo === 'potencia'){
+                    document.querySelectorAll(
+                        '.Potencia24h-container, .Potencia1sem-container, .Potencia1mes-container'
+                    ).forEach(el => el.classList.remove('oculto'));
+                }
+
+                if(tipo === 'eventos'){
+                    document.getElementById('event-panel').classList.remove('oculto');
+                    iniciarListenerEventos();
+                }
+                else {// si no selecciono eventos, ocultamos el panel de eventos y detenemos el listener para optimizar recursos
+                    document.getElementById('event-panel').classList.add('oculto');
+                    if(eventosUnsubscribe){
+                        eventosUnsubscribe();
+                        eventosUnsubscribe = null;
+                        eventosInicializados = false;
+                        primeraCarga = true;
+                    }
+                }
+    
+
+                // botón activo
+                const botones = document.querySelectorAll('.selector-graficos button');
+                botones.forEach(btn => btn.classList.remove('activo'));// removemos la clase activo de todos los botones para luego asignarla al que se selecciono
+
+                if(event){// si se hizo click en el boton se le asigna la clase activo
+                    event.target.classList.add('activo');
+                } else {// por defecto sino se hizo click, se le asigna la clase activo a temperatura
+                    document.querySelector('.selector-graficos button')
+                    .classList.add('activo');
+                }
+
+                // esto es para forzar al navegador a recalcular el tamaño de los graficos
+                setTimeout(() => {
+                    window.dispatchEvent(new Event('resize'));
+                }, 100);
+
+                cargarGraficosSiHaceFalta(tipo);
             }
         </script>
 
@@ -233,9 +234,6 @@
                 onSnapshot
             } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
-            // =========================
-            // Firebase init
-            // =========================
             const firebaseConfig = {
                 apiKey: "AIzaSyA7BNbFNzdARWEGM_dAMKe7WUNUTI_0h-0",
                 authDomain: "camara-frio-elabuelo.firebaseapp.com",
@@ -247,30 +245,26 @@
             const db = getDatabase(app);
             const firestore = getFirestore(app);
 
-            // =======================
-            // 🔹 FUNCION UI EVENTOS
-            // =======================
-
-            function formatearFecha(ts){
+            // determinar fecha por timestamp o actual, y formatear a string legible
+            function formatearFecha(ts){// esta funcion es para formatear un timestamp de firestore a un string legible con fecha y hora, si no se le pasa timestamp usa la fecha actual
                 const d = ts
                 ? new Date(ts.seconds * 1000)
                 : new Date();
-                const fecha = d.toLocaleDateString();
-                const hora  = d.toLocaleTimeString();
-                return `${fecha} - ${hora}`;
+                const fecha = d.toLocaleDateString();//formatea la fecha segun la config regional del navegador, ej "31/12/2024"
+                const hora  = d.toLocaleTimeString();//formatea la hora segun la config regional del navegador, ej "14:30:15"
+                return `${fecha} - ${hora}`;// devuelve un string con la fecha y hora formateada, ej "31/12/2024 - 14:30:15"
             }
 
+            // agregar evento al panel evento con un mensaje, el tipo y la hora a la que ocurrio
             function agregarEvento(mensaje, tipo, timestamp) {
-                const eventList = document.getElementById("eventList");
+                const eventList = document.getElementById("eventList");//document.getElementById busca a un elemento por su id, es un contenedor aqui
 
-                const nuevoEvento = document.createElement("div");
-                nuevoEvento.classList.add("event", tipo);
+                const nuevoEvento = document.createElement("div");// sera el renglon del evento
+                nuevoEvento.classList.add("event", tipo);// dependiendo del tipo de evento, se le asigna un color
 
-                const d = timestamp
-                ? new Date(timestamp.seconds * 1000)
-                : new Date();
+                const d = timestamp ? new Date(timestamp.seconds * 1000) : new Date();
 
-                const fecha = d.toLocaleString('es-AR', {
+                const fecha = d.toLocaleString('es-AR', { // formateamos la fecha y hora segun la config regional de argentina, ej "31/12/2024 14:30:15"
                     day: '2-digit',
                     month: '2-digit',
                     year: 'numeric',
@@ -278,24 +272,20 @@
                     minute: '2-digit',
                     second: '2-digit'
                 });
-
+                
+                // el renglon del evento contiene la fecha y el mensaje del evento
+                //strong es para resaltar el texto
                 nuevoEvento.innerHTML = `
                     <strong>${fecha}</strong> - ${mensaje}
                 `;
 
+                //los eventos se iran agregando al princiipo de la lista asi el mas receinte queda arriba
                 eventList.prepend(nuevoEvento);
             }
 
-            // =======================
-            // 🔹 MAPEO DE TIPOS
-            // =======================
-
+            // leemos que tipo de evnto es para luego asignarle el color correspondiente
             function mapearTipo(tipoFirestore) {
                 switch (tipoFirestore) {
-                    case "puerta":
-                    case "luz":
-                    return "info";
-
                     case "aviso":
                     return "aviso";
 
@@ -307,46 +297,44 @@
                 }
             }
 
-            // =======================
-            // 🔹 ESCUCHAR EVENTOS
-            // =======================
-
-
+            // ESCUCHAR EVENTOS
             function iniciarListenerEventos(){
-                if(eventosInicializados) return;
-                const eventosRef = collection(firestore, "eventos");
-                const q = query(
-                    eventosRef,
+                if(eventosInicializados) return;// si ya esta activo nos salimos
+                const eventosRef = collection(firestore, "eventos");// extraemos los datos de la coleccion de eventos
+                const q = query( //query es para hacer consultas a la base de datos
+                    eventosRef,// e la base extraeremos los eventos, ordenados por fecha y de foma desendente, y limitados a los ultimos 50 eventos                    eventosRef,
                     orderBy("timestamp", "desc"),
                     limit(50)
                 );
 
+                //de los eventos obtenidos con la consulta, ahora escuchamos a los nuevos eventos y lo cargamos en la pag
                 eventosUnsubscribe = onSnapshot(q, (snapshot) => {
 
                     if (primeraCarga) {
 
-                        document.getElementById("eventList").innerHTML = "";
+                        document.getElementById("eventList").innerHTML = "";// limpiamos la lista de eventos para cargarla con nuevos
 
-                        const docs = snapshot.docs.reverse();
+                        const docs = snapshot.docs.reverse(); // la captura de docs la invertimos
 
-                        docs.forEach(doc => {
-                            const data = doc.data();
+                        docs.forEach(doc => { // es un ciclo que evalua cada evento 
+                            const data = doc.data();// doc.data() obtenemos descr, tipo y hora
                             if (!data.timestamp) return;
 
                             agregarEvento(
-                                data.descripcion,
-                                mapearTipo(data.tipo),
-                                data.timestamp
+                                data.descripcion, //del documento leemos la descripcion
+                                mapearTipo(data.tipo), // leemos el tipo de evento y le asignamos un color
+                                data.timestamp// leemos el timestamp para mostrar la hora
                             );
                         });
 
                         primeraCarga = false;
                         return;
                     }
+                    
+                    // ciclo para evaluar los cambios ocurridos en la coleccion
+                    snapshot.docChanges().forEach((change) => {//.docchanges() es un metodo que nos da los cambios ocurridos
 
-                    snapshot.docChanges().forEach((change) => {
-
-                        if (change.type === "added") {
+                        if (change.type === "added") {// si se agrega un nuevo evento a la base de datos lo agregamos al panel
                             const data = change.doc.data();
                             if (!data.timestamp) return;
 
@@ -361,6 +349,7 @@
 
                 eventosInicializados = true;
             }
+            //hacemos global a la funcion para poder llamarla desde otros lugares
             window.iniciarListenerEventos = iniciarListenerEventos;
             // =========================
             // Datos en vivo desde RTDB
@@ -381,7 +370,7 @@
 
             onValue(ref(db, "camara/actual"), (snapshot) => {
                 const firebaseData = snapshot.val();
-                if (!firebaseData) return;
+                if (!firebaseData) return;// si no hay datos en la ruta, no hacemos nada
                 data = firebaseData;
             });// aqui obtenemos los datos en tiempo real desde la ruta "camara/actual" de la base de datos, y los guardamos en la variable global "data" para usarlos en los gráficos
 
@@ -390,6 +379,7 @@
             // =========================
 
             const CONFIGS = {
+                // cada grafico tiene su contenedor, su rango de tiempo en milisegundos a mostras, los intervalos entre punto y punto de la grafica, el titulo de la grafica, los campos a mostrar y la coleccion de firestore de donde cargar los datos histricos
                 temp24:  { container: "container-1", rangoMs: 24*60*60*1000,    intervalo: 600000,   titulo: "Histórico de Temperaturas (24 hs)",    campos: ["temperatura1","temperatura2","promedio","temperaturaExterior"], coleccion: "historial" },
                 temp7:   { container: "container-2", rangoMs: 7*24*60*60*1000,  intervalo: 7200000,  titulo: "Histórico de Temperaturas (1 Semana)", campos: ["temperatura1","temperatura2","promedio","temperaturaExterior"], coleccion: "historialxhora" },
                 temp30:  { container: "container-3", rangoMs: 30*24*60*60*1000, intervalo: 14400000, titulo: "Histórico de Temperaturas (1 Mes)",    campos: ["temperatura1","temperatura2","promedio","temperaturaExterior"], coleccion: "historialxhora" },
@@ -423,7 +413,7 @@
                     limit(5000)
                 );
 
-                const key = campos.join(",") + rangoMs;
+                const key = campos.join(",") + rangoMs;// crea clave unica para no hacer consultas innecesarias
 
                 if(cacheHistorico[key]){
                     return cacheHistorico[key];
@@ -433,7 +423,7 @@
                 const snapshot = await getDocs(q);
 
                 const series = campos.map(() => []);
-
+                // funcion generica para cargar los datos historicos segun los campos y rango de tiempo
                 snapshot.forEach(doc => {
                     const d = doc.data();
                     if (!d.timestamp) return;

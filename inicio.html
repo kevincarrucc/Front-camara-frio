@@ -113,10 +113,12 @@
             © 2026 El Abuelo Distribuciones - Todos los derechos reservados
         </footer>
 
-        <script src="Auth.js" ></script>
+        <script src="Auth.js" >
+            //definicion de las funciones verificarSesion y logout
+        </script>
 
         <script>
-            window.addEventListener("load", verificarSesion);
+            window.addEventListener("load", verificarSesion);//cuando la pagina este 100% cargada verificamos sesion 
 
             function toggleMenu() {
                 const nav = document.getElementById("mobileMenu");
@@ -126,7 +128,7 @@
             }
         </script>
 
-        <script type="module">
+        <script type="module">//podemos usar el import y export aqui
             console.log("🔌 Conectando a Firebase...") ;
             import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
             import { getDatabase, ref, onValue, set } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
@@ -382,16 +384,6 @@
 
             function evaluarConexion(card, timestamp) {
 
-                if (!timestamp) {
-                    setCardEstado(card, "alarma");
-                    document.getElementById("estadoConexion").innerText = "Desconectado";
-                    if (!alertaDisparada) {
-                        alert("⚠️ Se perdió la conexión con el dispositivo");
-                        alertaDisparada = true;
-                    }
-                return;
-                }
-
                 let tiempoUltimoDato;
 
                 if (typeof timestamp === "number") { 
@@ -409,12 +401,12 @@
                 const ahora = Date.now();
                 const diferenciaMs = ahora - tiempoUltimoDato;
 
-                // 🔴 MÁS DE 10 SEGUNDOS → ALARMA
-                if (diferenciaMs > 10000) {
+                // 🔴 MÁS DE 30 SEGUNDOS → ALARMA
+                if (diferenciaMs > 30000) {
                     setCardEstado(card, "alarma");
                     document.getElementById("estadoConexion").innerText = "Desconectado";
                     if (!alertaDisparada) {
-                        alert("⚠️ Se perdió la conexión con el dispositivo");
+                        alert("⚠️ Se perdió la conexión con el dispositivo NOSE");
                         alertaDisparada = true;
                     }
                 } else {

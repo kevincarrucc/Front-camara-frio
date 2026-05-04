@@ -132,10 +132,12 @@
             © 2026 El Abuelo Distribuciones
         </footer>
 
-        <script src="Auth.js"></script>
+        <script src="Auth.js">
+            //dwfinicion de las funciones verificarSesion y logout
+        </script>
 
         <script>
-            window.addEventListener("load", verificarSesion);
+            window.addEventListener("load", verificarSesion);//cuando la pagina este 100% cargada verificamos sesion 
 
             function toggleMenu() {
                 const nav = document.getElementById("mobileMenu");
@@ -145,7 +147,7 @@
             }
         </script>
 
-        <script type="module">
+        <script type="module">//podemos usar el import y export aqui
             console.log("🔌 Conectando a Firebase...") ;
             import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
             import { getDatabase, ref, onValue, update } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
@@ -159,6 +161,21 @@
             getDocs,
             onSnapshot
             } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+            /*funcion de cada import
+                getDatabase: obtiene la instancia de la base de datos en tiempo real (RTDB)
+                ref: crea una referencia a una ruta específica dentro de la RTDB
+                onValue: escucha cambios en tiempo real en una referencia de la RTDB
+                update: actualiza uno o más campos en la RTDB sin sobrescribir todo
+
+                getFirestore: obtiene la instancia de la base de datos Firestore
+                collection: referencia una colección dentro de Firestore
+                query: construye consultas combinando filtros, orden y límites
+                orderBy: ordena los documentos de una consulta por un campo
+                where: filtra documentos según una condición (igual, mayor, menor, etc.)
+                limit: limita la cantidad de documentos que devuelve la consulta
+                getDocs: ejecuta la consulta una sola vez y devuelve los resultados
+                onSnapshot: escucha cambios en tiempo real en una colección o consulta de Firestore
+            */
 
             const firebaseConfig = {
                 apiKey: "AIzaSyA7BNbFNzdARWEGM_dAMKe7WUNUTI_0h-0",
@@ -170,7 +187,7 @@
             const db = getDatabase(app);
             const firestore = getFirestore(app);
 
-            document.addEventListener("DOMContentLoaded", function () {
+            document.addEventListener("DOMContentLoaded", function () {// esta función se ejecuta cuando el DOM está completamente cargado, es decir, cuando la estructura de la página está lista para ser manipulada por JavaScript
                 const config = { //configuración inicial por si no hay datos en Firebase
                     setPointTemperatura: 6.0,
                     setPointHisteresis: 3.0,
@@ -184,6 +201,7 @@
                 const saveBtn = document.getElementById("saveBtn");
                 const configRef = ref(db, "camara/config");
 
+                //Escuchamos los cambios de CONFIG en la RTDB y actualizamos al nuevo valor proveniente del ESP32
                 onValue(configRef, (snapshot) => {
                     if (modified.size > 0) return; // no actualizar mientras hay cambios locales
                     const data = snapshot.val();
@@ -193,12 +211,12 @@
                     Object.keys(data).forEach(param => {
                         config[param] = data[param];
                         stagedConfig[param] = data[param];
-                        const control = document.querySelector(
+                        const control = document.querySelector(//buscamo el control visual correpondiente
                             `.control[data-param="${param}"]`
                         );
                         if (control) {
-                            updateDisplay(control, data[param]);
-                            control.querySelector(".value").classList.remove("pending");
+                            updateDisplay(control, data[param]);//actualizamo al nuevo valor
+                            control.querySelector(".value").classList.remove("pending");// removemos el titileo del valor
                         }
                     });
                     modified.clear();
@@ -275,6 +293,7 @@
                     });
 
                     // VALIDACIÓN DE PARÁMETROS
+                    // convertimos a decimal el valor correspondiente
                     const avisoBajo  = parseFloat(stagedConfig.avisoTemperaturaBaja ?? config.avisoTemperaturaBaja);
                     const alarmaBaja = parseFloat(stagedConfig.alarmaTemperaturaBaja ?? config.alarmaTemperaturaBaja);
                     const avisoAlto  = parseFloat(stagedConfig.avisoTemperaturaAlta ?? config.avisoTemperaturaAlta);
@@ -376,6 +395,7 @@
             //cada vez que haya un cambio en la configuración en Firebase, se actualiza la variable global "config" con los nuevos valores, para que las funciones de evaluación puedan usar los umbrales correctos
             const configRef = ref(db, "camara/config");
             let config = {};
+            //Escucha lo cambio de CONFIG en la RTDB para compar siempre los valores actuales con lo correctos de config
             onValue(configRef, (snapshot) => {
                 config = snapshot.val();
                 console.log("CONFIG:", config);
@@ -466,12 +486,14 @@
                 const snapshot = await getDocs(q);// ejecuta la consulta y obtiene los documentos que cumplen con los criterios
                 const series = campos.map(() => []);// inicializa un array de series vacío para cada campo a graficar
 
+                // ARMA PUNTOS [x, y] Recorre documentos y arma series [tiempo, valor] para cada variable
                 snapshot.forEach(doc => {
-                    const d = doc.data();
+                    const d = doc.data();// Obtiene los datos del documento de Firestore como objeto JS
                     if (!d.timestamp) return;
-                    const x = d.timestamp.toDate().getTime();
+                    const x = d.timestamp.toDate().getTime();// obtiene el tiempo de cada documento
 
-                    campos.forEach((campo, i) => {
+                    // Recorre cada campo (4 en este caso) para cada documento
+                    campos.forEach((campo, i) => {//campo nombre del dato e i poscicion del array
 
                         let y = null;
 
@@ -485,7 +507,7 @@
                         }
 
                         if (y != null)
-                        series[i].push([x, y]);
+                        series[i].push([x, y]);// Usa un mismo tiempo (x) y genera un punto [x,y] para cada serie
                     });
                 });
 
@@ -522,31 +544,33 @@
             // Crear gráfico genérico
             // =========================
 
+            //Highcharts es una librería de JavaScript para hacer gráficos interactivos en la web.
+
             async function crearGrafico(config) {
 
                 mostrarLoading(config.container);
 
-                const seriesData = await cargarHistorico(
+                const seriesData = await cargarHistorico(//traemo los dato viejos para llenar el grafico
                     config.campos,
                     config.rangoMs,
                     config.coleccion
                 );
 
-                Highcharts.chart(config.container, {
+                Highcharts.chart(config.container, {//cremaos el grafico en el div especificado
 
                     chart: {
-                        type: "spline",
+                        type: "spline",//tipo de grafica, es con lineas suavizadas
                         //zoomType: config.puntos > 100 ? "x" : undefined,
                         events: {
                             load: function () {
                                 ocultarLoading(config.container);
                                 const chart = this;
 
-                                setInterval(() => {
+                                setInterval(() => {// cada x tiempo añadimos un nuevo punto o nuevos puntos
 
-                                    const x = Date.now();
+                                    const x = Date.now();// extraemos el tiempo
 
-                                    config.campos.forEach((campo, i) => {
+                                    config.campos.forEach((campo, i) => {// reccore todos los campos a mostrar para el tiempo dado
 
                                         let y;
 
@@ -557,10 +581,10 @@
                                         if (campo.startsWith("temperatura")) y = y;
                                         }
 
-                                        chart.series[i].addPoint([x, y], true, false);
+                                        chart.series[i].addPoint([x, y], true, false);// añade nuevo punto a la grafica, redibuja el grafico y no borra los puntos viejos
                                     });
 
-                                }, config.intervalo);
+                                }, config.intervalo);// intervalo de tiempo entre puntos del grafico
                             }
                         }
                     },

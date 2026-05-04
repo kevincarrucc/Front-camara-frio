@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="es"> 
+<html lang="es">// 
     
     <head>
         <meta charset="UTF-8">
@@ -24,7 +24,6 @@
             </nav>
             <div class="menu-overlay" onclick="toggleMenu()"></div>
         </header>
-
 
         <section class="login">
 
@@ -100,6 +99,7 @@
         </script>
 
         <script>
+            //para mostrar o no la contraseña
             const checkbox = document.getElementById("mostrar");
             const password = document.getElementById("password");
             checkbox.addEventListener("change", function(){
@@ -112,20 +112,21 @@
         </script>
 
         <script>
-
+            //verficaar usuario y contraseña
             const form = document.getElementById("loginForm");
             const error = document.getElementById("error-msg");
 
-            form.addEventListener("submit", async function(e){
+            form.addEventListener("submit", async function(e){//escucha al boton de ingresar
 
                 e.preventDefault();
 
+                //captura lo que escribimos
                 const username = document.getElementById("username").value;
                 const password = document.getElementById("password").value;
 
-                try{
-                    const response = await fetch("https://back-camara-frio.onrender.com/login", {
-                    method: "POST",
+                try{//enviamos un JSON al back para validar
+                    const response = await fetch("https://back-camara-frio.onrender.com/login", {//fetch(...) = hacer una petición HTTP al backend y esperar la respuesta
+                    method: "POST",//POST se usa para enviar datos al servidor
                     headers:{
                         "Content-Type":"application/json"
                     },
@@ -137,11 +138,11 @@
 
                 });
 
-                if(response.ok){
+                if(response.ok){//Si es correcto ingresamos 
                     const data = await response.json();
                     localStorage.setItem("token", data.token);
                     window.location.href = "inicio.html";
-                }else{
+                }else{//sino mensaje de error
                     error.style.display = "block";
                 }
 
