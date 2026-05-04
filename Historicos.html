@@ -207,6 +207,7 @@
                 } else {// por defecto sino se hizo click, se le asigna la clase activo a temperatura
                     document.querySelector('.selector-graficos button')
                     .classList.add('activo');
+                    //deja activo ya desde el nav
                 }
 
                 // esto es para forzar al navegador a recalcular el tamaño de los graficos
@@ -397,6 +398,10 @@
                 pot30:   { container: "container-12", rangoMs: 30*24*60*60*1000,intervalo: 14400000, titulo: "Histórico de Potencias (1 Mes)",       campos: ["potenciaAparente" ], coleccion: "historialxhora" }
             };
             window.CONFIGS = CONFIGS;
+            /*importante 
+                El gráfico carga datos históricos que ya están guardados (cada 1 hora en historialxhora) y, una vez cargados, 
+                se sigue actualizando agregando nuevos puntos cada 4 horas o 2 horas según el intervalo.
+            */
 
             // =========================
             // Cargar histórico Firestore
